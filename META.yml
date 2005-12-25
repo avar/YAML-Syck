@@ -1,0 +1,12 @@
+name: YAML-Syck
+version: 0.01
+abstract: Fast, lightweight YAML loader and dumper
+author: Audrey Tang <autrijus@autrijus.org>
+license: perl
+distribution_type: module
+requires:
+  perl: 5.004
+no_index:
+  directory:
+    - inc
+generated_by: Module::Install version 0.48
