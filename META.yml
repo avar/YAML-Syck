@@ -1,5 +1,5 @@
 name: YAML-Syck
-version: 0.01
+version: 0.02
 abstract: Fast, lightweight YAML loader and dumper
 author: Audrey Tang <autrijus@autrijus.org>
 license: perl

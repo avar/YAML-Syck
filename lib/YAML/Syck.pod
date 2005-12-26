@@ -6,7 +6,7 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.01 of YAML::Syck, released
+This document describes version 0.02 of YAML::Syck, released
 December 26, 2005.
 
 =head1 SYNOPSIS
@@ -44,8 +44,12 @@ Audrey Tang E<lt>autrijus@autrijus.orgE<gt>
 
 Copyright by Audrey Tang E<lt>autrijus@autrijus.orgE<gt>.
 
-The F<libsyck> code bundled with this library by C<why the lucky stiff>,
-under a BSD-style license.  See the COPYING file for details.
+The F<libsyck> code bundled with this library by I<why the lucky stiff>,
+under a BSD-style license.  See the F<COPYING> file for details.
+
+The F<Storable.xs> code bundled with this library is written by
+Raphael Manfredi and maintained by perl5-porters, under the
+same license as Perl.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

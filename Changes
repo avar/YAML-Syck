@@ -1,3 +1,9 @@
+[Changes for 0.02 - 2005-12-26]
+
+* Move from SWIG to much lighter-weight native XS implementation.
+
+* Begins bundling Storable.xs to use the same serialization logic.
+
 [Changes for 0.01 - 2005-12-26]
 
 * Initial release to CPAN of this six-hours-old hack.
