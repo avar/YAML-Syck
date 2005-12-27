@@ -2,7 +2,7 @@
 package Module::Install;
 use 5.004;
 
-$VERSION = '0.48'; # Don't forget to update Module::Install::Admin too!
+$VERSION = '0.50'; # Don't forget to update Module::Install::Admin too!
 
 die << "." unless $INC{join('/', inc => split(/::/, __PACKAGE__)).'.pm'};
 Please invoke ${\__PACKAGE__} with:

@@ -1,3 +1,8 @@
+[Changes for 0.03 - 2005-12-27]
+
+* Make syck.h compile with a Perl built with -DDEBUG.
+  Reported by: Slaven Rezic
+
 [Changes for 0.02 - 2005-12-26]
 
 * Move from SWIG to much lighter-weight native XS implementation.
