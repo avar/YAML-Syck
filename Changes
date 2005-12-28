@@ -1,3 +1,8 @@
+[Changes for 0.04 - 2005-12-28]
+
+* Truly support Perl versions before 5.7.3, thanks to ppport.h.
+  Reported by: Anton Berezin
+
 [Changes for 0.03 - 2005-12-27]
 
 * Make syck.h compile with a Perl built with -DDEBUG.

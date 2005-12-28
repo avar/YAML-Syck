@@ -1,6 +1,8 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include "ppport.h"
+
 #undef DEBUG /* maybe defined in perl.h */
 #include <syck.h>
 
