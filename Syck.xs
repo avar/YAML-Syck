@@ -129,8 +129,13 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         case SVt_NULL: { return; }
         case SVt_PV:
         case SVt_PVIV:
-        case SVt_PVNV: { /* XXX !SvROK(sv) XXX */
-            syck_emit_scalar(e, OBJOF("string"), scalar_none, 0, 0, 0, SvPVX(sv), SvCUR(sv));
+        case SVt_PVNV: {
+            if (SvCUR(sv) > 0) {
+                syck_emit_scalar(e, OBJOF("string"), scalar_none, 0, 0, 0, SvPVX(sv), SvCUR(sv));
+            }
+            else {
+                syck_emit_scalar(e, OBJOF("string"), scalar_1quote, 0, 0, 0, "", 0);
+            }
             break;
         }
         case SVt_IV:
@@ -138,7 +143,12 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         case SVt_PVMG:
         case SVt_PVBM:
         case SVt_PVLV: {
-            syck_emit_scalar(e, OBJOF("string"), scalar_none, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+            if (sv_len(sv) > 0) {
+                syck_emit_scalar(e, OBJOF("string"), scalar_none, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+            }
+            else {
+                syck_emit_scalar(e, OBJOF("string"), scalar_1quote, 0, 0, 0, "", 0);
+            }
             break;
         }
         case SVt_RV: {
@@ -196,6 +206,7 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
             break;
         }
     }
+    syck_emitter_flush( e, 0 );
 cleanup:
     *tag = '\0';
 }
@@ -214,7 +225,6 @@ SV* Dump(SV *sv) {
 
     perl_syck_mark_emitter( emitter );
     syck_emit( emitter, (st_data_t)sv );
-    syck_emitter_flush( emitter, 0 );
     syck_free_emitter( emitter );
     Safefree(bonus->tag);
 

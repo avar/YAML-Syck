@@ -1,3 +1,8 @@
+[Changes for 0.10 - 2006-01-09]
+
+* Fix emitting of empty strings; they are now always quoted.
+  Reported by: Chia-Liang Kao
+
 [Changes for 0.09 - 2006-01-09]
 
 * Downgrade to the last stable release of libsyck to fix the
