@@ -1,3 +1,9 @@
+[Changes for 0.09 - 2006-01-09]
+
+* Downgrade to the last stable release of libsyck to fix the
+  hash dumping layout problem.
+  Reported by: Gaal Yahas
+
 [Changes for 0.08 - 2006-01-09]
 
 * Fix double-free problem in object dumping.
