@@ -1,3 +1,8 @@
+[Changes for 0.06 - 2006-01-08]
+
+* Fix building problems on case-insensitive filesystems.
+  Reported by: Chia-Liang Kao
+
 [Changes for 0.05 - 2006-01-08]
 
 * DumpFile() and LoadFile() is exported by default.

@@ -6,7 +6,7 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.05 of YAML::Syck, released
+This document describes version 0.06 of YAML::Syck, released
 January 8, 2005.
 
 =head1 SYNOPSIS

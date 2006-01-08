@@ -26,9 +26,8 @@ node.c
 ppport.h
 README
 Storable.xs
-syck.c
+syck_.c
 syck.h
-syck.i
 Syck.xs
 syck_st.c
 syck_st.h
