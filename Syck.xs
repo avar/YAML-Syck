@@ -206,7 +206,6 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
             break;
         }
     }
-    syck_emitter_flush( e, 0 );
 cleanup:
     *tag = '\0';
 }
@@ -225,8 +224,10 @@ SV* Dump(SV *sv) {
 
     perl_syck_mark_emitter( emitter );
     syck_emit( emitter, (st_data_t)sv );
-    syck_free_emitter( emitter );
+    syck_emitter_flush( emitter, 1 );
+    syck_emitter_flush( emitter, 0 );
     Safefree(bonus->tag);
+    syck_free_emitter( emitter );
 
     return out;
 }
