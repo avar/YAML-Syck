@@ -5,7 +5,7 @@ use vars qw( @ISA @EXPORT $VERSION );
 use 5.003;
 use DynaLoader;
 
-$VERSION = '0.07';
+$VERSION = '0.08';
 @EXPORT  = qw( Dump Load DumpFile LoadFile );
 @ISA     = qw( Exporter DynaLoader );
 

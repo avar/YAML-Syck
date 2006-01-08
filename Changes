@@ -1,3 +1,8 @@
+[Changes for 0.08 - 2006-01-09]
+
+* Fix double-free problem in object dumping.
+  Reported by: Chia-Liang Kao
+
 [Changes for 0.07 - 2006-01-09]
 
 * Loading of blessed hash and array references.

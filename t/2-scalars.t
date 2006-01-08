@@ -1,7 +1,7 @@
 use strict;
 use Test;
 
-BEGIN { plan tests => 8 }
+BEGIN { plan tests => 6 }
 
 require YAML::Syck;
 ok(YAML::Syck->VERSION);
