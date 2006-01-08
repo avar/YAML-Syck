@@ -22,14 +22,17 @@ sub new {
 
 sub AUTOLOAD {
     my $self = shift;
-    goto &{$self->_top->autoload};
+
+    local $@;
+    my $autoload = eval { $self->_top->autoload } or return;
+    goto &$autoload;
 }
 
-#line 59
+#line 62
 
 sub _top { $_[0]->{_top} }
 
-#line 70
+#line 73
 
 sub admin {
     my $self = shift;
@@ -57,4 +60,4 @@ BEGIN { $SIG{__WARN__} = $SIG{__WARN__}->() };
 
 __END__
 
-#line 117
+#line 120

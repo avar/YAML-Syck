@@ -18,6 +18,18 @@ sub inc_paths {
     $self->makemaker_args(INC => join ' ', map { "-I$_" } @_);
 }
 
+sub lib_paths {
+    my $self = shift;
+    $self->makemaker_args(LIBS => join ' ', map { "-L$_" } @_);
+}
+
+sub lib_links {
+    my $self = shift;
+    $self->makemaker_args(
+        LIBS => join ' ', $self->makemaker_args->{LIBS}, map { "-l$_" } @_
+    );
+}
+
 sub optimize_flags {
     my $self = shift;
     $self->makemaker_args(OPTIMIZE => join ' ', @_);

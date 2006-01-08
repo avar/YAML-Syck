@@ -1,45 +1,41 @@
 #line 1 "inc/Module/Install/Metadata.pm - /usr/local/lib/perl5/site_perl/5.8.7/Module/Install/Metadata.pm"
 package Module::Install::Metadata;
-use Module::Install::Base;
-@ISA = qw(Module::Install::Base);
-
-$VERSION = '0.04';
 
 use strict 'vars';
-use vars qw($VERSION);
+use Module::Install::Base;
 
-my @scalar_keys = qw<
-    name module_name version abstract author license
+use vars qw($VERSION @ISA);
+BEGIN {
+	$VERSION = '0.06';
+	@ISA     = 'Module::Install::Base';
+}
+
+my @scalar_keys = qw{
+    name module_name abstract author version license
     distribution_type perl_version tests
->;
-my @tuple_keys = qw<
-    build_requires requires recommends bundles
->;
+};
 
-sub Meta { shift }
+my @tuple_keys = qw{
+    build_requires requires recommends bundles
+};
+
+sub Meta            { shift        }
 sub Meta_ScalarKeys { @scalar_keys }
-sub Meta_TupleKeys { @tuple_keys }
+sub Meta_TupleKeys  { @tuple_keys  }
 
 foreach my $key (@scalar_keys) {
     *$key = sub {
         my $self = shift;
-        return $self->{'values'}{$key} if defined wantarray and !@_;
-        $self->{'values'}{$key} = shift;
+        return $self->{values}{$key} if defined wantarray and !@_;
+        $self->{values}{$key} = shift;
         return $self;
     };
-}
-
-sub sign {
-    my $self = shift;
-    return $self->{'values'}{'sign'} if defined wantarray and !@_;
-    $self->{'values'}{'sign'} = ( @_ ? $_[0] : 1 );
-    return $self;
 }
 
 foreach my $key (@tuple_keys) {
     *$key = sub {
         my $self = shift;
-        return $self->{'values'}{$key} unless @_;
+        return $self->{values}{$key} unless @_;
 
         my @rv;
         while (@_) {
@@ -54,13 +50,28 @@ foreach my $key (@tuple_keys) {
             my $rv = [ $module, $version ];
             push @rv, $rv;
         }
-        push @{ $self->{'values'}{$key} }, @rv;
+        push @{ $self->{values}{$key} }, @rv;
         @rv;
     };
 }
 
+sub sign {
+    my $self = shift;
+    return $self->{'values'}{'sign'} if defined wantarray and !@_;
+    $self->{'values'}{'sign'} = ( @_ ? $_[0] : 1 );
+    return $self;
+}
+
 sub all_from {
     my ( $self, $file ) = @_;
+
+    unless ( defined($file) ) {
+        my $name = $self->name
+            or die "all_from called with no args without setting name() first";
+        $file = join('/', 'lib', split(/-/, $name)) . '.pm';
+        $file =~ s{.*/}{} unless -e $file;
+        die "all_from: cannot find $file from $name" unless -e $file;
+    }
 
     $self->version_from($file)      unless $self->version;
     $self->perl_version_from($file) unless $self->perl_version;
@@ -79,7 +90,7 @@ sub all_from {
 
 sub provides {
     my $self     = shift;
-    my $provides = ( $self->{'values'}{'provides'} ||= {} );
+    my $provides = ( $self->{values}{provides} ||= {} );
     %$provides = (%$provides, @_) if @_;
     return $provides;
 }
@@ -93,6 +104,12 @@ sub auto_provides {
         return $self;
     }
 
+    # Avoid spurious warnings as we are not checking manifest here.
+
+    local $SIG{__WARN__} = sub {1};
+    require ExtUtils::Manifest;
+    local *ExtUtils::Manifest::manicheck = sub { return };
+
     require Module::Build;
     my $build = Module::Build->new(
         dist_name    => $self->{name},
@@ -105,7 +122,7 @@ sub auto_provides {
 sub feature {
     my $self     = shift;
     my $name     = shift;
-    my $features = ( $self->{'values'}{'features'} ||= [] );
+    my $features = ( $self->{values}{features} ||= [] );
 
     my $mods;
 
@@ -137,14 +154,14 @@ sub features {
     while ( my ( $name, $mods ) = splice( @_, 0, 2 ) ) {
         $self->feature( $name, @$mods );
     }
-    return @{ $self->{'values'}{'features'} };
+    return @{ $self->{values}{features} };
 }
 
 sub no_index {
     my $self = shift;
     my $type = shift;
-    push @{ $self->{'values'}{'no_index'}{$type} }, @_ if $type;
-    return $self->{'values'}{'no_index'};
+    push @{ $self->{values}{no_index}{$type} }, @_ if $type;
+    return $self->{values}{no_index};
 }
 
 sub read {
@@ -186,8 +203,11 @@ sub abstract_from {
     my ( $self, $file ) = @_;
     require ExtUtils::MM_Unix;
     $self->abstract(
-        bless( { DISTNAME => $self->name }, 'ExtUtils::MM_Unix' )
-          ->parse_abstract($file) );
+        bless(
+            { DISTNAME => $self->name },
+            'ExtUtils::MM_Unix'
+        )->parse_abstract($file)
+     );
 }
 
 sub _slurp {

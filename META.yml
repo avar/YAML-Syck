@@ -1,7 +1,7 @@
 abstract: 'Fast, lightweight YAML loader and dumper'
-author: Audrey Tang <autrijus@autrijus.org>
+author: 'Audrey Tang <autrijus@autrijus.org>'
 distribution_type: module
-generated_by: Module::Install version 0.50
+generated_by: Module::Install version 0.51
 license: perl
 name: YAML-Syck
 no_index:
@@ -10,4 +10,4 @@ no_index:
     - t
 requires:
   perl: 5.003
-version: 0.04
+version: 0.05

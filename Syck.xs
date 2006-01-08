@@ -13,6 +13,7 @@
 
 struct emitter_xtra {
     SV* port;
+    char* tag;
 };
 
 SV* perl_syck_lookup_sym( SyckParser *p, SYMID v) {
@@ -29,7 +30,20 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
 
     switch (n->kind) {
         case syck_str_kind:
-            sv = newSVpvn(n->data.str->ptr, n->data.str->len);
+#if we_handle_all_types
+            if (n->type_id == NULL || strcmp( n->type_id, "str" ) == 0 ) {
+                sv = newSVpvn(n->data.str->ptr, n->data.str->len);
+            } else if (strcmp( n->type_id, "null" ) == 0 ) {
+                sv = &PL_sv_undef;
+            } else {
+                croak("unknown node type: %s", n->type_id);
+            }
+#endif
+            if (n->type_id == NULL || strcmp( n->type_id, "null" ) != 0) {
+                sv = newSVpvn(n->data.str->ptr, n->data.str->len);
+            } else {
+                sv = &PL_sv_undef;
+            }
         break;
 
         case syck_seq_kind:
@@ -37,7 +51,7 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
             for (i = 0; i < n->data.list->idx; i++) {
                 av_push(seq, perl_syck_lookup_sym(p, syck_seq_read(n, i) ));
             }
-            sv = newRV_inc((SV*)seq);
+            sv = newRV_noinc((SV*)seq);
         break;
 
         case syck_map_kind:
@@ -50,7 +64,7 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
                     0
                 );
             }
-            sv = newRV_inc((SV*)map);
+            sv = newRV_noinc((SV*)map);
         break;
     }
     return syck_add_sym(p, (char *)sv);
@@ -84,26 +98,57 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
     I32  len, i;
     SV*  sv = (SV*)data;
     struct emitter_xtra *bonus = (struct emitter_xtra *)e->bonus;
+    char* tag = bonus->tag;
+    char* ref = NULL;
 
+    if (sv == &PL_sv_undef) {
+        return syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, "~", 1);
+    }
+    
+#define OBJECT_TAG     "tag:perl:"
+    
+    if (SvMAGICAL(sv)) {
+        mg_get(sv);
+    }
+
+    if (sv_isobject(sv)) {
+        ref = savepv(sv_reftype(SvRV(sv), TRUE));
+        Newz(801, tag, strlen(ref)+strlen(OBJECT_TAG)+2, char);
+        strcat(tag, OBJECT_TAG);
+        switch (SvTYPE(SvRV(sv))) {
+            case SVt_PVAV: { strcat(tag, "@"); break; }
+            case SVt_RV:   { strcat(tag, "$"); break; }
+            case SVt_PVCV: { strcat(tag, "code"); break; }
+            case SVt_PVGV: { strcat(tag, "glob"); break; }
+        }
+        strcat(tag, ref);
+        bonus->tag = tag;
+    }
+
+#define OBJOF(a) (tag ? tag : a)
     switch (SvTYPE(sv)) {
         case SVt_NULL: { return; }
         case SVt_PV:
         case SVt_PVIV:
         case SVt_PVNV: { /* XXX !SvROK(sv) XXX */
-            return syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, SvPVX(sv), SvCUR(sv));
+            syck_emit_scalar(e, OBJOF("string"), scalar_none, 0, 0, 0, SvPVX(sv), SvCUR(sv));
+            break;
         }
         case SVt_IV:
         case SVt_NV:
         case SVt_PVMG:
         case SVt_PVBM:
         case SVt_PVLV: {
-            return syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+            syck_emit_scalar(e, OBJOF("string"), scalar_none, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+            break;
         }
         case SVt_RV: {
-            return perl_syck_emitter_handler(e, (st_data_t)SvRV(sv));
+            perl_syck_emitter_handler(e, (st_data_t)SvRV(sv));
+            break;
         }
         case SVt_PVAV: {
-            syck_emit_seq(e, "array", seq_none);
+            syck_emit_seq(e, OBJOF("array"), seq_none);
+            Safefree(tag); tag = NULL;
             len = av_len((AV*)sv) + 1;
             for (i = 0; i < len; i++) {
                 SV** sav = av_fetch((AV*)sv, i, 0);
@@ -113,7 +158,8 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
             return;
         }
         case SVt_PVHV: {
-            syck_emit_map(e, "hash", map_none);
+            syck_emit_map(e, OBJOF("hash"), map_none);
+            Safefree(tag); tag = NULL;
 #ifdef HAS_RESTRICTED_HASHES
             len = HvTOTALKEYS((HV*)sv);
 #else
@@ -137,17 +183,22 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         }
         case SVt_PVCV: {
             /* XXX TODO XXX */
-            return syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+            syck_emit_scalar(e, OBJOF("string"), scalar_none, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+            break;
         }
         case SVt_PVGV:
         case SVt_PVFM: {
             /* XXX TODO XXX */
-            return syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+            syck_emit_scalar(e, OBJOF("string"), scalar_none, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+            break;
         }
         case SVt_PVIO: {
-            return syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+            syck_emit_scalar(e, OBJOF("string"), scalar_none, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+            break;
         }
     }
+cleanup:
+    if (tag) Safefree(tag);
 }
 
 SV* Dump(SV *sv) {
@@ -157,6 +208,7 @@ SV* Dump(SV *sv) {
 
     bonus = emitter->bonus = S_ALLOC_N(struct emitter_xtra, 1);
     bonus->port = out;
+    bonus->tag = NULL;
 
     syck_emitter_handler( emitter, perl_syck_emitter_handler );
     syck_output_handler( emitter, perl_syck_output_handler );
