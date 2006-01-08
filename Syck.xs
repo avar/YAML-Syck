@@ -30,19 +30,13 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
 
     switch (n->kind) {
         case syck_str_kind:
-#if we_handle_all_types
             if (n->type_id == NULL || strcmp( n->type_id, "str" ) == 0 ) {
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
             } else if (strcmp( n->type_id, "null" ) == 0 ) {
                 sv = &PL_sv_undef;
             } else {
-                croak("unknown node type: %s", n->type_id);
-            }
-#endif
-            if (n->type_id == NULL || strcmp( n->type_id, "null" ) != 0) {
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
-            } else {
-                sv = &PL_sv_undef;
+                /* croak("unknown node type: %s", n->type_id); */
             }
         break;
 
@@ -52,6 +46,9 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
                 av_push(seq, perl_syck_lookup_sym(p, syck_seq_read(n, i) ));
             }
             sv = newRV_noinc((SV*)seq);
+            if (n->type_id) {
+                sv_bless(sv, gv_stashpv(n->type_id + 6, TRUE));
+            }
         break;
 
         case syck_map_kind:
@@ -65,6 +62,9 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
                 );
             }
             sv = newRV_noinc((SV*)map);
+            if (n->type_id) {
+                sv_bless(sv, gv_stashpv(n->type_id + 5, TRUE));
+            }
         break;
     }
     return syck_add_sym(p, (char *)sv);

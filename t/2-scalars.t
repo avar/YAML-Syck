@@ -1,20 +1,15 @@
 use strict;
-use Test::More;
+use Test;
 
 BEGIN { plan tests => 8 }
 
 require YAML::Syck;
 ok(YAML::Syck->VERSION);
-
 YAML::Syck->import;
-ok(Dump("Hello, world"), "--- Hello, world\n");
-ok(Load("--- Hello, world\n"), "Hello, world");
 
-# XXX: Test::Base this?
+ok(Dump(42),    "--- 42\n");
+ok(Load("--- 42\n"), 42);
 
-is(Dump(42),    "--- 42\n", "Dump a number");
-is(Load("--- 42\n"), 42,    "Load a number");
-
-is(Dump(undef), "--- ~\n",  "Dump undef");
-is(Load("--- ~\n"), undef,  "Load undef");
-is(Load("---\n"), undef,  "Load undef");
+ok(Dump(undef), "--- ~\n");
+ok(Load("--- ~\n"), undef);
+ok(Load("---\n"), undef);

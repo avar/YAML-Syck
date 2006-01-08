@@ -1,3 +1,9 @@
+[Changes for 0.07 - 2006-01-09]
+
+* Loading of blessed hash and array references.
+
+* Do away with Test::More as testing dependency.
+
 [Changes for 0.06 - 2006-01-08]
 
 * Fix building problems on case-insensitive filesystems.
@@ -8,7 +14,7 @@
 * DumpFile() and LoadFile() is exported by default.
 
 * Undef now dumps as '~'; also supports dumping blessed references as
-  'perl/!type'.  (Parsing them doesn't work at this moment.)
+  'perl/!type'.  (Loading them doesn't work at this moment.)
   Implemented by: Gaal Yahas
 
 * Loading hashes and arrays no longer creates dangling references
