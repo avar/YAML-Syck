@@ -1,3 +1,8 @@
+[Changes for 0.12 - 2006-01-09]
+
+* Parser errors now raises proper exceptions instead of segfaults.
+  Reported by: Tatsuhiko Miyagawa
+
 [Changes for 0.11 - 2006-01-09]
 
 * Trailing newlines were not outputted by emitters.

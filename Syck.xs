@@ -74,13 +74,20 @@ void perl_syck_mark_emitter(SyckEmitter *e) {
     return;
 }
 
+void perl_syck_error_handler(SyckParser *p, char *msg) {
+    croak(form( "YAML::Syck parser (line %d, column %d): %s", 
+        p->linect + 1,
+        p->cursor - p->lineptr,
+        msg ));
+}
+
 static SV * Load(char *s) {
     SV *obj;
     SYMID v;
     SyckParser *parser = syck_new_parser();
     syck_parser_str_auto(parser, s, NULL);
     syck_parser_handler(parser, perl_syck_parser_handler);
-    syck_parser_error_handler(parser, NULL);
+    syck_parser_error_handler(parser, perl_syck_error_handler);
     syck_parser_implicit_typing(parser, 1);
     syck_parser_taguri_expansion(parser, 0);
     v = syck_parse(parser);

@@ -22,10 +22,6 @@ The libsyck code bundled with this library is written by
 "why the lucky stiff", under a BSD-style license.
 See the COPYING file for details.
 
-The Storable.xs code bundled with this library is written by
-Raphael Manfredi and maintained by perl5-porters, under the
-same license as Perl.
-
 All rights reserved.  You can redistribute and/or modify
 this bundle under the same terms as Perl itself.
 
