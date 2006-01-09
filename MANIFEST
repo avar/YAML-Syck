@@ -25,7 +25,6 @@ META.yml
 node.c
 ppport.h
 README
-Storable.xs
 syck_.c
 syck.h
 Syck.xs

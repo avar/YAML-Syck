@@ -1,3 +1,15 @@
+[Changes for 0.14 - 2006-01-09]
+
+* Add a $YAML::Syck::ImplicitTyping flag to control recognition
+  of implicit types.  Currently supports null, bool, float, int;
+  if it's turned off (as per default) only null is recognized.
+  Reported by: Brian Ingerson
+
+* Fix potential emission of redundant "--- " headings in large
+  dumped documents.
+
+* We no longer ship Storable.xs with the distribution.
+
 [Changes for 0.13 - 2006-01-09]
 
 * Parsing an empty string no longer causes bus error in threaded Perls.
