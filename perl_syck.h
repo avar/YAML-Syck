@@ -9,20 +9,22 @@
 
 #ifdef YAML_IS_JSON
 #  define PACKAGE_NAME  "JSON::Syck"
-#  define NULL_TYPE     "str"
 #  define NULL_LITERAL  "null"
-#  define SCALAR_NONE   scalar_2quote
-#  define SCALAR_1QUOTE scalar_2quote
+#  define SCALAR_NUMBER scalar_none
+#  define SCALAR_STRING scalar_2quote
+#  define SCALAR_QUOTED scalar_2quote
 #  define SEQ_NONE      seq_inline
 #  define MAP_NONE      map_inline
+#  define TYPE_IS_NULL(x) ((x == NULL) || (strcmp( x, "str" ) == 0))
 #else
 #  define PACKAGE_NAME  "YAML::Syck"
-#  define NULL_TYPE     NULL
 #  define NULL_LITERAL  "~"
-#  define SCALAR_NONE   scalar_none
-#  define SCALAR_1QUOTE scalar_1quote
+#  define SCALAR_NUMBER scalar_none
+#  define SCALAR_STRING scalar_none
+#  define SCALAR_QUOTED scalar_1quote
 #  define SEQ_NONE      seq_none
 #  define MAP_NONE      map_none
+#  define TYPE_IS_NULL(x) (x == NULL)
 #endif
 
 /*
@@ -49,7 +51,7 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
 
     switch (n->kind) {
         case syck_str_kind:
-            if (n->type_id == NULL_TYPE) {
+            if (TYPE_IS_NULL(n->type_id)) {
                 if ((strcmp( n->data.str->ptr, NULL_LITERAL ) == 0)
                     && (n->data.str->style == scalar_plain)) {
                     sv = &PL_sv_undef;
@@ -188,6 +190,36 @@ void perl_syck_error_handler(SyckParser *p, char *msg) {
         msg ));
 }
 
+static char* perl_json_preprocess(char *s) {
+    int i;
+    char *out;
+    char ch;
+    bool in_string = 0;
+    bool in_quote  = 0;
+    char *pos;
+    STRLEN len = strlen(s);
+
+    Newz(2006, out, len*2+1, char);
+    pos = out;
+
+    for (i = 0; i < len; i++) {
+        ch = *(s+i);
+        *pos++ = ch;
+        if (in_quote) {
+            in_quote = !in_quote;
+        }
+        else if (ch == '\"') {
+            in_string = !in_string;
+        }
+        else if ((ch == ':' || ch == ',') && !in_string) {
+            *pos++ = ' ';
+        }
+    }
+
+    *pos = '\0';
+    return out;
+}
+
 static SV * Load(char *s) {
     SYMID v;
     SyckParser *parser;
@@ -196,6 +228,10 @@ static SV * Load(char *s) {
 
     /* Don't even bother if the string is empty. */
     if (*s == '\0') { return &PL_sv_undef; }
+
+#ifdef YAML_IS_JSON
+    s = perl_json_preprocess(s);
+#endif
 
     parser = syck_new_parser();
     syck_parser_str_auto(parser, s, NULL);
@@ -258,10 +294,10 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         case SVt_PVIV:
         case SVt_PVNV: {
             if (SvCUR(sv) > 0) {
-                syck_emit_scalar(e, OBJOF("string"), SCALAR_NONE, 0, 0, 0, SvPVX(sv), SvCUR(sv));
+                syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPVX(sv), SvCUR(sv));
             }
             else {
-                syck_emit_scalar(e, OBJOF("string"), SCALAR_1QUOTE, 0, 0, 0, "", 0);
+                syck_emit_scalar(e, OBJOF("string"), SCALAR_QUOTED, 0, 0, 0, "", 0);
             }
             break;
         }
@@ -271,10 +307,10 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         case SVt_PVBM:
         case SVt_PVLV: {
             if (sv_len(sv) > 0) {
-                syck_emit_scalar(e, OBJOF("string"), SCALAR_NONE, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+                syck_emit_scalar(e, OBJOF("string"), SCALAR_NUMBER, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
             }
             else {
-                syck_emit_scalar(e, OBJOF("string"), SCALAR_1QUOTE, 0, 0, 0, "", 0);
+                syck_emit_scalar(e, OBJOF("string"), SCALAR_QUOTED, 0, 0, 0, "", 0);
             }
             break;
         }
@@ -294,7 +330,7 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
             return;
         }
         case SVt_PVHV: {
-            syck_emit_map(e, OBJOF("hash"), map_none);
+            syck_emit_map(e, OBJOF("hash"), MAP_NONE);
             *tag = '\0';
 #ifdef HAS_RESTRICTED_HASHES
             len = HvTOTALKEYS((HV*)sv);
@@ -319,17 +355,17 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         }
         case SVt_PVCV: {
             /* XXX TODO XXX */
-            syck_emit_scalar(e, OBJOF("string"), scalar_none, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+            syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
             break;
         }
         case SVt_PVGV:
         case SVt_PVFM: {
             /* XXX TODO XXX */
-            syck_emit_scalar(e, OBJOF("string"), scalar_none, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+            syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
             break;
         }
         case SVt_PVIO: {
-            syck_emit_scalar(e, OBJOF("string"), scalar_none, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+            syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
             break;
         }
     }
@@ -341,7 +377,9 @@ SV* Dump(SV *sv) {
     struct emitter_xtra *bonus;
     SV* out = newSVpvn("", 0);
     SyckEmitter *emitter = syck_new_emitter();
-    SV *implicit = GvSV(gv_fetchpv(form("%s::Headless", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *headless = GvSV(gv_fetchpv(form("%s::Headless", PACKAGE_NAME), TRUE, SVt_PV));
+
+    emitter->headless = SvTRUE(headless);
 
     bonus = emitter->bonus = S_ALLOC_N(struct emitter_xtra, 1);
     bonus->port = out;
@@ -358,7 +396,10 @@ SV* Dump(SV *sv) {
     Safefree(bonus->tag);
 
 #ifdef YAML_IS_JSON
-    Perl_do_chomp(out);
+    if (SvCUR(out) > 0) {
+        /* Trim the trailing newline */
+        SvCUR_set(out, SvCUR(out)-1);
+    }
 #endif
 
     return out;
