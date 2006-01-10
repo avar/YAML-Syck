@@ -1,6 +1,12 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+
+#define NEED_grok_oct
+#define NEED_grok_hex
+#define NEED_grok_number
+#define NEED_grok_numeric_radix
+#define NEED_newRV_noinc
 #include "ppport.h"
 #include "ppport_math.h"
 
@@ -201,7 +207,7 @@ static char* perl_json_preprocess(char *s) {
     char *pos;
     STRLEN len = strlen(s);
 
-    Newz(2006, out, len*2+1, char);
+    New(2006, out, len*2+1, char);
     pos = out;
 
     for (i = 0; i < len; i++) {
@@ -275,6 +281,11 @@ static SV * Load(char *s) {
     v = syck_parse(parser);
     syck_lookup_sym(parser, v, (char **)&obj);
     syck_free_parser(parser);
+
+#ifdef YAML_IS_JSON
+    Safefree(s);
+#endif
+
     return obj;
 }
 
@@ -425,7 +436,7 @@ SV* Dump(SV *sv) {
 
     bonus = emitter->bonus = S_ALLOC_N(struct emitter_xtra, 1);
     bonus->port = out;
-    Newz(801, bonus->tag, 512, char);
+    New(801, bonus->tag, 512, char);
 
     syck_emitter_handler( emitter, perl_syck_emitter_handler );
     syck_output_handler( emitter, perl_syck_output_handler );
