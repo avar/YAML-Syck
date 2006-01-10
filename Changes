@@ -1,3 +1,15 @@
+[Changes for 0.15 - 2006-01-10]
+
+* Add a $YAML::Syck::Headless flag to control emission of "---\n"
+  headers, for easier JSON interoperability.
+
+* Fix mis-dumping references as strings if the same pad position has
+  stored a previous dump result as string.
+  Reported by: Tatsuhiko Miyagawa
+
+* Fix build on Perl 5.6.x and on platforms without NAN/INF support.
+  Reported by: Anton Berezin
+
 [Changes for 0.14 - 2006-01-09]
 
 * Add a $YAML::Syck::ImplicitTyping flag to control recognition

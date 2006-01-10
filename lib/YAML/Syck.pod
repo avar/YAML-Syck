@@ -6,8 +6,8 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.14 of YAML::Syck, released
-January 9, 2005.
+This document describes version 0.15 of YAML::Syck, released
+January 10, 2005.
 
 =head1 SYNOPSIS
 
@@ -30,6 +30,11 @@ Defaults to false.  Setting this to a true value will make C<Load> recognize
 various implicit types in YAML, such as unquoted C<true>, C<false>, as well as
 integers and floating-point numbers.  Otherwise, only C<~> is recognized to
 be C<undef>.
+
+=head2 $YAML::Syck::Headless
+
+Defaults to false.  Setting this to a true value will make C<Dump> omit the
+leading C<---\n> marker.
 
 =head1 CAVEATS
 
