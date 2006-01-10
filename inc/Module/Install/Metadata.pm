@@ -6,8 +6,8 @@ use Module::Install::Base;
 
 use vars qw($VERSION @ISA);
 BEGIN {
-	$VERSION = '0.06';
-	@ISA     = 'Module::Install::Base';
+    $VERSION = '0.06';
+    @ISA     = 'Module::Install::Base';
 }
 
 my @scalar_keys = qw{

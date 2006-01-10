@@ -1,3 +1,8 @@
+[Changes for 0.18 - 2006-01-11]
+
+* Allow installation for people with older Module::Install versions.
+  Reported by: Brian Ingerson
+
 [Changes for 0.17 - 2006-01-11]
 
 * Use the correct style for dual vars and tied scalars.

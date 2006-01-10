@@ -5,13 +5,13 @@ use 5.004;
 use strict 'vars';
 use vars qw{$VERSION};
 BEGIN {
-	# Don't forget to update Module::Install::Admin too!
-	$VERSION = '0.51';
+    # Don't forget to update Module::Install::Admin too!
+    $VERSION = '0.52';
 }
 
 # inc::Module::Install must be loaded first
 unless ( $INC{join('/', inc => split(/::/, __PACKAGE__)).'.pm'} ) {
-	die <<"END_DIE";
+    die <<"END_DIE";
 Please invoke ${\__PACKAGE__} with:
 
     use inc::${\__PACKAGE__};
@@ -40,7 +40,7 @@ sub autoload {
     $sym->{$cwd} = sub {
         my $pwd = Cwd::cwd();
         if ( my $code = $sym->{$pwd} ) {
-        	# delegate back to parent dirs
+            # delegate back to parent dirs
             goto &$code unless $cwd eq $pwd;
         }
         $$sym =~ /([^:]+)$/ or die "Cannot autoload $caller - $sym";
@@ -74,11 +74,11 @@ sub import {
 sub preload {
     my ($self) = @_;
 
-	unless ( $self->{extentions} ) {
-		$self->load_extensions(
-			"$self->{prefix}/$self->{path}", $self
-			);
-	}
+        unless ( $self->{extentions} ) {
+                $self->load_extensions(
+                        "$self->{prefix}/$self->{path}", $self
+                        );
+        }
 
     my @exts = @{$self->{extensions}};
     unless ( @exts ) {
@@ -111,7 +111,7 @@ sub new {
     # ignore the prefix on extension modules built from top level.
     my $base_path = Cwd::abs_path($FindBin::Bin);
     unless ( Cwd::abs_path(Cwd::cwd()) eq $base_path ) {
-    	delete $args{prefix};
+        delete $args{prefix};
     }
 
     return $args{_self} if $args{_self};
@@ -180,8 +180,8 @@ sub load_extensions {
         local $@;
         my $new = eval { require $file; $pkg->can('new') };
         unless ( $new ) {
-        	warn $@ if $@;
-        	next;
+            warn $@ if $@;
+            next;
         }
         $self->{pathnames}{$pkg} = delete $INC{$file};
         push @{$self->{extensions}}, &{$new}($pkg, _top => $top_obj );
