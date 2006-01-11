@@ -1,3 +1,10 @@
+[Changes for 0.21 - 2006-01-11]
+
+* Support for loading and dumping unicode strings.
+
+* Add a $YAML::Syck::ImplicitUnicode flag to control implicit setting
+  of unicode flags.
+
 [Changes for 0.20 - 2006-01-11]
 
 * Support for loading and dumping scalar references.

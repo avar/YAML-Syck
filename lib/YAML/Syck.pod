@@ -6,7 +6,7 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.20 of YAML::Syck, released
+This document describes version 0.21 of YAML::Syck, released
 January 11, 2005.
 
 =head1 SYNOPSIS
@@ -24,6 +24,11 @@ Perl data structures to YAML strings, and the other way around.
 
 =head1 FLAGS
 
+=head2 $YAML::Syck::Headless
+
+Defaults to false.  Setting this to a true value will make C<Dump> omit the
+leading C<---\n> marker.
+
 =head2 $YAML::Syck::ImplicitTyping
 
 Defaults to false.  Setting this to a true value will make C<Load> recognize
@@ -31,10 +36,17 @@ various implicit types in YAML, such as unquoted C<true>, C<false>, as well as
 integers and floating-point numbers.  Otherwise, only C<~> is recognized to
 be C<undef>.
 
-=head2 $YAML::Syck::Headless
+=head2 $YAML::Syck::ImplicitUnicode
 
-Defaults to false.  Setting this to a true value will make C<Dump> omit the
-leading C<---\n> marker.
+Defaults to false.  For Perl 5.8.0 or later, setting this to a true value will
+make C<Load> set Unicode flag on for every string that contains valid UTF8
+sequences, and make C<Dump> return a unicode string.
+
+Regardless of this flag, Unicode strings are dumped verbatim without escaping;
+byte strings with high-bit set will be dumped with backslash escaping.
+
+However, because YAML does not distinguish between these two kinds of strings,
+so this flag will affect loading of both variants of strings.
 
 =head1 CAVEATS
 
