@@ -1,3 +1,9 @@
+[Changes for 0.20 - 2006-01-11]
+
+* Support for loading and dumping scalar references.
+
+* Support for dumping self-recursive data structures.
+
 [Changes for 0.19 - 2006-01-11]
 
 * More efficient memory use and allocation for the JSON branch.

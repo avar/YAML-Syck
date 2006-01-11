@@ -3,9 +3,9 @@ no_index:
   directory: 
     - inc
     - t
-generated_by: Module::Install version 0.52
+generated_by: Module::Install version 0.54
 distribution_type: module
-version: 0.19
+version: 0.20
 name: YAML-Syck
 author: Audrey Tang <autrijus@autrijus.org>
 license: perl

@@ -15,21 +15,21 @@ not run its Makefile.PL or Build.PL.
 Hash: SHA1
 
 SHA1 3710975c0e6727079e17c6d1f27948c40729d710 COPYING
-SHA1 e9dc4d5fe6b9101fbb76c11dc8e2d876ae292e67 Changes
+SHA1 6c5957f3c327266489c62bc4dd152871a8fc4db2 Changes
 SHA1 301630ade3917b039f625b26a0d3a914d8159659 MANIFEST
-SHA1 00bf8d3923d11617d1b9a16e750541fb297f237f META.yml
+SHA1 3633ce4c567c43f5d5406d514fbf8caf14c5f73d META.yml
 SHA1 be5e1896f7b861d14c1dfbec8d7304a9630f211a Makefile.PL
 SHA1 d753cac4e816f0d97dbddc9ccf425801f4116c2a README
 SHA1 6f856b2f644d54eb4a7068f7ae51abd804cb636b Syck.xs
 SHA1 727b03a1eab1f094c4c054fb7d55de73397da1c9 bytecode.c
-SHA1 38b4bc9c8c9a6a18aac33f7d15475da358b3fcbc emitter.c
+SHA1 17100a5cfc8ff7a9aad34b227647f527d40d4fc6 emitter.c
 SHA1 e6426f94d8acb9d9e3159d8906e570b1e70d6eea gram.c
 SHA1 f4f2cc6ce84bd40f33a80d33d8881402f03ce75d gram.h
 SHA1 2cd027a631e4562e2bfc4c383e6c87531227462b handler.c
 SHA1 3c0e059a0c32ab192888d325f8571d7ed3e608db implicit.c
-SHA1 5d20262d5fd97f09da3f56b34702d361f0cd5962 inc/Module/Install.pm
+SHA1 69da1d30c4b44580bcea45de4cc15d6c1f6d9e3d inc/Module/Install.pm
 SHA1 726a6420b06d98e409bc105cc22f632855bbe3ed inc/Module/Install/Base.pm
-SHA1 a7c86e4d92f192995ec6acf9303eaf68b955571d inc/Module/Install/Can.pm
+SHA1 f4171c353bef786e91a7e918eaea388306c9be42 inc/Module/Install/Can.pm
 SHA1 4a14ef5459b12494099913bcadf0f5be446f4491 inc/Module/Install/Compiler.pm
 SHA1 d097dedadac0edcafbee3a14c262e24089f5795e inc/Module/Install/Fetch.pm
 SHA1 4f7d0880122aa5d9ddf37577b434af09d5d8628f inc/Module/Install/Makefile.pm
@@ -38,10 +38,10 @@ SHA1 8ee248d67d4c61a4f01e6a96c41afbd93be4c9ef inc/Module/Install/Win32.pm
 SHA1 bbdf00f8ca9d2ddaebd2dd6eb47d442fbc6fac05 inc/Module/Install/WriteAll.pm
 SHA1 2c2459b2b5cf94a7f9cd1905a242d7d01616ee0b lib/YAML/Dumper/Syck.pm
 SHA1 534000ebfb91c993f5344ae4e34185d853954e6f lib/YAML/Loader/Syck.pm
-SHA1 5b590e1fe0e73ef246656e13d7ec744c6973bbde lib/YAML/Syck.pm
-SHA1 e4954ad33103cdd25737be3d2acff99f781027d6 lib/YAML/Syck.pod
+SHA1 735798207331b9bc6cd9b8a0754585fbfff07913 lib/YAML/Syck.pm
+SHA1 bcdde9b1e80e4ca14f436a419097dee282a870e7 lib/YAML/Syck.pod
 SHA1 c0457a0d611568d5eb09f6cdf840303e90fbcf87 node.c
-SHA1 b594fbd5869bb9a02050a307b815462827a9e61f perl_syck.h
+SHA1 0a53ebfdc49e69db73bcc71b9c0163fb9c73cd0e perl_syck.h
 SHA1 b8b76e40ef700b2dec432593c3883b0c11636aff ppport.h
 SHA1 9c9255d4d1a4b4ce5aa75ae4220df496cf8e4a44 ppport_math.h
 SHA1 ed6a9bf24d8c95558d6e0e2dd994387ab9c544a5 syck.h
@@ -49,7 +49,7 @@ SHA1 3ffa96b4e2182997a341f9e053a8371856d4ed2f syck_.c
 SHA1 7f4361420c4bca7c7dac3a0b5c04eb39c15a2000 syck_st.c
 SHA1 0909926bf7f2ae81b54a08e48ecc17f31bb2e736 syck_st.h
 SHA1 880bf8730bf41656b6719b7a6d7307b21ae34a7c t/1-basic.t
-SHA1 dd3746846082ae5cad590b5e7cf61012dae79ba4 t/2-scalars.t
+SHA1 0a5d923bb75b0edfe7a633299bffe0388214cdeb t/2-scalars.t
 SHA1 bed6aff610c235ef2a7bd79fab8166e13d1cf880 t/3-objects.t
 SHA1 6af7ed5bd98e88eba077604f27492341593dd5ad token.c
 SHA1 d733795338d93c22cce6cd05b8eed9d8e35a8790 yaml2byte.c
@@ -57,7 +57,7 @@ SHA1 b0528d36416a3650b8514d8f65093fe894adc3a5 yamlbyte.h
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.2 (FreeBSD)
 
-iD8DBQFDw9aRtLPdNzw1AaARAsihAJ9b3RC3Oq3lbkRz0FvzaO3h+3aREQCgoe+0
-fByj41k5fORGrCuc1uZ82H4=
-=njdE
+iD8DBQFDxOkAtLPdNzw1AaARArImAKCAkHQu9FIoaqkt9wdggY+3lYgWrwCgujro
+gmGZocFftSFAN+ptfeI9mSU=
+=5G0r
 -----END PGP SIGNATURE-----

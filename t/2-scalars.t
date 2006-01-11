@@ -1,7 +1,7 @@
 use strict;
 use Test;
 
-BEGIN { plan tests => 11 }
+BEGIN { plan tests => 14 }
 
 require YAML::Syck;
 ok(YAML::Syck->VERSION);
@@ -9,6 +9,13 @@ YAML::Syck->import;
 
 ok(Dump(42),    "--- 42\n");
 ok(Load("--- 42\n"), 42);
+
+ok(Dump(\42),    "--- !perl/ref: \n=: 42\n");
+ok(${Load("--- !perl/ref: \n=: 42\n")}, 42);
+
+my $x;
+$x = \$x;
+ok(Dump($x),     "--- &1 !perl/ref: \n=: *1\n");
 
 ok(Dump(undef), "--- ~\n");
 ok(Load("--- ~\n"), undef);

@@ -1217,6 +1217,9 @@ syck_emitter_mark_node( SyckEmitter *e, st_data_t n )
              * Insert into anchors table
              */
             st_insert( e->anchors, (st_data_t)oid, (st_data_t)anchor_name );
+
+            /* XXX - Added by Audrey Tang to handle self-recursive structures - XXX */
+            return 0;
         }
     }
     return oid;
