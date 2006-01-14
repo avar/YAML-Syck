@@ -1,3 +1,8 @@
+[Changes for 0.24 - 2006-01-14]
+
+* Silence warnings on 64-bit machines.
+  Reported by: Anton Berezin
+
 [Changes for 0.23 - 2006-01-14]
 
 * Fix build for 5.6.x again.
