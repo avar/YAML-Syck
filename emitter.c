@@ -411,6 +411,8 @@ syck_emit( SyckEmitter *e, st_data_t n )
         }
         else
         {
+            if (anchor_name == NULL) { anchor_name = "1"; }
+
             char *an = S_ALLOC_N( char, strlen( anchor_name ) + 2 );
             sprintf( an, "*%s", anchor_name );
             syck_emitter_write( e, an, strlen( anchor_name ) + 1 );

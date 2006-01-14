@@ -13,6 +13,10 @@
 #undef DEBUG /* maybe defined in perl.h */
 #include <syck.h>
 
+#ifndef newSVpvn_share
+#define newSVpvn_share newSVpvn
+#endif
+
 #ifdef YAML_IS_JSON
 #  define PACKAGE_NAME  "JSON::Syck"
 #  define NULL_LITERAL  "null"
