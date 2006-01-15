@@ -22,8 +22,10 @@
 #  define PACKAGE_NAME  "JSON::Syck"
 #  define NULL_LITERAL  "null"
 #  define SCALAR_NUMBER scalar_none
-#  define SCALAR_STRING scalar_2quote
-#  define SCALAR_QUOTED scalar_2quote
+char json_quote_char = '"';
+static enum scalar_style json_quote_style = scalar_2quote;
+#  define SCALAR_STRING json_quote_style
+#  define SCALAR_QUOTED json_quote_style
 #  define SCALAR_UTF8   scalar_fold
 #  define SEQ_NONE      seq_inline
 #  define MAP_NONE      map_inline
@@ -295,6 +297,7 @@ void perl_syck_error_handler(SyckParser *p, char *msg) {
         msg ));
 }
 
+#ifdef YAML_IS_JSON
 static char* perl_json_preprocess(char *s) {
     int i;
     char *out;
@@ -313,7 +316,7 @@ static char* perl_json_preprocess(char *s) {
         if (in_quote) {
             in_quote = !in_quote;
         }
-        else if (ch == '\"') {
+        else if (ch == json_quote_char) {
             in_string = !in_string;
         }
         else if ((ch == ':' || ch == ',') && !in_string) {
@@ -343,7 +346,7 @@ void perl_json_postprocess(SV *sv) {
         if (in_quote) {
             in_quote = !in_quote;
         }
-        else if (ch == '\"') {
+        else if (ch == json_quote_char) {
             in_string = !in_string;
         }
         else if ((ch == ':' || ch == ',') && !in_string) {
@@ -359,6 +362,7 @@ void perl_json_postprocess(SV *sv) {
     *pos = '\0';
     SvCUR_set(sv, final_len);
 }
+#endif
 
 static SV * Load(char *s) {
     SYMID v;
@@ -366,6 +370,11 @@ static SV * Load(char *s) {
     SV *obj = &PL_sv_undef;
     SV *implicit = GvSV(gv_fetchpv(form("%s::ImplicitTyping", PACKAGE_NAME), TRUE, SVt_PV));
     SV *unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
+#ifdef YAML_IS_JSON
+    SV *singlequote = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
+    json_quote_char = (SvTRUE(singlequote) ? '\'' : '"' );
+    json_quote_style = (SvTRUE(singlequote) ? scalar_1quote : scalar_2quote );
+#endif
 
     /* Don't even bother if the string is empty. */
     if (*s == '\0') { return &PL_sv_undef; }
@@ -587,6 +596,11 @@ SV* Dump(SV *sv) {
     SV *headless = GvSV(gv_fetchpv(form("%s::Headless", PACKAGE_NAME), TRUE, SVt_PV));
     SV *unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
     SV *sortkeys = GvSV(gv_fetchpv(form("%s::SortKeys", PACKAGE_NAME), TRUE, SVt_PV));
+#ifdef YAML_IS_JSON
+    SV *singlequote = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
+    json_quote_char = (SvTRUE(singlequote) ? '\'' : '"' );
+    json_quote_style = (SvTRUE(singlequote) ? scalar_1quote : scalar_2quote );
+#endif
 
     emitter->headless = SvTRUE(headless);
     emitter->sort_keys = SvTRUE(sortkeys);

@@ -1,15 +1,15 @@
 package YAML::Syck;
 use strict;
-use vars qw( @ISA @EXPORT $VERSION $ImplicitTyping );
+use vars qw( @ISA @EXPORT $VERSION $ImplicitTyping $SortKeys );
 
 use 5.003;
 use DynaLoader;
 
-$VERSION = '0.26';
+$VERSION = '0.27';
 @EXPORT  = qw( Dump Load DumpFile LoadFile );
 @ISA     = qw( Exporter DynaLoader );
 
-$ImplicitTyping = 0;
+$SortKeys = 1;
 
 sub DumpFile {
     my $file = shift;
