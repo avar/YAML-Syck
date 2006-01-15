@@ -9,6 +9,7 @@
 #define NEED_newRV_noinc
 #include "ppport.h"
 #include "ppport_math.h"
+#include "ppport_sort.h"
 
 #undef DEBUG /* maybe defined in perl.h */
 #include <syck.h>
@@ -504,6 +505,7 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
             return;
         }
         case SVt_PVHV: {
+            HV *hv = (HV*)sv;
             syck_emit_map(e, OBJOF("hash"), MAP_NONE);
             *tag = '\0';
 #ifdef HAS_RESTRICTED_HASHES
@@ -512,17 +514,48 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
             len = HvKEYS((HV*)sv);
 #endif
             hv_iterinit((HV*)sv);
-            for (i = 0; i < len; i++) {
-#ifdef HV_ITERNEXT_WANTPLACEHOLDERS
-                HE *he = hv_iternext_flags((HV*)sv, HV_ITERNEXT_WANTPLACEHOLDERS);
+
+            if (e->sort_keys) {
+		AV *av = newAV();
+		for (i = 0; i < len; i++) {
+#ifdef HAS_RESTRICTED_HASHES
+                    HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
 #else
-                HE *he = hv_iternext((HV*)sv);
+                    HE *he = hv_iternext(hv);
 #endif
-                I32 keylen;
-                SV *key = hv_iterkeysv(he);
-                SV *val = hv_iterval((HV*)sv, he);
-                syck_emit_item( e, (st_data_t)key );
-                syck_emit_item( e, (st_data_t)val );
+                    SV *key = hv_iterkeysv(he);
+                    av_store(av, AvFILLp(av)+1, key);	/* av_push(), really */
+		}
+		STORE_HASH_SORT;
+		for (i = 0; i < len; i++) {
+#ifdef HAS_RESTRICTED_HASHES
+                    int placeholders = (int)HvPLACEHOLDERS_get(hv);
+#endif
+                    unsigned char flags = 0;
+                    char *keyval;
+                    STRLEN keylen_tmp;
+                    I32 keylen;
+                    SV *key = av_shift(av);
+                    HE *he  = hv_fetch_ent(hv, key, 0, 0);
+                    SV *val = HeVAL(he);
+                    if (val == NULL) { val = &PL_sv_undef; }
+                    syck_emit_item( e, (st_data_t)key );
+                    syck_emit_item( e, (st_data_t)val );
+                }
+            }
+            else {
+                for (i = 0; i < len; i++) {
+#ifdef HV_ITERNEXT_WANTPLACEHOLDERS
+                    HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
+#else
+                    HE *he = hv_iternext(hv);
+#endif
+                    I32 keylen;
+                    SV *key = hv_iterkeysv(he);
+                    SV *val = hv_iterval(hv, he);
+                    syck_emit_item( e, (st_data_t)key );
+                    syck_emit_item( e, (st_data_t)val );
+                }
             }
             syck_emit_end(e);
             return;
@@ -553,8 +586,10 @@ SV* Dump(SV *sv) {
     SyckEmitter *emitter = syck_new_emitter();
     SV *headless = GvSV(gv_fetchpv(form("%s::Headless", PACKAGE_NAME), TRUE, SVt_PV));
     SV *unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *sortkeys = GvSV(gv_fetchpv(form("%s::SortKeys", PACKAGE_NAME), TRUE, SVt_PV));
 
     emitter->headless = SvTRUE(headless);
+    emitter->sort_keys = SvTRUE(sortkeys);
     emitter->anchor_format = "%d";
 
     bonus = emitter->bonus = S_ALLOC_N(struct emitter_xtra, 1);

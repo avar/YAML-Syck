@@ -26,12 +26,14 @@ node.c
 perl_syck.h
 ppport.h
 ppport_math.h
+ppport_sort.h
 README
 syck_.c
 syck.h
 Syck.xs
 syck_st.c
 syck_st.h
+t/TestYAML.pm
 t/1-basic.t
 t/2-scalars.t
 t/3-objects.t

@@ -5,7 +5,7 @@ no_index:
     - t
 generated_by: Module::Install version 0.54
 distribution_type: module
-version: 0.25
+version: 0.26
 name: YAML-Syck
 author: Audrey Tang <autrijus@autrijus.org>
 license: perl
