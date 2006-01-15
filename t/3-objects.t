@@ -1,13 +1,12 @@
-use strict;
-use Test;
+use t::TestYAML tests => 6;
 
-BEGIN { plan tests => 4 }
-
-require YAML::Syck;
 ok(YAML::Syck->VERSION);
-YAML::Syck->import;
 
-ok(Dump(bless({}, 'foo')),    "--- !perl/foo {}\n\n");
+is(Dump(bless({}, 'foo')),    "--- !perl/foo {}\n\n");
 my $x = Load("--- !perl/foo {a: b}\n");
-ok(ref($x), 'foo');
-ok($x->{a}, 'b');
+is(ref($x), 'foo');
+is($x->{a}, 'b');
+
+my $y = Load("--- !hs/Foo {a: b}\n");
+is(ref($y), 'hs::Foo');
+is($y->{a}, 'b');

@@ -1,31 +1,26 @@
-use strict;
-use Test;
+use t::TestYAML tests => 14; 
 
-BEGIN { plan tests => 14 }
-
-require YAML::Syck;
 ok(YAML::Syck->VERSION);
-YAML::Syck->import;
 
-ok(Dump(42),    "--- 42\n");
-ok(Load("--- 42\n"), 42);
+is(Dump(42),    "--- 42\n");
+is(Load("--- 42\n"), 42);
 
-ok(Dump(\42),    "--- !perl/ref: \n=: 42\n");
-ok(${Load("--- !perl/ref: \n=: 42\n")}, 42);
+is(Dump(\42),    "--- !perl/ref: \n=: 42\n");
+is(${Load("--- !perl/ref: \n=: 42\n")}, 42);
 
 my $x;
 $x = \$x;
-ok(Dump($x),     "--- &1 !perl/ref: \n=: *1\n");
+is(Dump($x),     "--- &1 !perl/ref: \n=: *1\n");
 
-ok(Dump(undef), "--- ~\n");
-ok(Load("--- ~\n"), undef);
-ok(Load("---\n"), undef);
-ok(Load("--- ''\n"), '');
+is(Dump(undef), "--- ~\n");
+is(Load("--- ~\n"), undef);
+is(Load("---\n"), undef);
+is(Load("--- ''\n"), '');
 
-ok(Load("--- true\n"), "true");
-ok(Load("--- false\n"), "false");
+is(Load("--- true\n"), "true");
+is(Load("--- false\n"), "false");
 
 $YAML::Syck::ImplicitTyping = $YAML::Syck::ImplicitTyping = 1;
 
-ok(Load("--- true\n"), 1);
-ok(Load("--- false\n"), '');
+is(Load("--- true\n"), 1);
+is(Load("--- false\n"), '');

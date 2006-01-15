@@ -1,12 +1,5 @@
-use strict;
-use Test;
+use t::TestYAML tests => 3;
 
-BEGIN { plan tests => 3 }
-
-require YAML::Syck;
 ok(YAML::Syck->VERSION);
-YAML::Syck->import;
-
-ok(Dump("Hello, world"), "--- Hello, world\n");
-ok(Load("--- Hello, world\n"), "Hello, world");
-
+is(Dump("Hello, world"), "--- Hello, world\n");
+is(Load("--- Hello, world\n"), "Hello, world");
