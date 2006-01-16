@@ -1,3 +1,7 @@
+#ifndef PATCHLEVEL
+#include <patchlevel.h>		/* Perl's one, needed since 5.6 */
+#endif
+
 #if (PATCHLEVEL <= 6)
 
 #if defined(USE_ITHREADS)

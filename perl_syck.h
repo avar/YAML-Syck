@@ -21,6 +21,7 @@
 #ifdef YAML_IS_JSON
 #  define PACKAGE_NAME  "JSON::Syck"
 #  define NULL_LITERAL  "null"
+#  define NULL_LITERAL_LENGTH 4
 #  define SCALAR_NUMBER scalar_none
 char json_quote_char = '"';
 static enum scalar_style json_quote_style = scalar_2quote;
@@ -30,11 +31,12 @@ static enum scalar_style json_quote_style = scalar_2quote;
 #  define SEQ_NONE      seq_inline
 #  define MAP_NONE      map_inline
 #  define COND_FOLD(x)  TRUE
-#  define TYPE_IS_NULL(x) ((x == NULL) || (strcmp( x, "str" ) == 0))
+#  define TYPE_IS_NULL(x) ((x == NULL) || (strncmp( x, "str", 3 ) == 0))
 #  define OBJOF(a)        (a)
 #else
 #  define PACKAGE_NAME  "YAML::Syck"
 #  define NULL_LITERAL  "~"
+#  define NULL_LITERAL_LENGTH 1
 #  define SCALAR_NUMBER scalar_none
 #  define SCALAR_STRING scalar_none
 #  define SCALAR_QUOTED scalar_1quote
@@ -74,7 +76,7 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
     switch (n->kind) {
         case syck_str_kind:
             if (TYPE_IS_NULL(n->type_id)) {
-                if ((strcmp( n->data.str->ptr, NULL_LITERAL ) == 0)
+                if ((strncmp( n->data.str->ptr, NULL_LITERAL, NULL_LITERAL_LENGTH) == 0)
                     && (n->data.str->style == scalar_plain)) {
                     sv = &PL_sv_undef;
                 } else {
@@ -376,6 +378,8 @@ static SV * Load(char *s) {
     json_quote_style = (SvTRUE(singlequote) ? scalar_1quote : scalar_2quote );
 #endif
 
+    ENTER; SAVETMPS;
+
     /* Don't even bother if the string is empty. */
     if (*s == '\0') { return &PL_sv_undef; }
 
@@ -401,6 +405,8 @@ static SV * Load(char *s) {
     Safefree(s);
 #endif
 
+    FREETMPS; LEAVE;
+
     return obj;
 }
 
@@ -416,11 +422,8 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
     struct emitter_xtra *bonus = (struct emitter_xtra *)e->bonus;
     char* tag = bonus->tag;
     char* ref = NULL;
+    svtype ty = SvTYPE(sv);
 
-    if (sv == &PL_sv_undef) {
-        return syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, NULL_LITERAL, 1);
-    }
-    
 #define OBJECT_TAG     "tag:perl:"
     
     if (SvMAGICAL(sv)) {
@@ -457,132 +460,120 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
                 syck_emit_end(e);
             }
         }
-        *tag = '\0';
-        return;
     }
-
-    switch (SvTYPE(sv)) {
-        case SVt_NULL: { return; }
-        case SVt_IV:
-        case SVt_NV: {
-            if (sv_len(sv) > 0) {
-                syck_emit_scalar(e, OBJOF("string"), SCALAR_NUMBER, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
-            }
-            else {
-                syck_emit_scalar(e, OBJOF("string"), SCALAR_QUOTED, 0, 0, 0, "", 0);
-            }
-            break;
+    else if (ty == SVt_NULL) {
+        syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
+    }
+    else if (SvNIOK(sv)) {
+        syck_emit_scalar(e, OBJOF("string"), SCALAR_NUMBER, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+    }
+    else if (SvPOK(sv)) {
+        STRLEN len = sv_len(sv);
+        if (len == 0) {
+            syck_emit_scalar(e, OBJOF("string"), SCALAR_QUOTED, 0, 0, 0, "", 0);
         }
-        case SVt_PV:
-        case SVt_PVIV:
-        case SVt_PVNV:
-        case SVt_PVMG:
-        case SVt_PVBM:
-        case SVt_PVLV: {
-            if (sv_len(sv) > 0) {
-                if (SvNIOK(sv)) {
-                    syck_emit_scalar(e, OBJOF("string"), SCALAR_NUMBER, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+        else if (COND_FOLD(sv)) {
+            enum scalar_style old_s = e->style;
+            e->style = SCALAR_UTF8;
+            syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), len);
+            e->style = old_s;
+        }
+        else {
+            syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), len);
+        }
+    }
+    else {
+        switch (ty) {
+            case SVt_PVAV: {
+                syck_emit_seq(e, OBJOF("array"), SEQ_NONE);
+                *tag = '\0';
+                len = av_len((AV*)sv) + 1;
+                for (i = 0; i < len; i++) {
+                    SV** sav = av_fetch((AV*)sv, i, 0);
+                    if (sav == NULL) {
+                        syck_emit_item( e, (st_data_t)(&PL_sv_undef) );
+                    }
+                    else {
+                        syck_emit_item( e, (st_data_t)(*sav) );
+                    }
                 }
-                else if (COND_FOLD(sv)) {
-                    enum scalar_style old_s = e->style;
-                    e->style = SCALAR_UTF8;
-                    syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
-                    e->style = old_s;
+                syck_emit_end(e);
+                return;
+            }
+            case SVt_PVHV: {
+                HV *hv = (HV*)sv;
+                syck_emit_map(e, OBJOF("hash"), MAP_NONE);
+                *tag = '\0';
+#ifdef HAS_RESTRICTED_HASHES
+                len = HvTOTALKEYS((HV*)sv);
+#else
+                len = HvKEYS((HV*)sv);
+#endif
+                hv_iterinit((HV*)sv);
+
+                if (e->sort_keys) {
+                    AV *av = newAV();
+                    for (i = 0; i < len; i++) {
+#ifdef HAS_RESTRICTED_HASHES
+                        HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
+#else
+                        HE *he = hv_iternext(hv);
+#endif
+                        SV *key = hv_iterkeysv(he);
+                        av_store(av, AvFILLp(av)+1, key);	/* av_push(), really */
+                    }
+                    STORE_HASH_SORT;
+                    for (i = 0; i < len; i++) {
+#ifdef HAS_RESTRICTED_HASHES
+                        int placeholders = (int)HvPLACEHOLDERS_get(hv);
+#endif
+                        unsigned char flags = 0;
+                        char *keyval;
+                        STRLEN keylen_tmp;
+                        I32 keylen;
+                        SV *key = av_shift(av);
+                        HE *he  = hv_fetch_ent(hv, key, 0, 0);
+                        SV *val = HeVAL(he);
+                        if (val == NULL) { val = &PL_sv_undef; }
+                        syck_emit_item( e, (st_data_t)key );
+                        syck_emit_item( e, (st_data_t)val );
+                    }
                 }
                 else {
-                    syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
-                }
-            }
-            else {
-                syck_emit_scalar(e, OBJOF("string"), SCALAR_QUOTED, 0, 0, 0, "", 0);
-            }
-            break;
-        }
-        case SVt_RV: {
-            perl_syck_emitter_handler(e, (st_data_t)SvRV(sv));
-            break;
-        }
-        case SVt_PVAV: {
-            syck_emit_seq(e, OBJOF("array"), SEQ_NONE);
-            *tag = '\0';
-            len = av_len((AV*)sv) + 1;
-            for (i = 0; i < len; i++) {
-                SV** sav = av_fetch((AV*)sv, i, 0);
-                syck_emit_item( e, (st_data_t)(*sav) );
-            }
-            syck_emit_end(e);
-            return;
-        }
-        case SVt_PVHV: {
-            HV *hv = (HV*)sv;
-            syck_emit_map(e, OBJOF("hash"), MAP_NONE);
-            *tag = '\0';
-#ifdef HAS_RESTRICTED_HASHES
-            len = HvTOTALKEYS((HV*)sv);
-#else
-            len = HvKEYS((HV*)sv);
-#endif
-            hv_iterinit((HV*)sv);
-
-            if (e->sort_keys) {
-		AV *av = newAV();
-		for (i = 0; i < len; i++) {
-#ifdef HAS_RESTRICTED_HASHES
-                    HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
-#else
-                    HE *he = hv_iternext(hv);
-#endif
-                    SV *key = hv_iterkeysv(he);
-                    av_store(av, AvFILLp(av)+1, key);	/* av_push(), really */
-		}
-		STORE_HASH_SORT;
-		for (i = 0; i < len; i++) {
-#ifdef HAS_RESTRICTED_HASHES
-                    int placeholders = (int)HvPLACEHOLDERS_get(hv);
-#endif
-                    unsigned char flags = 0;
-                    char *keyval;
-                    STRLEN keylen_tmp;
-                    I32 keylen;
-                    SV *key = av_shift(av);
-                    HE *he  = hv_fetch_ent(hv, key, 0, 0);
-                    SV *val = HeVAL(he);
-                    if (val == NULL) { val = &PL_sv_undef; }
-                    syck_emit_item( e, (st_data_t)key );
-                    syck_emit_item( e, (st_data_t)val );
-                }
-            }
-            else {
-                for (i = 0; i < len; i++) {
+                    for (i = 0; i < len; i++) {
 #ifdef HV_ITERNEXT_WANTPLACEHOLDERS
-                    HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
+                        HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
 #else
-                    HE *he = hv_iternext(hv);
+                        HE *he = hv_iternext(hv);
 #endif
-                    I32 keylen;
-                    SV *key = hv_iterkeysv(he);
-                    SV *val = hv_iterval(hv, he);
-                    syck_emit_item( e, (st_data_t)key );
-                    syck_emit_item( e, (st_data_t)val );
+                        I32 keylen;
+                        SV *key = hv_iterkeysv(he);
+                        SV *val = hv_iterval(hv, he);
+                        syck_emit_item( e, (st_data_t)key );
+                        syck_emit_item( e, (st_data_t)val );
+                    }
                 }
+                syck_emit_end(e);
+                return;
             }
-            syck_emit_end(e);
-            return;
-        }
-        case SVt_PVCV: {
-            /* XXX TODO XXX */
-            syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
-            break;
-        }
-        case SVt_PVGV:
-        case SVt_PVFM: {
-            /* XXX TODO XXX */
-            syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
-            break;
-        }
-        case SVt_PVIO: {
-            syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
-            break;
+            case SVt_PVCV: {
+                /* XXX TODO XXX */
+                syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+                break;
+            }
+            case SVt_PVGV:
+            case SVt_PVFM: {
+                /* XXX TODO XXX */
+                syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+                break;
+            }
+            case SVt_PVIO: {
+                syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+                break;
+            }
+            default: {
+                syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
+            }
         }
     }
 cleanup:
@@ -601,6 +592,8 @@ SV* Dump(SV *sv) {
     json_quote_char = (SvTRUE(singlequote) ? '\'' : '"' );
     json_quote_style = (SvTRUE(singlequote) ? scalar_1quote : scalar_2quote );
 #endif
+
+    ENTER; SAVETMPS;
 
     emitter->headless = SvTRUE(headless);
     emitter->sort_keys = SvTRUE(sortkeys);
@@ -632,5 +625,8 @@ SV* Dump(SV *sv) {
     if (SvTRUE(unicode)) {
         SvUTF8_on(out);
     }
+
+    FREETMPS; LEAVE;
+
     return out;
 }
