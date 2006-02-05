@@ -318,6 +318,9 @@ static char* perl_json_preprocess(char *s) {
         if (in_quote) {
             in_quote = !in_quote;
         }
+        else if (ch == '\\') {
+            in_quote = 1;
+        }
         else if (ch == json_quote_char) {
             in_string = !in_string;
         }
@@ -347,6 +350,9 @@ void perl_json_postprocess(SV *sv) {
         *pos++ = ch;
         if (in_quote) {
             in_quote = !in_quote;
+        }
+        else if (ch == '\\') {
+            in_quote = 1;
         }
         else if (ch == json_quote_char) {
             in_string = !in_string;

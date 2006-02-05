@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.51.
+signed via the Module::Signature module, version 0.53.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -17,7 +17,7 @@ Hash: SHA1
 SHA1 3710975c0e6727079e17c6d1f27948c40729d710 COPYING
 SHA1 37d2c14308376b2d04943daed498eb4ef0813e9f Changes
 SHA1 41ebc102e9f9b2f2287f7d43bd54fcea0ccaffd7 MANIFEST
-SHA1 197afa26f5582e9c099b4e57028eace5c58743b7 META.yml
+SHA1 655998b00d6ff512884df7826c8c9da13506ce15 META.yml
 SHA1 be5e1896f7b861d14c1dfbec8d7304a9630f211a Makefile.PL
 SHA1 d753cac4e816f0d97dbddc9ccf425801f4116c2a README
 SHA1 6f856b2f644d54eb4a7068f7ae51abd804cb636b Syck.xs
@@ -27,21 +27,21 @@ SHA1 e6426f94d8acb9d9e3159d8906e570b1e70d6eea gram.c
 SHA1 f4f2cc6ce84bd40f33a80d33d8881402f03ce75d gram.h
 SHA1 2cd027a631e4562e2bfc4c383e6c87531227462b handler.c
 SHA1 3c0e059a0c32ab192888d325f8571d7ed3e608db implicit.c
-SHA1 69da1d30c4b44580bcea45de4cc15d6c1f6d9e3d inc/Module/Install.pm
-SHA1 726a6420b06d98e409bc105cc22f632855bbe3ed inc/Module/Install/Base.pm
-SHA1 f4171c353bef786e91a7e918eaea388306c9be42 inc/Module/Install/Can.pm
-SHA1 4a14ef5459b12494099913bcadf0f5be446f4491 inc/Module/Install/Compiler.pm
-SHA1 d097dedadac0edcafbee3a14c262e24089f5795e inc/Module/Install/Fetch.pm
-SHA1 4f7d0880122aa5d9ddf37577b434af09d5d8628f inc/Module/Install/Makefile.pm
-SHA1 f5e5d508da03f2fb4de988b26858094b25690de4 inc/Module/Install/Metadata.pm
-SHA1 8ee248d67d4c61a4f01e6a96c41afbd93be4c9ef inc/Module/Install/Win32.pm
-SHA1 bbdf00f8ca9d2ddaebd2dd6eb47d442fbc6fac05 inc/Module/Install/WriteAll.pm
+SHA1 1d1b3d580d4ecd48878f1a3a49681bafdb7541cd inc/Module/Install.pm
+SHA1 4ed81cf0a97ac5df87a4032435dee277d582f90c inc/Module/Install/Base.pm
+SHA1 8b6b20c1fadc6dcc4defd276af029ff06a31b5f3 inc/Module/Install/Can.pm
+SHA1 0603dfa7fe593b64de07be7b80b2fa864e3d46de inc/Module/Install/Compiler.pm
+SHA1 c78a2e772d17c54522e6f327587524b769c56577 inc/Module/Install/Fetch.pm
+SHA1 c201df1e509f4f708754da171285cb523df3a73b inc/Module/Install/Makefile.pm
+SHA1 c62e34ab923a8fe263e32f2a8d7140562e257448 inc/Module/Install/Metadata.pm
+SHA1 34299cd6be8088430ada9cd2ba5d1c4463add0b5 inc/Module/Install/Win32.pm
+SHA1 8e8ad58cbc7d5df7becd400ee2105d2b0301aa62 inc/Module/Install/WriteAll.pm
 SHA1 2c2459b2b5cf94a7f9cd1905a242d7d01616ee0b lib/YAML/Dumper/Syck.pm
 SHA1 534000ebfb91c993f5344ae4e34185d853954e6f lib/YAML/Loader/Syck.pm
-SHA1 0f0bf86e0d326fc1d2f212ae7451df8545af29eb lib/YAML/Syck.pm
-SHA1 9a31b1c0ae56fd3846a8b912bb41c9a329428022 lib/YAML/Syck.pod
+SHA1 99f54d5325ee6c5c27bd6d627a72c8300b8b51fb lib/YAML/Syck.pm
+SHA1 368a5f106ff8595aec387bcebcca85aef92bc6f4 lib/YAML/Syck.pod
 SHA1 c0457a0d611568d5eb09f6cdf840303e90fbcf87 node.c
-SHA1 78a10ea46fa98ac1ea578b636a28e34b2c38237e perl_syck.h
+SHA1 39665d5ae556c49ba03a560f12519bc64a464324 perl_syck.h
 SHA1 b8b76e40ef700b2dec432593c3883b0c11636aff ppport.h
 SHA1 9c9255d4d1a4b4ce5aa75ae4220df496cf8e4a44 ppport_math.h
 SHA1 604dd165210e0209bc5464e9793cdd22d9c6e3fd ppport_sort.h
@@ -59,7 +59,7 @@ SHA1 b0528d36416a3650b8514d8f65093fe894adc3a5 yamlbyte.h
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.2 (FreeBSD)
 
-iD8DBQFDy23mtLPdNzw1AaARAodYAJ92m6i2N0ZkDGrRyN7jAVGKt7x9NgCfVwNP
-LKpUk4rBQZ9unvBC2rsftJI=
-=Bxxy
+iD8DBQFD5XXitLPdNzw1AaARAnmXAJ95AmtOGsjv2Y9g8gWuv7JXDDyL7ACgmtjz
+9qecrrxqBSfer+DhbP7sv+Y=
+=BLR+
 -----END PGP SIGNATURE-----
