@@ -1,4 +1,4 @@
-use t::TestYAML tests => 7;
+use t::TestYAML tests => 11;
 
 ok(YAML::Syck->VERSION);
 
@@ -10,5 +10,13 @@ is($x->{a}, 'b');
 my $y = Load("--- !hs/Foo {a: b}\n");
 is(ref($y), 'hs::Foo');
 is($y->{a}, 'b');
+
+my $z = Load("--- !haskell.org/Foo {a: b}\n");
+is(ref($z), 'haskell.org::Foo');
+is($z->{a}, 'b');
+
+my $a = Load("--- !haskell.org/^Foo {a: b}\n");
+is(ref($a), 'haskell.org::Foo');
+is($a->{a}, 'b');
 
 is(Dump(bless({1..10}, 'foo')),  "--- !perl/foo \n1: 2\n3: 4\n5: 6\n7: 8\n9: 10\n");
