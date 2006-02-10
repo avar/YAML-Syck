@@ -616,8 +616,9 @@ syck_scan_scalar( int req_width, char *cursor, long len )
             flags |= SCAN_FLOWMAP;
         }
         /* remember, if plain collections get implemented, to add nb-plain-flow-char */
-        else if ( ( cursor[i] == ' ' && cursor[i+1] == '#' ) ||
-                  ( cursor[i] == ':' && cursor[i+1] == ' ' ) )
+        else if ( ( cursor[i] == ' ' && (cursor[i+1] == '#' || cursor[i+1] == '\0') ) ||
+                  ( cursor[i] == ':' && (cursor[i+1] == ' ' || cursor[i+1] == '\0') ) ||
+                  ( cursor[i] == '\t' && (cursor[i+1] == '#' || cursor[i+1] == '\0') ) )
         {
             flags |= SCAN_INDIC_C;
         }
