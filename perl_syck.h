@@ -423,7 +423,6 @@ static SV * Load(char *s) {
 void perl_syck_output_handler(SyckEmitter *e, char *str, long len) {
     struct emitter_xtra *bonus = (struct emitter_xtra *)e->bonus;
     sv_catpvn_nomg(bonus->port, str, len);
-    e->headless = 1;
 }
 
 void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
