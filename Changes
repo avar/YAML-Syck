@@ -1,3 +1,8 @@
+[Changes for 0.33 - 2006-02-14]
+
+* Plain strings beginning with "~" was loaded as undef.
+  Reported by: Stephen Quinney
+
 [Changes for 0.32 - 2006-02-11]
 
 * Synchronize to upstream r231 (Ruby 1.8.4), with improved parsing of block

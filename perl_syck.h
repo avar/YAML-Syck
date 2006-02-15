@@ -76,7 +76,7 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
     switch (n->kind) {
         case syck_str_kind:
             if (TYPE_IS_NULL(n->type_id)) {
-                if ((strncmp( n->data.str->ptr, NULL_LITERAL, NULL_LITERAL_LENGTH) == 0)
+                if ((strncmp( n->data.str->ptr, NULL_LITERAL, 1+NULL_LITERAL_LENGTH) == 0)
                     && (n->data.str->style == scalar_plain)) {
                     sv = newSV(0);
                 } else {

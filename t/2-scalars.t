@@ -1,4 +1,4 @@
-use t::TestYAML tests => 21; 
+use t::TestYAML tests => 22; 
 
 ok(YAML::Syck->VERSION);
 
@@ -22,6 +22,7 @@ is(Dump('a:b'), "--- a:b\n");
 is(Load("--- ~\n"), undef);
 is(Load("---\n"), undef);
 is(Load("--- ''\n"), '');
+is(Load('--- ~x'), '~x');
 
 # RT #17223
 my $y = YAML::Syck::Load("SID:\n type: fixed\n default: ~\n");
