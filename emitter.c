@@ -553,7 +553,7 @@ syck_scan_scalar( int req_width, char *cursor, long len )
          cursor[0] == '>' || cursor[0] == '\'' ||
          cursor[0] == '"' || cursor[0] == '#' ||
          cursor[0] == '%' || cursor[0] == '@' ||
-         cursor[0] == '&' ) {
+         cursor[0] == '&' || cursor[0] == '^' ) {
             flags |= SCAN_INDIC_S;
     }
     if ( ( cursor[0] == '-' || cursor[0] == ':' ||
@@ -758,7 +758,8 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
         break;
 
         case scalar_literal:
-            syck_emit_literal( e, keep_nl, str, len );
+            /* syck_emit_literal( e, keep_nl, str, len ); */
+            syck_emit_2quoted( e, force_width, str, len );
         break;
 
         case scalar_plain:

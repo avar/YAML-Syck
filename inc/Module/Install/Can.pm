@@ -4,13 +4,16 @@ package Module::Install::Can;
 use Module::Install::Base;
 @ISA = qw(Module::Install::Base);
 
-$VERSION = '0.01';
+$VERSION = '0.59';
 
 use strict;
 use Config ();
-use File::Spec ();
 use ExtUtils::MakeMaker ();
 
+# This may introduce a 5.005 dependency, or at the very least it may
+# not bootstrap properly under 5.004.
+use File::Spec ();
+ 
 # check if we can load some module
 sub can_use {
     my ($self, $mod, $ver) = @_;

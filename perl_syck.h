@@ -181,7 +181,7 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
             for (i = 0; i < n->data.list->idx; i++) {
                 av_push(seq, perl_syck_lookup_sym(p, syck_seq_read(n, i) ));
             }
-            sv = newRV_noinc((SV*)seq);
+            sv = newRV_inc((SV*)seq);
 #ifndef YAML_IS_JSON
             if (n->type_id) {
                 char *lang = strtok(n->type_id, "/:");
