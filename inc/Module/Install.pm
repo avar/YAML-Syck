@@ -35,6 +35,17 @@ use File::Find ();
 use File::Path ();
 use FindBin;
 
+# Prevent people (Audrey) relasing till the inc::Module::Install
+# loading bug is fixed properly :)
+my $message = <<"END_DIE";
+THIS MODULES MAY MAKE A BAD ASSUMPTION WHICH COULD CAUSE
+SERIOUS BACK-COMPATIBILITY PROBLEMS. TALK TO ADAMK.
+
+DO NOT RELEASE A NEW VERSION OF THIS MODULE UNTIL HE REMOVES
+THIS MESSAGE.
+END_DIE
+#$ENV{HARNESS_ACTIVE} ? die($message) : warn($message);
+
 *inc::Module::Install::VERSION = *VERSION;
 @inc::Module::Install::ISA     = __PACKAGE__;
 

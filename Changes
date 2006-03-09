@@ -1,3 +1,8 @@
+[Changes for 0.35 - 2006-03-09]
+
+* Under implicit typing, hex and octal integers triggered segfaults.
+  Reported by: Rachwal Waldemar
+
 [Changes for 0.34 - 2006-03-07]
 
 * Upgrade to Module::Install 0.59.

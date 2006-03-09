@@ -1,4 +1,4 @@
-use t::TestYAML tests => 22; 
+use t::TestYAML tests => 25; 
 
 ok(YAML::Syck->VERSION);
 
@@ -36,3 +36,6 @@ $YAML::Syck::ImplicitTyping = $YAML::Syck::ImplicitTyping = 1;
 
 is(Load("--- true\n"), 1);
 is(Load("--- false\n"), '');
+is(Load("--- 0xE\n"), 0xE);
+is(Load("--- 042\n"), 042);
+is(Load("--- 187\n"), 187);

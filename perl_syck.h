@@ -157,13 +157,15 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
                 }
                 sv = newSVuv(total);
             } else if (strcmp( n->type_id, "int#hex" ) == 0 ) {
+                I32 flags = 0;
                 STRLEN len = n->data.str->len;
                 syck_str_blow_away_commas( n );
-                sv = newSVuv( grok_hex( n->data.str->ptr, &len, 0, NULL) );
+                sv = newSVuv( grok_hex( n->data.str->ptr, &len, &flags, NULL) );
             } else if (strcmp( n->type_id, "int#oct" ) == 0 ) {
+                I32 flags = 0;
                 STRLEN len = n->data.str->len;
                 syck_str_blow_away_commas( n );
-                sv = newSVuv( grok_oct( n->data.str->ptr, &len, 0, NULL) );
+                sv = newSVuv( grok_oct( n->data.str->ptr, &len, &flags, NULL) );
             } else if (strncmp( n->type_id, "int", 3 ) == 0) {
                 UV uv = 0;
                 syck_str_blow_away_commas( n );
