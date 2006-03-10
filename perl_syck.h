@@ -397,6 +397,11 @@ static SV * Load(char *s) {
 
 #ifdef YAML_IS_JSON
     s = perl_json_preprocess(s);
+#else
+    /* Special preprocessing to maintain compat with YAML.pm <= 0.35 */
+    if (strncmp( s, "--- #YAML:1.0", 13) == 0) {
+        s[4] = '%';
+    }
 #endif
 
     parser = syck_new_parser();

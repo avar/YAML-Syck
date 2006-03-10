@@ -1,3 +1,9 @@
+[Changes for 0.36 - 2006-03-10]
+
+* YAML.pm 0.35 or earlier emitted "--- #YAML:1.0" instead of "--- %YAML:1.0"
+  as the version string; work around it to maintain compatibility..
+  Reported by: Chia-Liang Kao
+
 [Changes for 0.35 - 2006-03-09]
 
 * Under implicit typing, hex and octal integers triggered segfaults.
