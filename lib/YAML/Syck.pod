@@ -6,21 +6,32 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.36 of YAML::Syck, released
-March 10, 2006.
+This document describes version 0.38 of YAML::Syck, released
+March 14, 2006.
 
 =head1 SYNOPSIS
 
     use YAML::Syck;
 
+    # Set this for interoperability with other YAML/Syck bindings:
+    # e.g. Load('Yes') becomes 1 and Load('No') becomes undef.
+    $YAML::Syck::ImplicitTyping = 1;
+
     $data = Load($yaml);
+    $data = LoadFile($file);
     $yaml = Dump($data);
+    DumpFile($data);
 
 =head1 DESCRIPTION
 
 This module provides a Perl interface to the B<libsyck> data serialization
 library.  It exports the C<Dump> and C<Load> functions for converting
 Perl data structures to YAML strings, and the other way around.
+
+B<NOTE>: If you are working with other language's YAML/Syck bindings
+(such as Ruby), please set C<$YAML::Syck::ImplicitTyping> to C<1> before
+calling the C<Load>/C<Dump> functions.  The default setting is for
+preserving backward-compatibility with C<YAML.pm>.
 
 =head1 FLAGS
 
