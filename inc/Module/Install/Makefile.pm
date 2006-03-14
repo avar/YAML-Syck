@@ -1,4 +1,4 @@
-#line 1 "inc/Module/Install/Makefile.pm - /usr/local/lib/perl5/site_perl/5.8.8/Module/Install/Makefile.pm"
+#line 1
 package Module::Install::Makefile;
 
 use strict 'vars';
@@ -7,7 +7,7 @@ use ExtUtils::MakeMaker ();
 
 use vars qw{$VERSION @ISA};
 BEGIN {
-	$VERSION = '0.59';
+	$VERSION = '0.61';
 	@ISA     = qw{Module::Install::Base};
 }
 
@@ -132,7 +132,7 @@ sub write {
     }
 
     my $mm = ExtUtils::MakeMaker::WriteMakefile(%args);
-    $self->fix_up_makefile($mm->{FIRST_MAKEFILE});
+    $self->fix_up_makefile($mm->{FIRST_MAKEFILE} || 'Makefile');
 }
 
 sub fix_up_makefile {

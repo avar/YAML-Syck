@@ -1,7 +1,7 @@
-#line 1 "inc/Module/Install/Base.pm - /usr/local/lib/perl5/site_perl/5.8.8/Module/Install/Base.pm"
+#line 1
 package Module::Install::Base;
 
-$VERSION = '0.59';
+$VERSION = '0.61';
 
 # Suspend handler for "redefined" warnings
 BEGIN {

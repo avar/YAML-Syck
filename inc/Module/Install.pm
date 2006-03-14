@@ -1,5 +1,21 @@
-#line 1 "/home/autrijus/work/YAML-Syck/inc/Module/Install.pm - /usr/local/lib/perl5/site_perl/5.8.8/Module/Install.pm"
+#line 1
 package Module::Install;
+
+# For any maintainers:
+# The load order for Module::Install is a bit magic.
+# It goes something like this...
+#
+# IF ( host has Module::Install installed, creating author mode ) {
+#     1. Makefile.PL calls "use inc::Module::Install"
+#     2. $INC{inc/Module/Install.pm} set to installed version of inc::Module::Install
+#     3. The installed version of inc::Module::Install loads
+#     4. inc::Module::Install calls "require Module::Install"
+#     5. The ./inc/ version of Module::Install loads
+# } ELSE {
+#     1. Makefile.PL calls "use inc::Module::Install"
+#     2. $INC{inc/Module/Install.pm} set to ./inc/ version of Module::Install
+#     3. The ./inc/ version of Module::Install loads
+# }
 
 use 5.004;
 use strict 'vars';
@@ -12,10 +28,15 @@ BEGIN {
     # This is not enforced yet, but will be some time in the next few
     # releases once we can make sure it won't clash with custom
     # Module::Install extensions.
-    $VERSION = '0.59';
+    $VERSION = '0.61';
 }
 
-# inc::Module::Install must be loaded first
+# Whether or not inc::Module::Install is actually loaded, the
+# $INC{inc/Module/Install.pm} is what will still get set as long as
+# the caller loaded module this in the documented manner.
+# If not set, the caller may NOT have loaded the bundled version, and thus
+# they may not have a MI version that works with the Makefile.PL. This would
+# result in false errors or unexpected behaviour. And we don't want that.
 my $file = join( '/', 'inc', split /::/, __PACKAGE__ ) . '.pm';
 unless ( $INC{$file} ) {
     die <<"END_DIE";
@@ -34,17 +55,6 @@ use Cwd        ();
 use File::Find ();
 use File::Path ();
 use FindBin;
-
-# Prevent people (Audrey) relasing till the inc::Module::Install
-# loading bug is fixed properly :)
-my $message = <<"END_DIE";
-THIS MODULES MAY MAKE A BAD ASSUMPTION WHICH COULD CAUSE
-SERIOUS BACK-COMPATIBILITY PROBLEMS. TALK TO ADAMK.
-
-DO NOT RELEASE A NEW VERSION OF THIS MODULE UNTIL HE REMOVES
-THIS MESSAGE.
-END_DIE
-#$ENV{HARNESS_ACTIVE} ? die($message) : warn($message);
 
 *inc::Module::Install::VERSION = *VERSION;
 @inc::Module::Install::ISA     = __PACKAGE__;
@@ -147,7 +157,7 @@ sub new {
     }
     $args{file}     ||= "$args{base}/$args{prefix}/$args{path}.pm";
 
-    bless \%args, $class;
+    bless( \%args, $class );
 }
 
 sub call {
