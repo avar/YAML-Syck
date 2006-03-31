@@ -392,6 +392,9 @@ yaml_syck_emitter_handler
 #endif
 
     if (SvROK(sv)) {
+#ifdef YAML_IS_JSON
+        PERL_SYCK_EMITTER_HANDLER(e, (st_data_t)SvRV(sv));
+#else
         switch (SvTYPE(SvRV(sv))) {
             case SVt_PVAV:
             case SVt_PVHV:
@@ -406,6 +409,7 @@ yaml_syck_emitter_handler
                 syck_emit_end(e);
             }
         }
+#endif
     }
     else if (ty == SVt_NULL) {
         syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
