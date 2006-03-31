@@ -21,6 +21,7 @@
 #ifdef YAML_IS_JSON
 #  define PACKAGE_NAME  "JSON::Syck"
 #  define NULL_LITERAL  "null"
+#  define NULL_LITERAL_LENGTH 4
 #  define SCALAR_NUMBER scalar_none
 char json_quote_char = '"';
 static enum scalar_style json_quote_style = scalar_2quote;
@@ -35,6 +36,7 @@ static enum scalar_style json_quote_style = scalar_2quote;
 #else
 #  define PACKAGE_NAME  "YAML::Syck"
 #  define NULL_LITERAL  "~"
+#  define NULL_LITERAL_LENGTH 1
 #  define SCALAR_NUMBER scalar_none
 #  define SCALAR_STRING scalar_none
 #  define SCALAR_QUOTED scalar_1quote
@@ -74,7 +76,7 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
     switch (n->kind) {
         case syck_str_kind:
             if (TYPE_IS_NULL(n->type_id)) {
-                if ((strcmp( n->data.str->ptr, NULL_LITERAL ) == 0)
+                if ((strncmp( n->data.str->ptr, NULL_LITERAL, NULL_LITERAL_LENGTH) == 0)
                     && (n->data.str->style == scalar_plain)) {
                     sv = &PL_sv_undef;
                 } else {
@@ -418,7 +420,7 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
     char* ref = NULL;
 
     if (sv == &PL_sv_undef) {
-        return syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, NULL_LITERAL, 1);
+        return syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
     }
     
 #define OBJECT_TAG     "tag:perl:"
