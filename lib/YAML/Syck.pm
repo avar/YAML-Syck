@@ -5,7 +5,7 @@ use vars qw( @ISA @EXPORT $VERSION $ImplicitTyping $SortKeys );
 use 5.003;
 use DynaLoader;
 
-$VERSION = '0.27';
+$VERSION = '0.28';
 @EXPORT  = qw( Dump Load DumpFile LoadFile );
 @ISA     = qw( Exporter DynaLoader );
 
