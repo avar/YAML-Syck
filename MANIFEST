@@ -26,14 +26,14 @@ node.c
 ppport.h
 README
 Storable.xs
-syck.c
+syck_.c
 syck.h
-syck.i
 Syck.xs
 syck_st.c
 syck_st.h
 t/1-basic.t
 t/2-scalars.t
+t/3-objects.t
 token.c
 yaml2byte.c
 yamlbyte.h

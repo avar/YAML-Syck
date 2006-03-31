@@ -2,7 +2,7 @@
  * emitter.c
  *
  * $Author: why $
- * $Date: 2005-09-20 14:20:40 +0800 (二, 20  9 2005) $
+ * $Date: 2005/05/19 06:07:42 $
  *
  * Copyright (C) 2003 why the lucky stiff
  * 
@@ -296,15 +296,15 @@ syck_emitter_write( SyckEmitter *e, char *str, long len )
     if ( len + at >= e->bufsize )
     {
         syck_emitter_flush( e, 0 );
-	for (;;) {
-	    long rest = e->bufsize - (e->marker - e->buffer);
-	    if (len <= rest) break;
-	    S_MEMCPY( e->marker, str, char, rest );
-	    e->marker += rest;
-	    str += rest;
-	    len -= rest;
-	    syck_emitter_flush( e, 0 );
-	}
+        for (;;) {
+            long rest = e->bufsize - (e->marker - e->buffer);
+            if (len <= rest) break;
+            S_MEMCPY( e->marker, str, char, rest );
+            e->marker += rest;
+            str += rest;
+            len -= rest;
+            syck_emitter_flush( e, 0 );
+        }
     }
 
     /*
@@ -337,6 +337,27 @@ syck_emitter_flush( SyckEmitter *e, long check_room )
     }
 
     /*
+     * Determine headers.
+     */
+    if ( ( e->stage == doc_open && ( e->headless == 0 || e->use_header == 1 ) ) || 
+         e->stage == doc_need_header )
+    {
+        if ( e->use_version == 1 )
+        {
+            char *header = S_ALLOC_N( char, 64 );
+            S_MEMZERO( header, char, 64 );
+            sprintf( header, "--- %%YAML:%d.%d ", SYCK_YAML_MAJOR, SYCK_YAML_MINOR );
+            (e->output_handler)( e, header, strlen( header ) );
+            S_FREE( header );
+        }
+        else
+        {
+            (e->output_handler)( e, "--- ", 4 );
+        }
+        e->stage = doc_processing;
+    }
+
+    /*
      * Commit buffer.
      */
     if ( check_room > e->marker - e->buffer )
@@ -357,30 +378,9 @@ syck_emit( SyckEmitter *e, st_data_t n )
 {
     SYMID oid;
     char *anchor_name = NULL;
-    int indent = 0;
-    long x = 0;
+    int indent = 0, x = 0;
     SyckLevel *lvl = syck_emitter_current_level( e );
     
-    /*
-     * Determine headers.
-     */
-    if ( e->stage == doc_open && ( e->headless == 0 || e->use_header == 1 ) )
-    {
-        if ( e->use_version == 1 )
-        {
-            char *header = S_ALLOC_N( char, 64 );
-            S_MEMZERO( header, char, 64 );
-            sprintf( header, "--- %%YAML:%d.%d ", SYCK_YAML_MAJOR, SYCK_YAML_MINOR );
-            syck_emitter_write( e, header, strlen( header ) );
-            S_FREE( header );
-        }
-        else
-        {
-            syck_emitter_write( e, "--- ", 4 );
-        }
-        e->stage = doc_processing;
-    }
-
     /* Add new level */
     if ( lvl->spaces >= 0 ) {
         indent = lvl->spaces + e->indent;
@@ -427,7 +427,6 @@ end_emit:
     syck_emitter_pop_level( e );
     if ( e->lvl_idx == 1 ) {
         syck_emitter_write( e, "\n", 1 );
-        e->headless = 0;
         e->stage = doc_open;
     }
 }
@@ -492,7 +491,6 @@ void syck_emit_indent( SyckEmitter *e )
 {
     int i;
     SyckLevel *lvl = syck_emitter_current_level( e );
-    if ( e->bufpos == 0 && ( e->marker - e->buffer ) == 0 ) return;
     if ( lvl->spaces >= 0 ) {
         char *spcs = S_ALLOC_N( char, lvl->spaces + 2 );
 
@@ -511,8 +509,8 @@ void syck_emit_indent( SyckEmitter *e )
 #define SCAN_INDENTED   2
 /* Larger than the requested width? */
 #define SCAN_WIDE       4
-/* Opens or closes with whitespace? */
-#define SCAN_WHITEEDGE  8
+/* Opens with whitespace? */
+#define SCAN_WHITESTART 8
 /* Contains a newline */
 #define SCAN_NEWLINE    16
 /* Contains a single quote */
@@ -558,22 +556,15 @@ syck_scan_scalar( int req_width, char *cursor, long len )
     }
     if ( ( cursor[0] == '-' || cursor[0] == ':' ||
            cursor[0] == '?' || cursor[0] == ',' ) &&
-           ( cursor[1] == ' ' || cursor[1] == '\n' || len == 1 ) )
-    {
+           cursor[1] == ' ' ) {
             flags |= SCAN_INDIC_S;
     }
 
-    /* whitespace edges */
+    /* ending newlines */
     if ( cursor[len-1] != '\n' ) {
         flags |= SCAN_NONL_E;
     } else if ( len > 1 && cursor[len-2] == '\n' ) {
         flags |= SCAN_MANYNL_E;
-    }
-    if ( 
-        ( len > 0 && ( cursor[0] == ' ' || cursor[0] == '\t' ) ) ||
-        ( len > 1 && ( cursor[len-1] == ' ' || cursor[len-1] == '\t' ) )
-    ) {
-        flags |= SCAN_WHITEEDGE;
     }
 
     /* opening doc sep */
@@ -618,16 +609,20 @@ syck_scan_scalar( int req_width, char *cursor, long len )
         }
         /* remember, if plain collections get implemented, to add nb-plain-flow-char */
         else if ( ( cursor[i] == ' ' && cursor[i+1] == '#' ) ||
-                  ( cursor[i] == ':' && 
-                    ( cursor[i+1] == ' ' || cursor[i+1] == '\n' || i == len - 1 ) ) )
+                  ( cursor[i] == ':' && cursor[i+1] == ' ' ) )
         {
             flags |= SCAN_INDIC_C;
         }
-        else if ( cursor[i] == ',' && 
-                  ( cursor[i+1] == ' ' || cursor[i+1] == '\n' || i == len - 1 ) )
+        else if ( cursor[i] == ',' && cursor[i+1] == ' ' )
         {
             flags |= SCAN_FLOWMAP;
             flags |= SCAN_FLOWSEQ;
+        }
+
+        if ( i == 0 &&
+            ( cursor[i] == ' ' || cursor[i] == '\t' ) 
+        ) {
+            flags |= SCAN_WHITESTART;
         }
     }
 
@@ -644,7 +639,7 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
     enum scalar_style favor_style = scalar_literal;
     SyckLevel *parent = syck_emitter_parent_level( e );
     SyckLevel *lvl = syck_emitter_current_level( e );
-    int scan = 0;
+    int scan;
     char *implicit;
     
     if ( str == NULL ) str = "";
@@ -665,14 +660,6 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
     if ( syck_tagcmp( tag, implicit ) != 0 && syck_tagcmp( tag, "tag:yaml.org,2002:str" ) == 0 ) {
         force_style = scalar_2quote;
     } else {
-        /* complex key */
-        if ( parent->status == syck_lvl_map && parent->ncount % 2 == 1 &&
-             ( !( tag == NULL || 
-             ( implicit != NULL && syck_tagcmp( tag, implicit ) == 0 && e->explicit_typing == 0 ) ) ) ) 
-        {
-            syck_emitter_write( e, "? ", 2 );
-            parent->status = syck_lvl_mapx;
-        }
         syck_emit_tag( e, tag, implicit );
     }
     S_FREE( implicit );
@@ -693,7 +680,7 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
     /* Determine block style */
     if ( scan & SCAN_NONPRINT ) {
         force_style = scalar_2quote;
-    } else if ( scan & SCAN_WHITEEDGE ) {
+    } else if ( scan & SCAN_WHITESTART ) {
         force_style = scalar_2quote;
     } else if ( force_style != scalar_fold && ( scan & SCAN_INDENTED ) ) {
         force_style = scalar_literal;
@@ -720,7 +707,7 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
     }
 
     /* For now, all ambiguous keys are going to be double-quoted */
-    if ( ( parent->status == syck_lvl_map || parent->status == syck_lvl_mapx ) && parent->ncount % 2 == 1 ) {
+    if ( parent->status == syck_lvl_map && parent->ncount % 2 == 1 ) {
         if ( force_style != scalar_plain ) {
             force_style = scalar_2quote;
         }
@@ -747,7 +734,6 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
             syck_emit_1quoted( e, force_width, str, len );
         break;
 
-        case scalar_none:
         case scalar_2quote:
             syck_emit_2quoted( e, force_width, str, len );
         break;
@@ -763,11 +749,6 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
         case scalar_plain:
             syck_emitter_write( e, str, len );
         break;
-    }
-
-    if ( parent->status == syck_lvl_mapx )
-    {
-        syck_emitter_write( e, "\n", 1 );
     }
 }
 
@@ -1138,8 +1119,6 @@ void syck_emit_item( SyckEmitter *e, st_data_t n )
             }
         }
         break;
-
-        default: break;
     }
     lvl->ncount++;
 
@@ -1180,8 +1159,6 @@ void syck_emit_end( SyckEmitter *e )
         case syck_lvl_imap:
             syck_emitter_write( e, "}\n", 1 );
         break;
-
-        default: break;
     }
 }
 

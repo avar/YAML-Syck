@@ -30,19 +30,13 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
 
     switch (n->kind) {
         case syck_str_kind:
-#if we_handle_all_types
             if (n->type_id == NULL || strcmp( n->type_id, "str" ) == 0 ) {
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
             } else if (strcmp( n->type_id, "null" ) == 0 ) {
                 sv = &PL_sv_undef;
             } else {
-                croak("unknown node type: %s", n->type_id);
-            }
-#endif
-            if (n->type_id == NULL || strcmp( n->type_id, "null" ) != 0) {
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
-            } else {
-                sv = &PL_sv_undef;
+                /* croak("unknown node type: %s", n->type_id); */
             }
         break;
 
@@ -52,6 +46,9 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
                 av_push(seq, perl_syck_lookup_sym(p, syck_seq_read(n, i) ));
             }
             sv = newRV_noinc((SV*)seq);
+            if (n->type_id) {
+                sv_bless(sv, gv_stashpv(n->type_id + 6, TRUE));
+            }
         break;
 
         case syck_map_kind:
@@ -65,6 +62,9 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
                 );
             }
             sv = newRV_noinc((SV*)map);
+            if (n->type_id) {
+                sv_bless(sv, gv_stashpv(n->type_id + 5, TRUE));
+            }
         break;
     }
     return syck_add_sym(p, (char *)sv);
@@ -113,7 +113,7 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
 
     if (sv_isobject(sv)) {
         ref = savepv(sv_reftype(SvRV(sv), TRUE));
-        Newz(801, tag, strlen(ref)+strlen(OBJECT_TAG)+2, char);
+        *tag = '\0';
         strcat(tag, OBJECT_TAG);
         switch (SvTYPE(SvRV(sv))) {
             case SVt_PVAV: { strcat(tag, "@"); break; }
@@ -122,10 +122,9 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
             case SVt_PVGV: { strcat(tag, "glob"); break; }
         }
         strcat(tag, ref);
-        bonus->tag = tag;
     }
 
-#define OBJOF(a) (tag ? tag : a)
+#define OBJOF(a) (*tag ? tag : a)
     switch (SvTYPE(sv)) {
         case SVt_NULL: { return; }
         case SVt_PV:
@@ -148,7 +147,7 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         }
         case SVt_PVAV: {
             syck_emit_seq(e, OBJOF("array"), seq_none);
-            Safefree(tag); tag = NULL;
+            *tag = '\0';
             len = av_len((AV*)sv) + 1;
             for (i = 0; i < len; i++) {
                 SV** sav = av_fetch((AV*)sv, i, 0);
@@ -159,7 +158,7 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         }
         case SVt_PVHV: {
             syck_emit_map(e, OBJOF("hash"), map_none);
-            Safefree(tag); tag = NULL;
+            *tag = '\0';
 #ifdef HAS_RESTRICTED_HASHES
             len = HvTOTALKEYS((HV*)sv);
 #else
@@ -198,7 +197,7 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         }
     }
 cleanup:
-    if (tag) Safefree(tag);
+    *tag = '\0';
 }
 
 SV* Dump(SV *sv) {
@@ -208,7 +207,7 @@ SV* Dump(SV *sv) {
 
     bonus = emitter->bonus = S_ALLOC_N(struct emitter_xtra, 1);
     bonus->port = out;
-    bonus->tag = NULL;
+    Newz(801, bonus->tag, 512, char);
 
     syck_emitter_handler( emitter, perl_syck_emitter_handler );
     syck_output_handler( emitter, perl_syck_output_handler );
@@ -217,6 +216,7 @@ SV* Dump(SV *sv) {
     syck_emit( emitter, (st_data_t)sv );
     syck_emitter_flush( emitter, 0 );
     syck_free_emitter( emitter );
+    Safefree(bonus->tag);
 
     return out;
 }
