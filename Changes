@@ -8,7 +8,7 @@
   [rt:18464].
 
 * Under JSON, scalar references are dereferenced eplicitly and
-  subroutine refefrences are serialized to empty string.
+  subroutine refefrences are serialized to null.
 
 * Fixed bug that integer elements in tied hashes were not correctly
   serialized. Reported by: Dan Kogai
