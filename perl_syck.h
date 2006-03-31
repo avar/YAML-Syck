@@ -26,6 +26,7 @@
 #  define SCALAR_UTF8   scalar_fold
 #  define SEQ_NONE      seq_inline
 #  define MAP_NONE      map_inline
+#  define COND_FOLD(x)  TRUE
 #  define TYPE_IS_NULL(x) ((x == NULL) || (strcmp( x, "str" ) == 0))
 #  define OBJOF(a)        (a)
 #else
@@ -37,6 +38,7 @@
 #  define SCALAR_UTF8   scalar_fold
 #  define SEQ_NONE      seq_none
 #  define MAP_NONE      map_none
+#  define COND_FOLD(x)  (SvUTF8(sv))
 #  define TYPE_IS_NULL(x) (x == NULL)
 #  define OBJOF(a)        (*tag ? tag : a)
 #endif
@@ -457,7 +459,7 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
                 if (SvNIOK(sv)) {
                     syck_emit_scalar(e, OBJOF("string"), SCALAR_NUMBER, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
                 }
-                else if (SvUTF8(sv)) {
+                else if (COND_FOLD(sv)) {
                     enum scalar_style old_s = e->style;
                     e->style = SCALAR_UTF8;
                     syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
