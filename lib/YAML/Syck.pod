@@ -6,8 +6,8 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.19 of YAML::Syck, released
-January 10, 2005.
+This document describes version 0.20 of YAML::Syck, released
+January 11, 2005.
 
 =head1 SYNOPSIS
 
@@ -44,11 +44,11 @@ side-wide shared libsyck, it will I<not> be used.
 This module is not currently pluggable to the new L<YAML> (0.50+) framework,
 but that's expected to change in the future.
 
-Dumping cyclic references is currently broken.
+Loading cyclic references is currently broken.
 
 =head1 SEE ALSO
 
-L<YAML>
+L<YAML>, L<JSON::Syck>
 
 =head1 AUTHORS
 

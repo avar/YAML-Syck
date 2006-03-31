@@ -56,7 +56,6 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
     AV *seq;
     HV *map;
     long i;
-
     switch (n->kind) {
         case syck_str_kind:
             if (TYPE_IS_NULL(n->type_id)) {
@@ -162,32 +161,99 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
                 av_push(seq, perl_syck_lookup_sym(p, syck_seq_read(n, i) ));
             }
             sv = newRV_noinc((SV*)seq);
+#ifndef YAML_IS_JSON
             if (n->type_id) {
                 sv_bless(sv, gv_stashpv(n->type_id + 6, TRUE));
             }
+#endif
         break;
 
         case syck_map_kind:
-            map = newHV();
-            for (i = 0; i < n->data.pairs->idx; i++) {
-                hv_store_ent(
-                    map,
-                    perl_syck_lookup_sym(p, syck_map_read(n, map_key, i) ),
-                    perl_syck_lookup_sym(p, syck_map_read(n, map_value, i) ),
-                    0
-                );
+#ifndef YAML_IS_JSON
+            if ( (n->type_id != NULL) && (strcmp( n->type_id, "perl/ref:" ) == 0) ) {
+                sv = newRV_noinc( perl_syck_lookup_sym(p, syck_map_read(n, map_value, 0) ) );
             }
-            sv = newRV_noinc((SV*)map);
-            if (n->type_id) {
-                sv_bless(sv, gv_stashpv(n->type_id + 5, TRUE));
+            else
+#endif
+            {
+                map = newHV();
+                for (i = 0; i < n->data.pairs->idx; i++) {
+                    hv_store_ent(
+                        map,
+                        perl_syck_lookup_sym(p, syck_map_read(n, map_key, i) ),
+                        perl_syck_lookup_sym(p, syck_map_read(n, map_value, i) ),
+                        0
+                    );
+                }
+                sv = newRV_noinc((SV*)map);
+#ifndef YAML_IS_JSON
+                if (n->type_id) {
+                    sv_bless(sv, gv_stashpv(n->type_id + 5, TRUE));
+                }
+#endif
             }
         break;
     }
     return syck_add_sym(p, (char *)sv);
 }
 
-void perl_syck_mark_emitter(SyckEmitter *e) {
-    return;
+void perl_syck_mark_emitter(SyckEmitter *e, SV *sv) {
+    if (syck_emitter_mark_node(e, (st_data_t)sv) == 0) {
+        return;
+    }
+
+    if (SvROK(sv)) {
+        perl_syck_mark_emitter(e, SvRV(sv));
+        return;
+    }
+
+    switch (SvTYPE(sv)) {
+        case SVt_PVAV: {
+            I32 len, i;
+            len = av_len((AV*)sv) + 1;
+            for (i = 0; i < len; i++) {
+                SV** sav = av_fetch((AV*)sv, i, 0);
+                perl_syck_mark_emitter( e, *sav );
+            }
+            break;
+        }
+        case SVt_PVHV: {
+            I32 len, i;
+#ifdef HAS_RESTRICTED_HASHES
+            len = HvTOTALKEYS((HV*)sv);
+#else
+            len = HvKEYS((HV*)sv);
+#endif
+            hv_iterinit((HV*)sv);
+            for (i = 0; i < len; i++) {
+#ifdef HV_ITERNEXT_WANTPLACEHOLDERS
+                HE *he = hv_iternext_flags((HV*)sv, HV_ITERNEXT_WANTPLACEHOLDERS);
+#else
+                HE *he = hv_iternext((HV*)sv);
+#endif
+                I32 keylen;
+                SV *val = hv_iterval((HV*)sv, he);
+                perl_syck_mark_emitter( e, val );
+            }
+            break;
+        }
+    }
+}
+
+SyckNode * perl_syck_bad_anchor_handler(SyckParser *p, char *a) {
+    croak(form( "%s parser (line %d, column %d): Unsupported self-recursive anchor *%s", 
+        PACKAGE_NAME,
+        p->linect + 1,
+        p->cursor - p->lineptr,
+        a ));
+    /*
+    SyckNode *badanc = syck_new_map(
+        (SYMID)newSVpvn_share("name", 4, 0),
+        (SYMID)newSVpvn_share(a, strlen(a), 0)
+    );
+    badanc->type_id = syck_strndup( "perl:YAML::Syck::BadAlias", 25 );
+    return badanc;
+    */
 }
 
 void perl_syck_error_handler(SyckParser *p, char *msg) {
@@ -254,8 +320,12 @@ void perl_json_postprocess(SV *sv) {
             final_len--;
         }
     }
-    *pos = '\0';
 
+    /* Remove the trailing newline */
+    if (final_len > 0) {
+        final_len--; pos--;
+    }
+    *pos = '\0';
     SvCUR_set(sv, final_len);
 }
 
@@ -276,6 +346,7 @@ static SV * Load(char *s) {
     syck_parser_str_auto(parser, s, NULL);
     syck_parser_handler(parser, perl_syck_parser_handler);
     syck_parser_error_handler(parser, perl_syck_error_handler);
+    syck_parser_bad_anchor_handler( parser, perl_syck_bad_anchor_handler );
     syck_parser_implicit_typing(parser, SvTRUE(implicit));
     syck_parser_taguri_expansion(parser, 0);
     v = syck_parse(parser);
@@ -328,7 +399,20 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
 #endif
 
     if (SvROK(sv)) {
-        perl_syck_emitter_handler(e, (st_data_t)SvRV(sv));
+        switch (SvTYPE(SvRV(sv))) {
+            case SVt_PVAV:
+            case SVt_PVHV:
+            case SVt_PVCV: {
+                perl_syck_emitter_handler(e, (st_data_t)SvRV(sv));
+                break;
+            }
+            default: {
+                syck_emit_map(e, "tag:perl:ref:", MAP_NONE);
+                syck_emit_item( e, (st_data_t)newSVpvn_share("=", 1, 0) );
+                syck_emit_item( e, (st_data_t)SvRV(sv) );
+                syck_emit_end(e);
+            }
+        }
         *tag = '\0';
         return;
     }
@@ -433,6 +517,7 @@ SV* Dump(SV *sv) {
     SV *headless = GvSV(gv_fetchpv(form("%s::Headless", PACKAGE_NAME), TRUE, SVt_PV));
 
     emitter->headless = SvTRUE(headless);
+    emitter->anchor_format = "%d";
 
     bonus = emitter->bonus = S_ALLOC_N(struct emitter_xtra, 1);
     bonus->port = out;
@@ -441,7 +526,10 @@ SV* Dump(SV *sv) {
     syck_emitter_handler( emitter, perl_syck_emitter_handler );
     syck_output_handler( emitter, perl_syck_output_handler );
 
-    perl_syck_mark_emitter( emitter );
+#ifndef YAML_IS_JSON
+    perl_syck_mark_emitter( emitter, sv );
+#endif
+
     syck_emit( emitter, (st_data_t)sv );
     syck_emitter_flush( emitter, 0 );
     syck_free_emitter( emitter );
@@ -450,13 +538,8 @@ SV* Dump(SV *sv) {
 
 #ifdef YAML_IS_JSON
     if (SvCUR(out) > 0) {
-        /* Trim the trailing newline */
-        SvCUR_set(out, SvCUR(out)-1);
+        perl_json_postprocess(out);
     }
-#endif
-
-#ifdef YAML_IS_JSON
-    perl_json_postprocess(out);
 #endif
 
     return out;
