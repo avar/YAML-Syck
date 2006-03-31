@@ -341,7 +341,9 @@ SV* Dump(SV *sv) {
     struct emitter_xtra *bonus;
     SV* out = newSVpvn("", 0);
     SyckEmitter *emitter = syck_new_emitter();
-    SV *implicit = GvSV(gv_fetchpv(form("%s::Headless", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *headless = GvSV(gv_fetchpv(form("%s::Headless", PACKAGE_NAME), TRUE, SVt_PV));
+
+    emitter->headless = SvTRUE(headless);
 
     bonus = emitter->bonus = S_ALLOC_N(struct emitter_xtra, 1);
     bonus->port = out;
