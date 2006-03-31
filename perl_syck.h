@@ -222,6 +222,37 @@ static char* perl_json_preprocess(char *s) {
     return out;
 }
 
+void perl_json_postprocess(SV *sv) {
+    int i;
+    char ch;
+    bool in_string = 0;
+    bool in_quote  = 0;
+    char *pos;
+    char *s = SvPVX(sv);
+    STRLEN len = sv_len(sv);
+    STRLEN final_len = len;
+
+    pos = s;
+
+    for (i = 0; i < len; i++) {
+        ch = *(s+i);
+        *pos++ = ch;
+        if (in_quote) {
+            in_quote = !in_quote;
+        }
+        else if (ch == '\"') {
+            in_string = !in_string;
+        }
+        else if ((ch == ':' || ch == ',') && !in_string) {
+            i++; /* has to be a space afterwards */
+            final_len--;
+        }
+    }
+    *pos = '\0';
+
+    SvCUR_set(sv, final_len);
+}
+
 static SV * Load(char *s) {
     SYMID v;
     SyckParser *parser;
@@ -293,17 +324,16 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
 
     switch (SvTYPE(sv)) {
         case SVt_NULL: { return; }
-        case SVt_PV: {
-            if (SvCUR(sv) > 0) {
-                syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPVX(sv), SvCUR(sv));
+        case SVt_PVIV:
+        case SVt_PVNV: {
+            if (sv_len(sv) > 0) {
+                syck_emit_scalar(e, OBJOF("string"), SvNIOK(sv) ? SCALAR_NUMBER : SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
             }
             else {
                 syck_emit_scalar(e, OBJOF("string"), SCALAR_QUOTED, 0, 0, 0, "", 0);
             }
             break;
         }
-        case SVt_PVIV:
-        case SVt_PVNV:
         case SVt_IV:
         case SVt_NV: {
             if (sv_len(sv) > 0) {
@@ -314,6 +344,7 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
             }
             break;
         }
+        case SVt_PV:
         case SVt_PVMG:
         case SVt_PVBM:
         case SVt_PVLV: {
@@ -411,6 +442,10 @@ SV* Dump(SV *sv) {
         /* Trim the trailing newline */
         SvCUR_set(out, SvCUR(out)-1);
     }
+#endif
+
+#ifdef YAML_IS_JSON
+    perl_json_postprocess(out);
 #endif
 
     return out;
