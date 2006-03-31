@@ -1,3 +1,10 @@
+[Changes for 0.22 - 2006-01-12]
+
+* Dump numbers without quoting even when under Unicode flag.
+  Conversely, a scalar with high bit set is dumped as Unicode even
+  if it had stored a number before.
+  Reported by: Tatsuhiko Miyagawa
+
 [Changes for 0.21 - 2006-01-11]
 
 * Support for loading and dumping unicode strings.
