@@ -1,8 +1,8 @@
 [Changes for 0.16 - 2006-01-11]
 
-* Proper Headless/chomping support for Miyagawa's JSON::Syck branch.
-  JSON::Syck and YAML::Syck now completely shares a codebase.
-  Reported by: Tatsuhiko Miyagawa
+* Proper Headless/chomping/quoting support for Miyagawa's JSON::Syck
+  branch.  JSON::Syck and YAML::Syck now shares a codebase completely.
+  Requested by: Tatsuhiko Miyagawa
 
 [Changes for 0.15 - 2006-01-10]
 
