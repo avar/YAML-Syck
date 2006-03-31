@@ -13,6 +13,10 @@
 #undef DEBUG /* maybe defined in perl.h */
 #include <syck.h>
 
+#ifndef newSVpvn_share
+#define newSVpvn_share(x, y, z) newSVpvn(x, y)
+#endif
+
 #ifdef YAML_IS_JSON
 #  define PACKAGE_NAME  "JSON::Syck"
 #  define NULL_LITERAL  "null"
@@ -361,7 +365,7 @@ static SV * Load(char *s) {
     syck_parser_implicit_typing(parser, SvTRUE(implicit));
     syck_parser_taguri_expansion(parser, 0);
 
-    parser->bonus = (void*)SvTRUE(unicode);
+    parser->bonus = (void*)(SvTRUE(unicode) ? unicode : NULL);
 
     v = syck_parse(parser);
     syck_lookup_sym(parser, v, (char **)&obj);
