@@ -30,13 +30,95 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
 
     switch (n->kind) {
         case syck_str_kind:
-            if (n->type_id == NULL || strcmp( n->type_id, "str" ) == 0 ) {
+            if (n->type_id == NULL) {
+                if ((strcmp( n->data.str->ptr, "~" ) == 0) && (n->data.str->style == scalar_plain)) {
+                    sv = &PL_sv_undef;
+                } else {
+                    sv = newSVpvn(n->data.str->ptr, n->data.str->len);
+                }
+            } else if (strcmp( n->type_id, "str" ) == 0 ) {
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
             } else if (strcmp( n->type_id, "null" ) == 0 ) {
                 sv = &PL_sv_undef;
-            } else {
+            } else if (strcmp( n->type_id, "bool#yes" ) == 0 ) {
+                sv = &PL_sv_yes;
+            } else if (strcmp( n->type_id, "bool#no" ) == 0 ) {
+                sv = &PL_sv_no;
+            } else if (strcmp( n->type_id, "default" ) == 0 ) {
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
+            } else if (strcmp( n->type_id, "float#base60" ) == 0 ) {
+                char *ptr, *end;
+                UV sixty = 1;
+                NV total = 0.0;
+                syck_str_blow_away_commas( n );
+                ptr = n->data.str->ptr;
+                end = n->data.str->ptr + n->data.str->len;
+                while ( end > ptr )
+                {
+                    NV bnum = 0;
+                    char *colon = end - 1;
+                    while ( colon >= ptr && *colon != ':' )
+                    {
+                        colon--;
+                    }
+                    if ( *colon == ':' ) *colon = '\0';
+
+                    bnum = strtod( colon + 1, NULL );
+                    total += bnum * sixty;
+                    sixty *= 60;
+                    end = colon;
+                }
+                sv = newSVnv(total);
+            } else if (strcmp( n->type_id, "float#nan" ) == 0 ) {
+                sv = newSVnv(NV_NAN);
+            } else if (strcmp( n->type_id, "float#inf" ) == 0 ) {
+                sv = newSVnv(NV_INF);
+            } else if (strcmp( n->type_id, "float#neginf" ) == 0 ) {
+                sv = newSVnv(-NV_INF);
+            } else if (strncmp( n->type_id, "float", 5 ) == 0) {
+                NV f;
+                syck_str_blow_away_commas( n );
+                f = strtod( n->data.str->ptr, NULL );
+                sv = newSVnv( f );
+            } else if (strcmp( n->type_id, "int#base60" ) == 0 ) {
+                char *ptr, *end;
+                UV sixty = 1;
+                UV total = 0;
+                syck_str_blow_away_commas( n );
+                ptr = n->data.str->ptr;
+                end = n->data.str->ptr + n->data.str->len;
+                while ( end > ptr )
+                {
+                    long bnum = 0;
+                    char *colon = end - 1;
+                    while ( colon >= ptr && *colon != ':' )
+                    {
+                        colon--;
+                    }
+                    if ( *colon == ':' ) *colon = '\0';
+
+                    bnum = strtol( colon + 1, NULL, 10 );
+                    total += bnum * sixty;
+                    sixty *= 60;
+                    end = colon;
+                }
+                sv = newSVuv(total);
+            } else if (strcmp( n->type_id, "int#hex" ) == 0 ) {
+                STRLEN len = n->data.str->len;
+                syck_str_blow_away_commas( n );
+                sv = newSVuv( grok_hex( n->data.str->ptr, &len, 0, NULL) );
+            } else if (strcmp( n->type_id, "int#oct" ) == 0 ) {
+                STRLEN len = n->data.str->len;
+                syck_str_blow_away_commas( n );
+                sv = newSVuv( grok_oct( n->data.str->ptr, &len, 0, NULL) );
+            } else if (strncmp( n->type_id, "int", 3 ) == 0) {
+                UV uv = 0;
+                syck_str_blow_away_commas( n );
+                grok_number( n->data.str->ptr, n->data.str->len, &uv);
+                sv = newSVuv(uv);
+            } else {
                 /* croak("unknown node type: %s", n->type_id); */
+                sv = newSVpvn(n->data.str->ptr, n->data.str->len);
             }
         break;
 
@@ -85,6 +167,7 @@ static SV * Load(char *s) {
     SV *obj;
     SYMID v;
     SyckParser *parser;
+    SV *implicit = GvSV(gv_fetchpv("YAML::Syck::ImplicitTyping", TRUE, SVt_PV));
 
     /* Don't even bother if the string is empty. */
     if (*s == '\0') { return &PL_sv_undef; }
@@ -93,7 +176,7 @@ static SV * Load(char *s) {
     syck_parser_str_auto(parser, s, NULL);
     syck_parser_handler(parser, perl_syck_parser_handler);
     syck_parser_error_handler(parser, perl_syck_error_handler);
-    syck_parser_implicit_typing(parser, 1);
+    syck_parser_implicit_typing(parser, SvTRUE(implicit));
     syck_parser_taguri_expansion(parser, 0);
     v = syck_parse(parser);
     syck_lookup_sym(parser, v, (char **)&obj);

@@ -6,7 +6,7 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.13 of YAML::Syck, released
+This document describes version 0.14 of YAML::Syck, released
 January 9, 2005.
 
 =head1 SYNOPSIS
@@ -21,6 +21,15 @@ January 9, 2005.
 This module provides a Perl interface to the B<libsyck> data serialization
 library.  It exports the C<Dump> and C<Load> functions for converting
 Perl data structures to YAML strings, and the other way around.
+
+=head1 FLAGS
+
+=head2 $YAML::Syck::ImplicitTyping
+
+Defaults to false.  Setting this to a true value will make C<Load> recognize
+various implicit types in YAML, such as unquoted C<true>, C<false>, as well as
+integers and floating-point numbers.  Otherwise, only C<~> is recognized to
+be C<undef>.
 
 =head1 CAVEATS
 
