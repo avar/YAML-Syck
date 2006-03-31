@@ -296,7 +296,7 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
             return;
         }
         case SVt_PVHV: {
-            syck_emit_map(e, OBJOF("hash"), map_none);
+            syck_emit_map(e, OBJOF("hash"), MAP_NONE);
             *tag = '\0';
 #ifdef HAS_RESTRICTED_HASHES
             len = HvTOTALKEYS((HV*)sv);
@@ -321,17 +321,17 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         }
         case SVt_PVCV: {
             /* XXX TODO XXX */
-            syck_emit_scalar(e, OBJOF("string"), scalar_none, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+            syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
             break;
         }
         case SVt_PVGV:
         case SVt_PVFM: {
             /* XXX TODO XXX */
-            syck_emit_scalar(e, OBJOF("string"), scalar_none, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+            syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
             break;
         }
         case SVt_PVIO: {
-            syck_emit_scalar(e, OBJOF("string"), scalar_none, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+            syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
             break;
         }
     }

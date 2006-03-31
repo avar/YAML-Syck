@@ -1,5 +1,5 @@
+/* #define YAML_IS_JSON 1 */
 #include "perl_syck.h"
-#undef YAML_IS_JSON
 
 MODULE = YAML::Syck		PACKAGE = YAML::Syck		
 
