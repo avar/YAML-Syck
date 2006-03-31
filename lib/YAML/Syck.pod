@@ -1,0 +1,55 @@
+=pod
+
+=head1 NAME 
+
+YAML::Syck - Fast, lightweight YAML loader and dumper
+
+=head1 VERSION
+
+This document describes version 0.01 of YAML::Syck, released
+December 26, 2005.
+
+=head1 SYNOPSIS
+
+    use YAML::Syck;
+
+    $data = Load($yaml);
+    $yaml = Dump($data);
+
+=head1 DESCRIPTION
+
+This module provides a Perl interface to the B<libsyck> data serialization
+library.  It exports the C<Dump> and C<Load> functions for converting
+Perl data structures to YAML strings, and the other way around.
+
+=head1 CAVEATS
+
+The current implementation bundles libsyck source code; if your system has a
+side-wide shared libsyck, it will I<not> be used.
+
+This module is not currently pluggable to the new L<YAML> (0.50+) framework,
+but that's expected to change in the future.
+
+Dumping code, glob, scalar and blessed references are currently broken.
+
+=head1 SEE ALSO
+
+L<YAML>
+
+=head1 AUTHORS
+
+Audrey Tang E<lt>autrijus@autrijus.orgE<gt>
+
+=head1 COPYRIGHT
+
+Copyright by Audrey Tang E<lt>autrijus@autrijus.orgE<gt>.
+
+The F<libsyck> code bundled with this library by C<why the lucky stiff>,
+under a BSD-style license.  See the COPYING file for details.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+See L<http://www.perl.com/perl/misc/Artistic.html>
+
+=cut
