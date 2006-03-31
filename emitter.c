@@ -778,7 +778,10 @@ syck_emitter_escape( SyckEmitter *e, char *src, long len )
     int i;
     for( i = 0; i < len; i++ )
     {
-        if( (src[i] < 0x20) || (0x7E < src[i]) )
+        /* XXX - scalar_fold overloaded to mean utf8 from Audrey Tang */
+        if( (e->style == scalar_fold)
+                ? ((src[i] < 0x20) && (0 < src[i]))
+                : ((src[i] < 0x20) || (0x7E < src[i])) )
         {
             syck_emitter_write( e, "\\", 1 );
             if( '\0' == src[i] )
