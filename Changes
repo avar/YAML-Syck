@@ -1,3 +1,8 @@
+[Changes for 0.25 - 2006-01-14]
+
+* Loading foreign objects from YAML tags:
+  For example, "--- !hs/Foo {a: b}" is blessed into hs::Foo.
+
 [Changes for 0.24 - 2006-01-14]
 
 * Silence warnings on 64-bit machines.

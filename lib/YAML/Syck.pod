@@ -6,8 +6,8 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.24 of YAML::Syck, released
-January 14, 2005.
+This document describes version 0.25 of YAML::Syck, released
+January 15, 2005.
 
 =head1 SYNOPSIS
 
@@ -55,6 +55,10 @@ side-wide shared libsyck, it will I<not> be used.
 
 This module is not currently pluggable to the new L<YAML> (0.50+) framework,
 but that's expected to change in the future.
+
+Tag names such as C<!perl/Foo> is blessed into the package C<Foo>, but the
+C<!hs/Foo> tag is blessed into C<hs::Foo>.  There is currently no way to
+customize this behaviour; consider using L<Class::Rebless> for the time being.
 
 Loading cyclic references is currently broken.
 

@@ -179,7 +179,15 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
             sv = newRV_noinc((SV*)seq);
 #ifndef YAML_IS_JSON
             if (n->type_id) {
-                sv_bless(sv, gv_stashpv(n->type_id + 6, TRUE));
+                char *lang = strtok(n->type_id, "/:");
+                char *type = strtok(NULL, "");
+                while ((type != NULL) && *type == '@') { type++; }
+
+                if (lang == NULL || (strcmp(lang, "perl") == 0)) {
+                    sv_bless(sv, gv_stashpv(type, TRUE));
+                } else {
+                    sv_bless(sv, gv_stashpv(form("%s::%s", lang, type), TRUE));
+                }
             }
 #endif
         break;
@@ -204,7 +212,13 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
                 sv = newRV_noinc((SV*)map);
 #ifndef YAML_IS_JSON
                 if (n->type_id) {
-                    sv_bless(sv, gv_stashpv(n->type_id + 5, TRUE));
+                    char *lang = strtok(n->type_id, "/:");
+                    char *type = strtok(NULL, "");
+                    if (lang == NULL || (strcmp(lang, "perl") == 0)) {
+                        sv_bless(sv, gv_stashpv(type, TRUE));
+                    } else {
+                        sv_bless(sv, gv_stashpv(form("%s::%s", lang, type), TRUE));
+                    }
                 }
 #endif
             }
