@@ -1,3 +1,10 @@
+[Changes for 0.38 - 2006-03-14]
+
+* Documentation change: in the POD text, stress the importance of setting
+  $YAML::Syck::ImplicitTyping to true, for interoperability with other
+  language's YAML/Syck bindings is desired.
+  Suggested by: "dgaramond2" on Perlmonks.
+
 [Changes for 0.37 - 2006-03-14]
 
 * Fix build on Win32 caused by upstream Syck header changes.
