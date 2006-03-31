@@ -1,3 +1,18 @@
+[Changes for 0.40 (JSON::Syck 0.10) - 2006-03-31]
+
+* Merge YAML::Syck and JSON::Syck to a single distribution. Unified
+  our svn repo codebase onto openfoundry[1] as well.
+  [1] http://svn.openfoundry.org/perlsyck
+
+* Fixed JSON null serialization bug [rt:18021], unsigned integer bug
+  [rt:18464].
+
+* Under JSON, scalar references are dereferenced eplicitly and
+  subroutine refefrences are serialized to empty string.
+
+* Fixed bug that integer elements in tied hashes were not correctly
+  serialized. Reported by: Dan Kogai
+
 [Changes for 0.38 - 2006-03-14]
 
 * Documentation change: in the POD text, stress the importance of setting

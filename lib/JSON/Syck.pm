@@ -50,6 +50,23 @@ options, while JSON::Syck doesn't. There's only C<Load> and C<Dump>.
 
 Oh, and JSON::Syck doesn't use camelCase method names :-)
 
+=head1 REFERENCES
+
+=head2 SCALAR REFERNECE
+
+For now, when you pass a scalar reference to JSON::Syck, it
+derefernces to get the actual scalar value. It means when you pass
+self-referencing reference, JSON::Syck goes into infinite loop. Don't
+do it.
+
+If you want to serialize self refernecing stuff, you should use
+YAML which supports it.
+
+=head2 SUBROUTINE REFERENCE
+
+When you pass subroutine reference, JSON::Syck dumps it as an empty
+string.
+
 =head1 UNICODE FLAGS
 
 By default this module doesn't touch any of Unicode flags, and assumes
