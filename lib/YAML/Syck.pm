@@ -5,7 +5,7 @@ use vars qw( @ISA @EXPORT $VERSION $ImplicitTyping );
 use 5.003;
 use DynaLoader;
 
-$VERSION = '0.14';
+$VERSION = '0.15';
 @EXPORT  = qw( Dump Load DumpFile LoadFile );
 @ISA     = qw( Exporter DynaLoader );
 
