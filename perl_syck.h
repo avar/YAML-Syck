@@ -5,6 +5,7 @@
 #define NEED_grok_oct
 #define NEED_grok_hex
 #define NEED_grok_number
+#define NEED_grok_numeric_radix
 #define NEED_newRV_noinc
 #include "ppport.h"
 #include "ppport_math.h"
