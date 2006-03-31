@@ -1,3 +1,8 @@
+[Changes for 0.13 - 2006-01-09]
+
+* Parsing an empty string no longer causes bus error in threaded Perls.
+  Reported by: Tatsuhiko Miyagawa
+
 [Changes for 0.12 - 2006-01-09]
 
 * Parser errors now raises proper exceptions instead of segfaults.

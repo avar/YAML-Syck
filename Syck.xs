@@ -84,7 +84,12 @@ void perl_syck_error_handler(SyckParser *p, char *msg) {
 static SV * Load(char *s) {
     SV *obj;
     SYMID v;
-    SyckParser *parser = syck_new_parser();
+    SyckParser *parser;
+
+    /* Don't even bother if the string is empty. */
+    if (*s == '\0') { return &PL_sv_undef; }
+
+    parser = syck_new_parser();
     syck_parser_str_auto(parser, s, NULL);
     syck_parser_handler(parser, perl_syck_parser_handler);
     syck_parser_error_handler(parser, perl_syck_error_handler);
