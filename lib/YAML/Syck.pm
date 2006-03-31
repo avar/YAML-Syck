@@ -1,15 +1,27 @@
 package YAML::Syck;
 use strict;
 use vars qw( @ISA @EXPORT $VERSION $ImplicitTyping $SortKeys );
-
 use 5.003;
-use DynaLoader;
 
-$VERSION = '0.28';
-@EXPORT  = qw( Dump Load DumpFile LoadFile );
-@ISA     = qw( Exporter DynaLoader );
+BEGIN {
+    $VERSION = '0.28';
+    @EXPORT  = qw( Dump Load DumpFile LoadFile );
+    @ISA     = qw( Exporter );
 
-$SortKeys = 1;
+    $SortKeys = 1;
+
+    local $@;
+    eval {
+        require XSLoader;
+        XSLoader::load(__PACKAGE__ => $VERSION);
+        1;
+    } or do {
+        require DynaLoader;
+        push @ISA, 'DynaLoader';
+        __PACKAGE__->bootstrap($VERSION);
+    };
+}
+
 
 sub DumpFile {
     my $file = shift;
@@ -23,7 +35,5 @@ sub LoadFile {
     open FH, "< $file" or die "Cannot read from $file: $!";
     Load(do { local $/; <FH> })
 }
-
-__PACKAGE__->bootstrap;
 
 1;
