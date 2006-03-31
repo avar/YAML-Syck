@@ -3,19 +3,22 @@
 #include "XSUB.h"
 #include <syck.h>
 
-#ifdef HvPLACEHOLDERS
-#define HAS_RESTRICTED_HASHES
-#endif
+/*
+#undef ASSERT
+#include "Storable.xs"
+*/
 
-typedef SV* Perl_Scalar;
+struct emitter_xtra {
+    SV* port;
+};
 
-Perl_Scalar syck_perl_lookup_sym( SyckParser *p, SYMID v) {
+SV* perl_syck_lookup_sym( SyckParser *p, SYMID v) {
     SV *obj = &PL_sv_undef;
     syck_lookup_sym(p, v, (char **)&obj);
     return obj;
 }
 
-SYMID syck_perl_parser_handler(SyckParser *p, SyckNode *n) {
+SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
     SV *sv;
     AV *seq;
     HV *map;
@@ -29,7 +32,7 @@ SYMID syck_perl_parser_handler(SyckParser *p, SyckNode *n) {
         case syck_seq_kind:
             seq = newAV();
             for (i = 0; i < n->data.list->idx; i++) {
-                av_push(seq, syck_perl_lookup_sym(p, syck_seq_read(n, i) ));
+                av_push(seq, perl_syck_lookup_sym(p, syck_seq_read(n, i) ));
             }
             sv = newRV_inc((SV*)seq);
         break;
@@ -39,8 +42,8 @@ SYMID syck_perl_parser_handler(SyckParser *p, SyckNode *n) {
             for (i = 0; i < n->data.pairs->idx; i++) {
                 hv_store_ent(
                     map,
-                    syck_perl_lookup_sym(p, syck_map_read(n, map_key, i) ),
-                    syck_perl_lookup_sym(p, syck_map_read(n, map_value, i) ),
+                    perl_syck_lookup_sym(p, syck_map_read(n, map_key, i) ),
+                    perl_syck_lookup_sym(p, syck_map_read(n, map_value, i) ),
                     0
                 );
             }
@@ -50,17 +53,31 @@ SYMID syck_perl_parser_handler(SyckParser *p, SyckNode *n) {
     return syck_add_sym(p, (char *)sv);
 }
 
-void syck_perl_set_parser_handler( SyckParser *p ) {
-    syck_parser_handler( p, syck_perl_parser_handler );
+void perl_syck_mark_emitter(SyckEmitter *e) {
+    return;
 }
 
-struct emitter_xtra {
-    SV* this;
-    SV* output;
-    int id;
-};
+static SV * Load(char *s) {
+    SV *obj;
+    SYMID v;
+    SyckParser *parser = syck_new_parser();
+    syck_parser_str_auto(parser, s, NULL);
+    syck_parser_handler(parser, perl_syck_parser_handler);
+    syck_parser_error_handler(parser, NULL);
+    syck_parser_implicit_typing(parser, 1);
+    syck_parser_taguri_expansion(parser, 0);
+    v = syck_parse(parser);
+    syck_lookup_sym(parser, v, (char **)&obj);
+    syck_free_parser(parser);
+    return obj;
+}
 
-void syck_perl_emitter_handler(SyckEmitter *e, st_data_t data) {
+void perl_syck_output_handler(SyckEmitter *e, char *str, long len) {
+    struct emitter_xtra *bonus = (struct emitter_xtra *)e->bonus;
+    sv_catpvn_nomg(bonus->port, str, len);
+}
+
+void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
     I32  len, i;
     SV*  sv = (SV*)data;
     struct emitter_xtra *bonus = (struct emitter_xtra *)e->bonus;
@@ -70,7 +87,6 @@ void syck_perl_emitter_handler(SyckEmitter *e, st_data_t data) {
         case SVt_PV:
         case SVt_PVIV:
         case SVt_PVNV: { /* XXX !SvROK(sv) XXX */
-            bonus->id++;
             return syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, SvPVX(sv), SvCUR(sv));
         }
         case SVt_IV:
@@ -78,11 +94,10 @@ void syck_perl_emitter_handler(SyckEmitter *e, st_data_t data) {
         case SVt_PVMG:
         case SVt_PVBM:
         case SVt_PVLV: {
-            bonus->id++;
             return syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
         }
         case SVt_RV: {
-            return syck_perl_emitter_handler(e, (st_data_t)SvRV(sv));
+            return perl_syck_emitter_handler(e, (st_data_t)SvRV(sv));
         }
         case SVt_PVAV: {
             syck_emit_seq(e, "array", seq_none);
@@ -92,7 +107,6 @@ void syck_perl_emitter_handler(SyckEmitter *e, st_data_t data) {
                 syck_emit_item( e, (st_data_t)(*sav) );
             }
             syck_emit_end(e);
-            bonus->id++;
             return;
         }
         case SVt_PVHV: {
@@ -116,7 +130,6 @@ void syck_perl_emitter_handler(SyckEmitter *e, st_data_t data) {
                 syck_emit_item( e, (st_data_t)val );
             }
             syck_emit_end(e);
-            bonus->id++;
             return;
         }
         case SVt_PVCV: {
@@ -134,71 +147,33 @@ void syck_perl_emitter_handler(SyckEmitter *e, st_data_t data) {
     }
 }
 
-void syck_perl_output_handler(SyckEmitter *e, char *str, long len) {
-    struct emitter_xtra *bonus = (struct emitter_xtra *)e->bonus;
-    sv_catpvn_nomg(bonus->output, str, len);
-}
-
-void syck_perl_set_output_handler(SyckEmitter *e, Perl_Scalar sv) {
-    struct emitter_xtra *bonus = (struct emitter_xtra *)e->bonus;
-    bonus->id = 1;
-    bonus->output = sv;
-    syck_output_handler(e, syck_perl_output_handler);
-}
-
-void syck_perl_mark_emitter(SyckEmitter *e) {
-    struct emitter_xtra *bonus = (struct emitter_xtra *)e->bonus;
-    I32  len, i;
-    SV* sv = bonus->this;
-
-    switch (SvTYPE(sv)) {
-        case SVt_PVAV: {
-            syck_emit_seq(e, "array", seq_none);
-            len = av_len((AV*)sv) + 1;
-            for (i = 0; i < len; i++) {
-                SV** sav = av_fetch((AV*)sv, i, 0);
-                bonus->this = *sav;
-                syck_emitter_mark_node(e, bonus->id++);
-            }
-            bonus->id++;
-            return;
-        }
-        case SVt_PVHV: {
-            syck_emit_map(e, "hash", map_none);
-#ifdef HAS_RESTRICTED_HASHES
-            len = HvTOTALKEYS((HV*)sv);
-#else
-            len = HvKEYS((HV*)sv);
-#endif
-            hv_iterinit((HV*)sv);
-            for (i = 0; i < len; i++) {
-#ifdef HV_ITERNEXT_WANTPLACEHOLDERS
-                HE *he = hv_iternext_flags((HV*)sv, HV_ITERNEXT_WANTPLACEHOLDERS);
-#else
-                HE *he = hv_iternext((HV*)sv);
-#endif
-                SV *key = hv_iterkeysv(he);
-                SV *val = hv_iterval((HV*)sv, he);
-                bonus->this = key;
-                syck_emitter_mark_node(e, bonus->id++);
-                bonus->this = val;
-                syck_emitter_mark_node(e, bonus->id++);
-            }
-            syck_emit_end(e);
-            bonus->id++;
-            return;
-        }
-        default: {
-            syck_emitter_mark_node(e, bonus->id++);
-        }
-    }
-}
-
-void syck_perl_set_emitter_handler( SyckEmitter *e, SV* this ) {
+SV* Dump(SV *sv) {
     struct emitter_xtra *bonus;
-    e->bonus = S_ALLOC_N(struct emitter_xtra, 1);
-    bonus = (struct emitter_xtra *)e->bonus;
-    bonus->id = 1;
-    bonus->this = this;
-    syck_emitter_handler( e, syck_perl_emitter_handler );
+    SV* out = newSVpvn("", 0);
+    SyckEmitter *emitter = syck_new_emitter();
+
+    bonus = emitter->bonus = S_ALLOC_N(struct emitter_xtra, 1);
+    bonus->port = out;
+
+    syck_emitter_handler( emitter, perl_syck_emitter_handler );
+    syck_output_handler( emitter, perl_syck_output_handler );
+
+    perl_syck_mark_emitter( emitter );
+    syck_emit( emitter, (st_data_t)sv );
+    syck_emitter_flush( emitter, 0 );
+    syck_free_emitter( emitter );
+
+    return out;
 }
+
+MODULE = YAML::Syck		PACKAGE = YAML::Syck		
+
+PROTOTYPES: DISABLE
+
+SV *
+Load (s)
+	char *	s
+
+SV *
+Dump (sv)
+	SV *	sv

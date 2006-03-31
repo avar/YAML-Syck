@@ -1,0 +1,32 @@
+This is the README file for YAML::Syck, a fast, lightweight YAML loader
+and dumper library.
+
+Please type "perldoc YAML::Syck" after installation to see the
+module usage information.
+
+* Installation
+
+YAML::Syck uses the standard perl module install process:
+
+    cpansign -v         # optional; see SIGNATURE for details
+    perl Makefile.PL
+    make                # or 'nmake' on Win32
+    make test
+    make install
+
+* Copyright
+
+Copyright 2005 by Audrey Tang <autrijus@autrijus.org>.
+
+The libsyck code bundled with this library is written by
+"why the lucky stiff", under a BSD-style license.
+See the COPYING file for details.
+
+The Storable.xs code bundled with this library is written by
+Raphael Manfredi and maintained by perl5-porters, under the
+same license as Perl.
+
+All rights reserved.  You can redistribute and/or modify
+this bundle under the same terms as Perl itself.
+
+See <http://www.perl.com/perl/misc/Artistic.html>.

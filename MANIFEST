@@ -24,13 +24,13 @@ MANIFEST			This list of files
 META.yml
 node.c
 README
+Storable.xs
 syck.c
 syck.h
 syck.i
-syck_perl.c
+Syck.xs
 syck_st.c
 syck_st.h
-syck_wrap.c
 t/1-basic.t
 token.c
 yaml2byte.c
