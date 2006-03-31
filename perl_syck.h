@@ -419,10 +419,6 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
     char* tag = bonus->tag;
     char* ref = NULL;
 
-    if (sv == &PL_sv_undef) {
-        return syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
-    }
-    
 #define OBJECT_TAG     "tag:perl:"
     
     if (SvMAGICAL(sv)) {
@@ -464,7 +460,10 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
     }
 
     switch (SvTYPE(sv)) {
-        case SVt_NULL: { return; }
+        case SVt_NULL: {
+            syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
+            break;
+        }
         case SVt_IV:
         case SVt_NV: {
             if (sv_len(sv) > 0) {
