@@ -18,6 +18,7 @@ ok(Load("--- ''\n"), '');
 ok(Load("--- true\n"), "true");
 ok(Load("--- false\n"), "false");
 
-$YAML::Syck::ImplicitTyping = 1;
+$YAML::Syck::ImplicitTyping = $YAML::Syck::ImplicitTyping = 1;
+
 ok(Load("--- true\n"), 1);
 ok(Load("--- false\n"), '');

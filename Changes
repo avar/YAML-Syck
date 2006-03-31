@@ -5,7 +5,10 @@
   if it's turned off (as per default) only null is recognized.
   Reported by: Brian Ingerson
 
-* No longer ships Storable.xs with the distribution.
+* Fix potential emission of redundant "--- " headings in large
+  dumped documents.
+
+* We no longer ship Storable.xs with the distribution.
 
 [Changes for 0.13 - 2006-01-09]
 
