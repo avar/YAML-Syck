@@ -51,7 +51,7 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
             for (i = 0; i < n->data.list->idx; i++) {
                 av_push(seq, perl_syck_lookup_sym(p, syck_seq_read(n, i) ));
             }
-            sv = newRV_inc((SV*)seq);
+            sv = newRV_noinc((SV*)seq);
         break;
 
         case syck_map_kind:
@@ -64,7 +64,7 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
                     0
                 );
             }
-            sv = newRV_inc((SV*)map);
+            sv = newRV_noinc((SV*)map);
         break;
     }
     return syck_add_sym(p, (char *)sv);
