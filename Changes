@@ -1,3 +1,25 @@
+[Changes for 0.37 - 2006-03-14]
+
+* Fix build on Win32 caused by upstream Syck header changes.
+  Reported by: Nilson Santos F. Jr.
+
+[Changes for 0.36 - 2006-03-10]
+
+* YAML.pm 0.35 or earlier emitted "--- #YAML:1.0" instead of "--- %YAML:1.0"
+  as the version string; work around it to maintain compatibility..
+  Reported by: Chia-Liang Kao
+
+[Changes for 0.35 - 2006-03-09]
+
+* Under implicit typing, hex and octal integers triggered segfaults.
+  Reported by: Rachwal Waldemar
+
+[Changes for 0.34 - 2006-03-07]
+
+* Upgrade to Module::Install 0.59.
+
+* Corrected copyright notices.
+
 [Changes for 0.33 - 2006-02-14]
 
 * Plain strings beginning with "~" was loaded as undef.

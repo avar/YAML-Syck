@@ -1,4 +1,4 @@
-use t::TestYAML tests => 22; 
+use t::TestYAML tests => 26;
 
 ok(YAML::Syck->VERSION);
 
@@ -31,8 +31,12 @@ is($y->{SID}{default}, 'abc');
 
 is(Load("--- true\n"), "true");
 is(Load("--- false\n"), "false");
+is(ref(Load("--- #YAML:1.0 {}\n")), "HASH");
 
 $YAML::Syck::ImplicitTyping = $YAML::Syck::ImplicitTyping = 1;
 
 is(Load("--- true\n"), 1);
 is(Load("--- false\n"), '');
+is(Load("--- 0xE\n"), 0xE);
+is(Load("--- 042\n"), 042);
+is(Load("--- 187\n"), 187);

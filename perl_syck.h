@@ -157,13 +157,15 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
                 }
                 sv = newSVuv(total);
             } else if (strcmp( n->type_id, "int#hex" ) == 0 ) {
+                I32 flags = 0;
                 STRLEN len = n->data.str->len;
                 syck_str_blow_away_commas( n );
-                sv = newSVuv( grok_hex( n->data.str->ptr, &len, 0, NULL) );
+                sv = newSVuv( grok_hex( n->data.str->ptr, &len, &flags, NULL) );
             } else if (strcmp( n->type_id, "int#oct" ) == 0 ) {
+                I32 flags = 0;
                 STRLEN len = n->data.str->len;
                 syck_str_blow_away_commas( n );
-                sv = newSVuv( grok_oct( n->data.str->ptr, &len, 0, NULL) );
+                sv = newSVuv( grok_oct( n->data.str->ptr, &len, &flags, NULL) );
             } else if (strncmp( n->type_id, "int", 3 ) == 0) {
                 UV uv = 0;
                 syck_str_blow_away_commas( n );
@@ -181,7 +183,7 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
             for (i = 0; i < n->data.list->idx; i++) {
                 av_push(seq, perl_syck_lookup_sym(p, syck_seq_read(n, i) ));
             }
-            sv = newRV_noinc((SV*)seq);
+            sv = newRV_inc((SV*)seq);
 #ifndef YAML_IS_JSON
             if (n->type_id) {
                 char *lang = strtok(n->type_id, "/:");
@@ -395,6 +397,11 @@ static SV * Load(char *s) {
 
 #ifdef YAML_IS_JSON
     s = perl_json_preprocess(s);
+#else
+    /* Special preprocessing to maintain compat with YAML.pm <= 0.35 */
+    if (strncmp( s, "--- #YAML:1.0", 13) == 0) {
+        s[4] = '%';
+    }
 #endif
 
     parser = syck_new_parser();
