@@ -19,6 +19,7 @@
 #  define SCALAR_NUMBER scalar_none
 #  define SCALAR_STRING scalar_2quote
 #  define SCALAR_QUOTED scalar_2quote
+#  define SCALAR_UTF8   scalar_fold
 #  define SEQ_NONE      seq_inline
 #  define MAP_NONE      map_inline
 #  define TYPE_IS_NULL(x) ((x == NULL) || (strcmp( x, "str" ) == 0))
@@ -29,6 +30,7 @@
 #  define SCALAR_NUMBER scalar_none
 #  define SCALAR_STRING scalar_none
 #  define SCALAR_QUOTED scalar_1quote
+#  define SCALAR_UTF8   scalar_fold
 #  define SEQ_NONE      seq_none
 #  define MAP_NONE      map_none
 #  define TYPE_IS_NULL(x) (x == NULL)
@@ -51,6 +53,10 @@ SV* perl_syck_lookup_sym( SyckParser *p, SYMID v) {
     return obj;
 }
 
+#define CHECK_UTF8 \
+    if (p->bonus && is_utf8_string((U8*)n->data.str->ptr, n->data.str->len)) \
+        SvUTF8_on(sv);
+
 SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
     SV *sv;
     AV *seq;
@@ -64,9 +70,11 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
                     sv = &PL_sv_undef;
                 } else {
                     sv = newSVpvn(n->data.str->ptr, n->data.str->len);
+                    CHECK_UTF8;
                 }
             } else if (strcmp( n->type_id, "str" ) == 0 ) {
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
+                CHECK_UTF8;
             } else if (strcmp( n->type_id, "null" ) == 0 ) {
                 sv = &PL_sv_undef;
             } else if (strcmp( n->type_id, "bool#yes" ) == 0 ) {
@@ -75,6 +83,7 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
                 sv = &PL_sv_no;
             } else if (strcmp( n->type_id, "default" ) == 0 ) {
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
+                CHECK_UTF8;
             } else if (strcmp( n->type_id, "float#base60" ) == 0 ) {
                 char *ptr, *end;
                 UV sixty = 1;
@@ -152,6 +161,7 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
             } else {
                 /* croak("unknown node type: %s", n->type_id); */
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
+                CHECK_UTF8;
             }
         break;
 
@@ -334,6 +344,7 @@ static SV * Load(char *s) {
     SyckParser *parser;
     SV *obj = &PL_sv_undef;
     SV *implicit = GvSV(gv_fetchpv(form("%s::ImplicitTyping", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
 
     /* Don't even bother if the string is empty. */
     if (*s == '\0') { return &PL_sv_undef; }
@@ -349,6 +360,9 @@ static SV * Load(char *s) {
     syck_parser_bad_anchor_handler( parser, perl_syck_bad_anchor_handler );
     syck_parser_implicit_typing(parser, SvTRUE(implicit));
     syck_parser_taguri_expansion(parser, 0);
+
+    parser->bonus = (void*)SvTRUE(unicode);
+
     v = syck_parse(parser);
     syck_lookup_sym(parser, v, (char **)&obj);
     syck_free_parser(parser);
@@ -444,7 +458,15 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         case SVt_PVBM:
         case SVt_PVLV: {
             if (sv_len(sv) > 0) {
-                syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+                if (SvUTF8(sv)) {
+                    enum scalar_style old_s = e->style;
+                    e->style = SCALAR_UTF8;
+                    syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+                    e->style = old_s;
+                }
+                else {
+                    syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+                }
             }
             else {
                 syck_emit_scalar(e, OBJOF("string"), SCALAR_QUOTED, 0, 0, 0, "", 0);
@@ -515,6 +537,7 @@ SV* Dump(SV *sv) {
     SV* out = newSVpvn("", 0);
     SyckEmitter *emitter = syck_new_emitter();
     SV *headless = GvSV(gv_fetchpv(form("%s::Headless", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
 
     emitter->headless = SvTRUE(headless);
     emitter->anchor_format = "%d";
@@ -542,5 +565,8 @@ SV* Dump(SV *sv) {
     }
 #endif
 
+    if (SvTRUE(unicode)) {
+        SvUTF8_on(out);
+    }
     return out;
 }
