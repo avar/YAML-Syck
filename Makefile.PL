@@ -1,5 +1,5 @@
 use strict;
-use inc::Module::Install 0.48;
+use inc::Module::Install;
 
 name        'YAML-Syck';
 all_from    'lib/YAML/Syck.pm';
