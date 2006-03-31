@@ -433,16 +433,6 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
 
     switch (SvTYPE(sv)) {
         case SVt_NULL: { return; }
-        case SVt_PVIV:
-        case SVt_PVNV: {
-            if (sv_len(sv) > 0) {
-                syck_emit_scalar(e, OBJOF("string"), SvNIOK(sv) ? SCALAR_NUMBER : SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
-            }
-            else {
-                syck_emit_scalar(e, OBJOF("string"), SCALAR_QUOTED, 0, 0, 0, "", 0);
-            }
-            break;
-        }
         case SVt_IV:
         case SVt_NV: {
             if (sv_len(sv) > 0) {
@@ -454,11 +444,16 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
             break;
         }
         case SVt_PV:
+        case SVt_PVIV:
+        case SVt_PVNV:
         case SVt_PVMG:
         case SVt_PVBM:
         case SVt_PVLV: {
             if (sv_len(sv) > 0) {
-                if (SvUTF8(sv)) {
+                if (SvNIOK(sv)) {
+                    syck_emit_scalar(e, OBJOF("string"), SCALAR_NUMBER, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+                }
+                else if (SvUTF8(sv)) {
                     enum scalar_style old_s = e->style;
                     e->style = SCALAR_UTF8;
                     syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
