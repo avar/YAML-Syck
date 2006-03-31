@@ -553,8 +553,11 @@ SV* Dump(SV *sv) {
     SyckEmitter *emitter = syck_new_emitter();
     SV *headless = GvSV(gv_fetchpv(form("%s::Headless", PACKAGE_NAME), TRUE, SVt_PV));
     SV *unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *sortkeys = GvSV(gv_fetchpv(form("%s::SortKeys", PACKAGE_NAME), TRUE, SVt_PV));
 
+    printf("%d is happy\n", SvTYPE(sortkeys));
     emitter->headless = SvTRUE(headless);
+    emitter->sort_keys = SvTRUE(sortkeys);
     emitter->anchor_format = "%d";
 
     bonus = emitter->bonus = S_ALLOC_N(struct emitter_xtra, 1);

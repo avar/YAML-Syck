@@ -6,8 +6,8 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.25 of YAML::Syck, released
-January 15, 2005.
+This document describes version 0.26 of YAML::Syck, released
+January 16, 2005.
 
 =head1 SYNOPSIS
 
@@ -28,6 +28,11 @@ Perl data structures to YAML strings, and the other way around.
 
 Defaults to false.  Setting this to a true value will make C<Dump> omit the
 leading C<---\n> marker.
+
+=head2 $YAML::Syck::SortKeys
+
+Defaults to false.  Setting this to a true value will make C<Dump> sort
+hash keys.
 
 =head2 $YAML::Syck::ImplicitTyping
 
