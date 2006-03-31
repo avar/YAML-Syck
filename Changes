@@ -1,3 +1,8 @@
+[Changes for 0.31 - 2006-02-10]
+
+* Strings ending in colons, spaces or tabs was not quoted properly.
+  Reported by: Stephen Quinney
+
 [Changes for 0.30 - 2006-02-06]
 
 * When loading anchors pointing to a hash reference, reference count did

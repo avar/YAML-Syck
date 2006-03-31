@@ -2,7 +2,7 @@
  * syck.c
  *
  * $Author: why $
- * $Date: 2005/01/01 02:06:25 $
+ * $Date: 2005-01-01 10:06:25 +0800 (六, 01  1 2005) $
  *
  * Copyright (C) 2003 why the lucky stiff
  */
@@ -297,7 +297,7 @@ syck_parser_file( SyckParser *p, FILE *fp, SyckIoFileRead read )
 {
     ASSERT( p != NULL );
     free_any_io( p );
-    syck_parser_reset_cursor( p );
+	syck_parser_reset_cursor( p );
     p->io_type = syck_io_file;
     p->io.file = S_ALLOC( SyckIoFile );
     p->io.file->ptr = fp;
@@ -316,7 +316,7 @@ syck_parser_str( SyckParser *p, char *ptr, long len, SyckIoStrRead read )
 {
     ASSERT( p != NULL );
     free_any_io( p );
-    syck_parser_reset_cursor( p );
+	syck_parser_reset_cursor( p );
     p->io_type = syck_io_str;
     p->io.str = S_ALLOC( SyckIoStr );
     p->io.str->beg = ptr;

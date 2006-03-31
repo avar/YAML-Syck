@@ -1,4 +1,4 @@
-use t::TestYAML tests => 16; 
+use t::TestYAML tests => 21; 
 
 ok(YAML::Syck->VERSION);
 
@@ -14,6 +14,11 @@ is(Dump($x),     "--- &1 !perl/ref: \n=: *1\n");
 
 is(Dump(undef), "--- ~\n");
 is(Dump('~'), "--- \'~\'\n");
+is(Dump('a:'), "--- \"a:\"\n");
+is(Dump('a: '), "--- \"a: \"\n");
+is(Dump('a '), "--- \"a \"\n");
+is(Dump('a: b'), "--- \"a: b\"\n");
+is(Dump('a:b'), "--- a:b\n");
 is(Load("--- ~\n"), undef);
 is(Load("---\n"), undef);
 is(Load("--- ''\n"), '');
