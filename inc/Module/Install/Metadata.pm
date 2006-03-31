@@ -235,11 +235,13 @@ sub perl_version_from {
         ^
         use \s*
         v?
-        ([\d\.]+)
+        ([\d_\.]+)
         \s* ;
     /ixms
       )
     {
+        my $v = $1;
+        $v =~ s{_}{}g;
         $self->perl_version($1);
     }
     else {

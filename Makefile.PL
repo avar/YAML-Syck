@@ -11,4 +11,5 @@ cc_files        (glob("*.c"), (-e 'Syck.c' ? () : 'Syck.c'));
 
 can_cc or die "This module requires a C compiler";
 
+include_deps 'Test::More';
 sign; WriteAll;
