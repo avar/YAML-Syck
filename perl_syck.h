@@ -1,22 +1,18 @@
-#include "EXTERN.h"
-#include "perl.h"
-#include "XSUB.h"
-
-#define NEED_grok_oct
-#define NEED_grok_hex
-#define NEED_grok_number
-#define NEED_grok_numeric_radix
-#define NEED_newRV_noinc
-#include "ppport.h"
-#include "ppport_math.h"
-#include "ppport_sort.h"
-
-#undef DEBUG /* maybe defined in perl.h */
-#include <syck.h>
-
-#ifndef newSVpvn_share
-#define newSVpvn_share(x, y, z) newSVpvn(x, y)
-#endif
+/* Implementation-specific variables */
+#undef PACKAGE_NAME
+#undef NULL_LITERAL
+#undef NULL_LITERAL_LENGTH
+#undef SCALAR_NUMBER
+#undef SCALAR_STRING
+#undef SCALAR_QUOTED
+#undef SCALAR_UTF8
+#undef SEQ_NONE
+#undef MAP_NONE
+#undef COND_FOLD
+#undef TYPE_IS_NULL
+#undef OBJOF
+#undef PERL_SYCK_PARSER_HANDLER
+#undef PERL_SYCK_EMITTER_HANDLER
 
 #ifdef YAML_IS_JSON
 #  define PACKAGE_NAME  "JSON::Syck"
@@ -33,6 +29,8 @@ static enum scalar_style json_quote_style = scalar_2quote;
 #  define COND_FOLD(x)  TRUE
 #  define TYPE_IS_NULL(x) ((x == NULL) || (strncmp( x, "str", 3 ) == 0))
 #  define OBJOF(a)        (a)
+#  define PERL_SYCK_PARSER_HANDLER json_syck_parser_handler
+#  define PERL_SYCK_EMITTER_HANDLER json_syck_emitter_handler
 #else
 #  define PACKAGE_NAME  "YAML::Syck"
 #  define NULL_LITERAL  "~"
@@ -46,29 +44,17 @@ static enum scalar_style json_quote_style = scalar_2quote;
 #  define COND_FOLD(x)  (SvUTF8(sv))
 #  define TYPE_IS_NULL(x) (x == NULL)
 #  define OBJOF(a)        (*tag ? tag : a)
+#  define PERL_SYCK_PARSER_HANDLER yaml_syck_parser_handler
+#  define PERL_SYCK_EMITTER_HANDLER yaml_syck_emitter_handler
 #endif
 
-/*
-#undef ASSERT
-#include "Storable.xs"
-*/
-
-struct emitter_xtra {
-    SV* port;
-    char* tag;
-};
-
-SV* perl_syck_lookup_sym( SyckParser *p, SYMID v) {
-    SV *obj = &PL_sv_undef;
-    syck_lookup_sym(p, v, (char **)&obj);
-    return obj;
-}
-
-#define CHECK_UTF8 \
-    if (p->bonus && is_utf8_string((U8*)n->data.str->ptr, n->data.str->len)) \
-        SvUTF8_on(sv);
-
-SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
+SYMID
+#ifdef YAML_IS_JSON
+json_syck_parser_handler
+#else
+yaml_syck_parser_handler
+#endif
+(SyckParser *p, SyckNode *n) {
     SV *sv;
     AV *seq;
     HV *map;
@@ -169,8 +155,12 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
             } else if (strncmp( n->type_id, "int", 3 ) == 0) {
                 UV uv = 0;
                 syck_str_blow_away_commas( n );
-                grok_number( n->data.str->ptr, n->data.str->len, &uv);
-                sv = newSVuv(uv);
+                if (grok_number( n->data.str->ptr, n->data.str->len, &uv) & IS_NUMBER_NEG) {
+                    sv = newSViv(-uv);
+                }
+                else {
+                    sv = newSVuv(uv);
+                }
             } else {
                 /* croak("unknown node type: %s", n->type_id); */
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
@@ -236,73 +226,6 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
         break;
     }
     return syck_add_sym(p, (char *)sv);
-}
-
-void perl_syck_mark_emitter(SyckEmitter *e, SV *sv) {
-    if (syck_emitter_mark_node(e, (st_data_t)sv) == 0) {
-        return;
-    }
-
-    if (SvROK(sv)) {
-        perl_syck_mark_emitter(e, SvRV(sv));
-        return;
-    }
-
-    switch (SvTYPE(sv)) {
-        case SVt_PVAV: {
-            I32 len, i;
-            len = av_len((AV*)sv) + 1;
-            for (i = 0; i < len; i++) {
-                SV** sav = av_fetch((AV*)sv, i, 0);
-                perl_syck_mark_emitter( e, *sav );
-            }
-            break;
-        }
-        case SVt_PVHV: {
-            I32 len, i;
-#ifdef HAS_RESTRICTED_HASHES
-            len = HvTOTALKEYS((HV*)sv);
-#else
-            len = HvKEYS((HV*)sv);
-#endif
-            hv_iterinit((HV*)sv);
-            for (i = 0; i < len; i++) {
-#ifdef HV_ITERNEXT_WANTPLACEHOLDERS
-                HE *he = hv_iternext_flags((HV*)sv, HV_ITERNEXT_WANTPLACEHOLDERS);
-#else
-                HE *he = hv_iternext((HV*)sv);
-#endif
-                I32 keylen;
-                SV *val = hv_iterval((HV*)sv, he);
-                perl_syck_mark_emitter( e, val );
-            }
-            break;
-        }
-    }
-}
-
-SyckNode * perl_syck_bad_anchor_handler(SyckParser *p, char *a) {
-    croak(form( "%s parser (line %d, column %d): Unsupported self-recursive anchor *%s", 
-        PACKAGE_NAME,
-        p->linect + 1,
-        p->cursor - p->lineptr,
-        a ));
-    /*
-    SyckNode *badanc = syck_new_map(
-        (SYMID)newSVpvn_share("name", 4, 0),
-        (SYMID)newSVpvn_share(a, strlen(a), 0)
-    );
-    badanc->type_id = syck_strndup( "perl:YAML::Syck::BadAlias", 25 );
-    return badanc;
-    */
-}
-
-void perl_syck_error_handler(SyckParser *p, char *msg) {
-    croak(form( "%s parser (line %d, column %d): %s", 
-        PACKAGE_NAME,
-        p->linect + 1,
-        p->cursor - p->lineptr,
-        msg ));
 }
 
 #ifdef YAML_IS_JSON
@@ -378,7 +301,13 @@ void perl_json_postprocess(SV *sv) {
 }
 #endif
 
-static SV * Load(char *s) {
+static SV *
+#ifdef YAML_IS_JSON
+LoadJSON
+#else
+LoadYAML
+#endif
+(char *s) {
     SYMID v;
     SyckParser *parser;
     SV *obj = &PL_sv_undef;
@@ -406,7 +335,7 @@ static SV * Load(char *s) {
 
     parser = syck_new_parser();
     syck_parser_str_auto(parser, s, NULL);
-    syck_parser_handler(parser, perl_syck_parser_handler);
+    syck_parser_handler(parser, PERL_SYCK_PARSER_HANDLER);
     syck_parser_error_handler(parser, perl_syck_error_handler);
     syck_parser_bad_anchor_handler( parser, perl_syck_bad_anchor_handler );
     syck_parser_implicit_typing(parser, SvTRUE(implicit));
@@ -427,12 +356,13 @@ static SV * Load(char *s) {
     return obj;
 }
 
-void perl_syck_output_handler(SyckEmitter *e, char *str, long len) {
-    struct emitter_xtra *bonus = (struct emitter_xtra *)e->bonus;
-    sv_catpvn_nomg(bonus->port, str, len);
-}
-
-void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
+void
+#ifdef YAML_IS_JSON
+json_syck_emitter_handler
+#else
+yaml_syck_emitter_handler
+#endif
+(SyckEmitter *e, st_data_t data) {
     I32  len, i;
     SV*  sv = (SV*)data;
     struct emitter_xtra *bonus = (struct emitter_xtra *)e->bonus;
@@ -466,7 +396,7 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
             case SVt_PVAV:
             case SVt_PVHV:
             case SVt_PVCV: {
-                perl_syck_emitter_handler(e, (st_data_t)SvRV(sv));
+                PERL_SYCK_EMITTER_HANDLER(e, (st_data_t)SvRV(sv));
                 break;
             }
             default: {
@@ -601,7 +531,13 @@ cleanup:
     *tag = '\0';
 }
 
-SV* Dump(SV *sv) {
+SV*
+#ifdef YAML_IS_JSON
+DumpJSON
+#else
+DumpYAML
+#endif
+(SV *sv) {
     struct emitter_xtra *bonus;
     SV* out = newSVpvn("", 0);
     SyckEmitter *emitter = syck_new_emitter();
@@ -624,7 +560,7 @@ SV* Dump(SV *sv) {
     bonus->port = out;
     New(801, bonus->tag, 512, char);
 
-    syck_emitter_handler( emitter, perl_syck_emitter_handler );
+    syck_emitter_handler( emitter, PERL_SYCK_EMITTER_HANDLER );
     syck_output_handler( emitter, perl_syck_output_handler );
 
 #ifndef YAML_IS_JSON
@@ -651,3 +587,4 @@ SV* Dump(SV *sv) {
 
     return out;
 }
+

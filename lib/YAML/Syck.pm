@@ -20,6 +20,9 @@ BEGIN {
         push @ISA, 'DynaLoader';
         __PACKAGE__->bootstrap($VERSION);
     };
+
+    *Load = \&YAML::Syck::LoadYAML;
+    *Dump = \&YAML::Syck::DumpYAML;
 }
 
 

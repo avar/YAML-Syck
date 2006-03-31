@@ -34,6 +34,11 @@ my @tests = (
     '"~foo"',
 );
 
+unless (defined &utf8::encode) {
+    plan skip_all => 'No Unicode support';
+    exit;
+}
+
 plan tests => scalar @tests * (1 + $HAS_JSON) * 2;
 
 for my $unicode (0, 1) {
@@ -54,6 +59,7 @@ for my $unicode (0, 1) {
 
         # try parsing the data with JSON.pm
         if ($HAS_JSON) {
+            $SIG{__WARN__} = sub { 1 };
             utf8::encode($data) if defined($data) && !ref($data) && $unicode;
             my $data_pp = eval { JSON::jsonToObj($json) };
             is_deeply $data_pp, $data, "compatibility with JSON.pm $test";

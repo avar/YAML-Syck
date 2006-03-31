@@ -5,6 +5,11 @@ use YAML::Syck ();
 *Load = \&YAML::Syck::LoadJSON;
 *Dump = \&YAML::Syck::DumpJSON;
 
+$JSON::Syck::ImplicitTyping  = 1;
+$JSON::Syck::Headless        = 1;
+$JSON::Syck::ImplicitUnicode = 0;
+$JSON::Syck::SingleQuote     = 0;
+
 1;
 
 __END__
