@@ -11,16 +11,18 @@
 #  define PACKAGE_NAME  "JSON::Syck"
 #  define NULL_TYPE     "str"
 #  define NULL_LITERAL  "null"
-#  define SCALAR_NONE   scalar_2quote
-#  define SCALAR_1QUOTE scalar_2quote
+#  define SCALAR_NUMBER scalar_none
+#  define SCALAR_STRING scalar_2quote
+#  define SCALAR_QUOTED scalar_2quote
 #  define SEQ_NONE      seq_inline
 #  define MAP_NONE      map_inline
 #else
 #  define PACKAGE_NAME  "YAML::Syck"
 #  define NULL_TYPE     NULL
 #  define NULL_LITERAL  "~"
-#  define SCALAR_NONE   scalar_none
-#  define SCALAR_1QUOTE scalar_1quote
+#  define SCALAR_NUMBER scalar_none
+#  define SCALAR_STRING scalar_none
+#  define SCALAR_QUOTED scalar_1quote
 #  define SEQ_NONE      seq_none
 #  define MAP_NONE      map_none
 #endif
@@ -258,10 +260,10 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         case SVt_PVIV:
         case SVt_PVNV: {
             if (SvCUR(sv) > 0) {
-                syck_emit_scalar(e, OBJOF("string"), SCALAR_NONE, 0, 0, 0, SvPVX(sv), SvCUR(sv));
+                syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPVX(sv), SvCUR(sv));
             }
             else {
-                syck_emit_scalar(e, OBJOF("string"), SCALAR_1QUOTE, 0, 0, 0, "", 0);
+                syck_emit_scalar(e, OBJOF("string"), SCALAR_QUOTED, 0, 0, 0, "", 0);
             }
             break;
         }
@@ -271,10 +273,10 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         case SVt_PVBM:
         case SVt_PVLV: {
             if (sv_len(sv) > 0) {
-                syck_emit_scalar(e, OBJOF("string"), SCALAR_NONE, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+                syck_emit_scalar(e, OBJOF("string"), SCALAR_NUMBER, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
             }
             else {
-                syck_emit_scalar(e, OBJOF("string"), SCALAR_1QUOTE, 0, 0, 0, "", 0);
+                syck_emit_scalar(e, OBJOF("string"), SCALAR_QUOTED, 0, 0, 0, "", 0);
             }
             break;
         }

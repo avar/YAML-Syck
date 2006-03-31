@@ -1,3 +1,9 @@
+[Changes for 0.16 - 2006-01-11]
+
+* Proper Headless/chomping support for Miyagawa's JSON::Syck branch.
+  JSON::Syck and YAML::Syck now completely shares a codebase.
+  Reported by: Tatsuhiko Miyagawa
+
 [Changes for 0.15 - 2006-01-10]
 
 * Add a $YAML::Syck::Headless flag to control emission of "---\n"
