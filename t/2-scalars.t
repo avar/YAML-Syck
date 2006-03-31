@@ -1,4 +1,4 @@
-use t::TestYAML tests => 14; 
+use t::TestYAML tests => 16; 
 
 ok(YAML::Syck->VERSION);
 
@@ -13,9 +13,15 @@ $x = \$x;
 is(Dump($x),     "--- &1 !perl/ref: \n=: *1\n");
 
 is(Dump(undef), "--- ~\n");
+is(Dump('~'), "--- \'~\'\n");
 is(Load("--- ~\n"), undef);
 is(Load("---\n"), undef);
 is(Load("--- ''\n"), '');
+
+# RT #17223
+my $y = YAML::Syck::Load("SID:\n type: fixed\n default: ~\n");
+eval { $y->{SID}{default} = 'abc' };
+is($y->{SID}{default}, 'abc');
 
 is(Load("--- true\n"), "true");
 is(Load("--- false\n"), "false");

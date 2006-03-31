@@ -78,7 +78,7 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
             if (TYPE_IS_NULL(n->type_id)) {
                 if ((strncmp( n->data.str->ptr, NULL_LITERAL, NULL_LITERAL_LENGTH) == 0)
                     && (n->data.str->style == scalar_plain)) {
-                    sv = &PL_sv_undef;
+                    sv = newSV(0);
                 } else {
                     sv = newSVpvn(n->data.str->ptr, n->data.str->len);
                     CHECK_UTF8;
@@ -87,11 +87,11 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
                 CHECK_UTF8;
             } else if (strcmp( n->type_id, "null" ) == 0 ) {
-                sv = &PL_sv_undef;
+                sv = newSV(0);
             } else if (strcmp( n->type_id, "bool#yes" ) == 0 ) {
-                sv = &PL_sv_yes;
+                sv = newSVsv(&PL_sv_yes);
             } else if (strcmp( n->type_id, "bool#no" ) == 0 ) {
-                sv = &PL_sv_no;
+                sv = newSVsv(&PL_sv_no);
             } else if (strcmp( n->type_id, "default" ) == 0 ) {
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
                 CHECK_UTF8;
@@ -214,14 +214,18 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
                         0
                     );
                 }
-                sv = newRV_noinc((SV*)map);
+                sv = newRV((SV*)map);
 #ifndef YAML_IS_JSON
                 if (n->type_id) {
                     char *lang = strtok(n->type_id, "/:");
                     char *type = strtok(NULL, "");
-                    if (lang == NULL || (strcmp(lang, "perl") == 0)) {
+                    if (lang == NULL || (strcmp(lang, "perl") == 0)) { /*  || (strchr(lang, '.') != NULL)) { */
                         sv_bless(sv, gv_stashpv(type, TRUE));
-                    } else {
+                    }
+                    else if (type == NULL) {
+                        sv_bless(sv, gv_stashpv(lang, TRUE));
+                    }
+                    else {
                         sv_bless(sv, gv_stashpv(form("%s::%s", lang, type), TRUE));
                     }
                 }
@@ -478,6 +482,11 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         if (len == 0) {
             syck_emit_scalar(e, OBJOF("string"), SCALAR_QUOTED, 0, 0, 0, "", 0);
         }
+#ifndef YAML_IS_JSON
+        else if ((len == NULL_LITERAL_LENGTH) && *(SvPV_nolen(sv)) == '~') {
+            syck_emit_scalar(e, OBJOF("string"), SCALAR_QUOTED, 0, 0, 0, NULL_LITERAL, 1);
+        }
+#endif
         else if (COND_FOLD(sv)) {
             enum scalar_style old_s = e->style;
             e->style = SCALAR_UTF8;

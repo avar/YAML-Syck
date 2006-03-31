@@ -1,3 +1,24 @@
+[Changes for 0.30 - 2006-02-06]
+
+* When loading anchors pointing to a hash reference, reference count did
+  not increment accordingly.
+  Reported by: Johan Vromans
+
+* After loading hashes or arrays containing null elements, assigning into
+  those elements triggered a "modification of non-creatable value" error.
+  Reported by: Clinton Gormley
+
+* The string '~' is now emitted as a quoted "~" instead of bare ~
+  (which would be loaded as undef.)
+  Reported by: Stephen Quinney
+
+[Changes for 0.29 - 2006-02-05]
+
+* Proper quoting support (for the JSON branch only).
+  Reported by: Anton Berezin
+
+* Switch to XSLoader on Perl 5.6.0+ for faster loading.
+
 [Changes for 0.28 - 2006-01-16]
 
 * Undef hash values is now emitted as "~" instead of "".
