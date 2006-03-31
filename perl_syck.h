@@ -9,22 +9,22 @@
 
 #ifdef YAML_IS_JSON
 #  define PACKAGE_NAME  "JSON::Syck"
-#  define NULL_TYPE     "str"
 #  define NULL_LITERAL  "null"
 #  define SCALAR_NUMBER scalar_none
 #  define SCALAR_STRING scalar_2quote
 #  define SCALAR_QUOTED scalar_2quote
 #  define SEQ_NONE      seq_inline
 #  define MAP_NONE      map_inline
+#  define TYPE_IS_NULL(x) ((x == NULL) || (strcmp( x, "str" ) == 0))
 #else
 #  define PACKAGE_NAME  "YAML::Syck"
-#  define NULL_TYPE     NULL
 #  define NULL_LITERAL  "~"
 #  define SCALAR_NUMBER scalar_none
 #  define SCALAR_STRING scalar_none
 #  define SCALAR_QUOTED scalar_1quote
 #  define SEQ_NONE      seq_none
 #  define MAP_NONE      map_none
+#  define TYPE_IS_NULL(x) (x == NULL)
 #endif
 
 /*
@@ -51,7 +51,7 @@ SYMID perl_syck_parser_handler(SyckParser *p, SyckNode *n) {
 
     switch (n->kind) {
         case syck_str_kind:
-            if (n->type_id == NULL_TYPE) {
+            if (TYPE_IS_NULL(n->type_id)) {
                 if ((strcmp( n->data.str->ptr, NULL_LITERAL ) == 0)
                     && (n->data.str->style == scalar_plain)) {
                     sv = &PL_sv_undef;
@@ -190,6 +190,36 @@ void perl_syck_error_handler(SyckParser *p, char *msg) {
         msg ));
 }
 
+static char* perl_json_preprocess(char *s) {
+    int i;
+    char *out;
+    char ch;
+    bool in_string = 0;
+    bool in_quote  = 0;
+    char *pos;
+    STRLEN len = strlen(s);
+
+    Newz(2006, out, len*2+1, char);
+    pos = out;
+
+    for (i = 0; i < len; i++) {
+        ch = *(s+i);
+        *pos++ = ch;
+        if (in_quote) {
+            in_quote = !in_quote;
+        }
+        else if (ch == '\"') {
+            in_string = !in_string;
+        }
+        else if ((ch == ':' || ch == ',') && !in_string) {
+            *pos++ = ' ';
+        }
+    }
+
+    *pos = '\0';
+    return out;
+}
+
 static SV * Load(char *s) {
     SYMID v;
     SyckParser *parser;
@@ -198,6 +228,10 @@ static SV * Load(char *s) {
 
     /* Don't even bother if the string is empty. */
     if (*s == '\0') { return &PL_sv_undef; }
+
+#ifdef YAML_IS_JSON
+    s = perl_json_preprocess(s);
+#endif
 
     parser = syck_new_parser();
     syck_parser_str_auto(parser, s, NULL);
