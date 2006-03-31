@@ -358,7 +358,7 @@ SV* Dump(SV *sv) {
     Safefree(bonus->tag);
 
 #ifdef YAML_IS_JSON
-    Perl_do_chomp(out);
+    Perl_do_chomp(aTHX_ out);
 #endif
 
     return out;
