@@ -148,7 +148,7 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         }
         case SVt_PVAV: {
             syck_emit_seq(e, OBJOF("array"), seq_none);
-            Safefree(tag);
+            Safefree(tag); tag = NULL;
             len = av_len((AV*)sv) + 1;
             for (i = 0; i < len; i++) {
                 SV** sav = av_fetch((AV*)sv, i, 0);
@@ -159,7 +159,7 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         }
         case SVt_PVHV: {
             syck_emit_map(e, OBJOF("hash"), map_none);
-            Safefree(tag);
+            Safefree(tag); tag = NULL;
 #ifdef HAS_RESTRICTED_HASHES
             len = HvTOTALKEYS((HV*)sv);
 #else
