@@ -16,6 +16,7 @@
 #  define SEQ_NONE      seq_inline
 #  define MAP_NONE      map_inline
 #  define TYPE_IS_NULL(x) ((x == NULL) || (strcmp( x, "str" ) == 0))
+#  define OBJOF(a)        (a)
 #else
 #  define PACKAGE_NAME  "YAML::Syck"
 #  define NULL_LITERAL  "~"
@@ -25,6 +26,7 @@
 #  define SEQ_NONE      seq_none
 #  define MAP_NONE      map_none
 #  define TYPE_IS_NULL(x) (x == NULL)
+#  define OBJOF(a)        (*tag ? tag : a)
 #endif
 
 /*
@@ -268,6 +270,7 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         mg_get(sv);
     }
 
+#ifndef YAML_IS_JSON
     if (sv_isobject(sv)) {
         ref = savepv(sv_reftype(SvRV(sv), TRUE));
         *tag = '\0';
@@ -280,6 +283,7 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         }
         strcat(tag, ref);
     }
+#endif
 
     if (SvROK(sv)) {
         perl_syck_emitter_handler(e, (st_data_t)SvRV(sv));
@@ -287,7 +291,6 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
         return;
     }
 
-#define OBJOF(a) (*tag ? tag : a)
     switch (SvTYPE(sv)) {
         case SVt_NULL: { return; }
         case SVt_PV:
