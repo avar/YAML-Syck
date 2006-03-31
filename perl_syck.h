@@ -410,10 +410,10 @@ yaml_syck_emitter_handler
     else if (ty == SVt_NULL) {
         syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
     }
-    else if (SvNIOK(sv)) {
+    else if (SvNIOKp(sv)) {
         syck_emit_scalar(e, OBJOF("string"), SCALAR_NUMBER, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
     }
-    else if (SvPOK(sv)) {
+    else if (SvPOKp(sv)) {
         STRLEN len = sv_len(sv);
         if (len == 0) {
             syck_emit_scalar(e, OBJOF("string"), SCALAR_QUOTED, 0, 0, 0, "", 0);
