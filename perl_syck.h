@@ -414,7 +414,7 @@ yaml_syck_emitter_handler
     else if (ty == SVt_NULL) {
         syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
     }
-    else if (SvNIOKp(sv)) {
+    else if (SvNIOKp(sv) && (sv_len(sv) != 0)) {
         syck_emit_scalar(e, OBJOF("string"), SCALAR_NUMBER, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
     }
     else if (SvPOKp(sv)) {
@@ -513,7 +513,11 @@ yaml_syck_emitter_handler
             }
             case SVt_PVCV: {
                 /* XXX TODO XXX */
-                syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+#ifdef YAML_IS_JSON
+                syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
+#else
+                syck_emit_scalar(e, "tag:perl:code:", SCALAR_QUOTED, 0, 0, 0, "{ \"DUMMY\" }", 11);
+#endif
                 break;
             }
             case SVt_PVGV:
