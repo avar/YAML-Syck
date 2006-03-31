@@ -1,6 +1,9 @@
-#line 1 "inc/Module/Install/Can.pm - /usr/local/lib/perl5/site_perl/5.8.7/Module/Install/Can.pm"
+#line 1 "inc/Module/Install/Can.pm - /usr/local/lib/perl5/site_perl/5.8.8/Module/Install/Can.pm"
 package Module::Install::Can;
-use Module::Install::Base; @ISA = qw(Module::Install::Base);
+
+use Module::Install::Base;
+@ISA = qw(Module::Install::Base);
+
 $VERSION = '0.01';
 
 use strict;
@@ -53,7 +56,7 @@ sub can_cc {
 if ($^O eq 'cygwin') {
     require ExtUtils::MM_Cygwin;
     require ExtUtils::MM_Win32;
-    if (!defined(&ExtUtils::MM_Cygwin::maybe_command)) {
+    if ( ! defined(&ExtUtils::MM_Cygwin::maybe_command) ) {
         *ExtUtils::MM_Cygwin::maybe_command = sub {
             my ($self, $file) = @_;
             if ($file =~ m{^/cygdrive/}i and ExtUtils::MM_Win32->can('maybe_command')) {

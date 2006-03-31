@@ -1,4 +1,4 @@
-#line 1 "/home/autrijus/work/YAML-Syck/inc/Module/Install.pm - /usr/local/lib/perl5/site_perl/5.8.7/Module/Install.pm"
+#line 1 "/home/autrijus/work/YAML-Syck/inc/Module/Install.pm - /usr/local/lib/perl5/site_perl/5.8.8/Module/Install.pm"
 package Module::Install;
 
 use 5.004;
@@ -6,7 +6,7 @@ use strict 'vars';
 use vars qw{$VERSION};
 BEGIN {
     # Don't forget to update Module::Install::Admin too!
-    $VERSION = '0.54';
+    $VERSION = '0.55';
 }
 
 # inc::Module::Install must be loaded first
