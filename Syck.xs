@@ -74,13 +74,20 @@ void perl_syck_mark_emitter(SyckEmitter *e) {
     return;
 }
 
+void perl_syck_error_handler(SyckParser *p, char *msg) {
+    croak(form( "YAML::Syck parser (line %d, column %d): %s", 
+        p->linect + 1,
+        p->cursor - p->lineptr,
+        msg ));
+}
+
 static SV * Load(char *s) {
     SV *obj;
     SYMID v;
     SyckParser *parser = syck_new_parser();
     syck_parser_str_auto(parser, s, NULL);
     syck_parser_handler(parser, perl_syck_parser_handler);
-    syck_parser_error_handler(parser, NULL);
+    syck_parser_error_handler(parser, perl_syck_error_handler);
     syck_parser_implicit_typing(parser, 1);
     syck_parser_taguri_expansion(parser, 0);
     v = syck_parse(parser);
@@ -206,7 +213,6 @@ void perl_syck_emitter_handler(SyckEmitter *e, st_data_t data) {
             break;
         }
     }
-    syck_emitter_flush( e, 0 );
 cleanup:
     *tag = '\0';
 }
@@ -225,8 +231,10 @@ SV* Dump(SV *sv) {
 
     perl_syck_mark_emitter( emitter );
     syck_emit( emitter, (st_data_t)sv );
-    syck_free_emitter( emitter );
+    syck_emitter_flush( emitter, 1 );
+    syck_emitter_flush( emitter, 0 );
     Safefree(bonus->tag);
+    syck_free_emitter( emitter );
 
     return out;
 }
