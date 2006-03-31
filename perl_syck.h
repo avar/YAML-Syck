@@ -358,7 +358,10 @@ SV* Dump(SV *sv) {
     Safefree(bonus->tag);
 
 #ifdef YAML_IS_JSON
-    Perl_do_chomp(aTHX_ out);
+    if (SvCUR(out) > 0) {
+        /* Trim the trailing newline */
+        SvCUR_set(out, SvCUR(out)-1);
+    }
 #endif
 
     return out;
