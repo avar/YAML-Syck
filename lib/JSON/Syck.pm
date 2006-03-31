@@ -64,8 +64,7 @@ YAML which supports it.
 
 =head2 SUBROUTINE REFERENCE
 
-When you pass subroutine reference, JSON::Syck dumps it as an empty
-string.
+When you pass subroutine reference, JSON::Syck dumps it as null.
 
 =head1 UNICODE FLAGS
 
