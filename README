@@ -16,7 +16,7 @@ YAML::Syck uses the standard perl module install process:
 
 * Copyright
 
-Copyright 2005, 2006 by Audrey Tang <autrijus@autrijus.org>.
+Copyright 2005, 2006 by Audrey Tang <cpan@audreyt.org>.
 
 The libsyck code bundled with this library is written by
 "why the lucky stiff", under a BSD-style license.
