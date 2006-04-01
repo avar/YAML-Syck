@@ -6,6 +6,10 @@
 * Support for loading blessed scalar references.
   Requested by: Dan Kogai
 
+* 0.40 was missing included Test::More, so tests could fail on a 
+  freshly installed Perl 5.6.x.
+  Reported by: Uri Guttman
+
 [Changes for 0.40 (JSON::Syck 0.10) - 2006-03-31]
 
 * Merge YAML::Syck and JSON::Syck to a single distribution. Unified
