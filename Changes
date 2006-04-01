@@ -1,8 +1,10 @@
-[Changes for 0.41 (JSON::Syck 0.10) - 2006-03-31]
+[Changes for 0.41 (JSON::Syck 0.10) - 2006-04-01]
 
-* Circular structures in array and hash references are now correctly
-  dumped as anchors.
+* Correctly dump circular structures in array and hash references.
   Reported by: Jesse Vincent
+
+* Support for loading blessed scalar references.
+  Requested by: Dan Kogai
 
 [Changes for 0.40 (JSON::Syck 0.10) - 2006-03-31]
 

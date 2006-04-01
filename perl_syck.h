@@ -27,12 +27,14 @@ static enum scalar_style json_quote_style = scalar_2quote;
 #  define SEQ_NONE      seq_inline
 #  define MAP_NONE      map_inline
 #  define COND_FOLD(x)  TRUE
-#  define TYPE_IS_NULL(x) ((x == NULL) || (strncmp( x, "str", 3 ) == 0))
+#  define TYPE_IS_NULL(x) ((x == NULL) || strnEQ( x, "str", 3 ))
 #  define OBJOF(a)        (a)
 #  define PERL_SYCK_PARSER_HANDLER json_syck_parser_handler
 #  define PERL_SYCK_EMITTER_HANDLER json_syck_emitter_handler
 #else
 #  define PACKAGE_NAME  "YAML::Syck"
+#  define REF_LITERAL  "="
+#  define REF_LITERAL_LENGTH 1
 #  define NULL_LITERAL  "~"
 #  define NULL_LITERAL_LENGTH 1
 #  define SCALAR_NUMBER scalar_none
@@ -62,26 +64,26 @@ yaml_syck_parser_handler
     switch (n->kind) {
         case syck_str_kind:
             if (TYPE_IS_NULL(n->type_id)) {
-                if ((strncmp( n->data.str->ptr, NULL_LITERAL, 1+NULL_LITERAL_LENGTH) == 0)
+                if (strnEQ( n->data.str->ptr, NULL_LITERAL, 1+NULL_LITERAL_LENGTH)
                     && (n->data.str->style == scalar_plain)) {
                     sv = newSV(0);
                 } else {
                     sv = newSVpvn(n->data.str->ptr, n->data.str->len);
                     CHECK_UTF8;
                 }
-            } else if (strcmp( n->type_id, "str" ) == 0 ) {
+            } else if (strEQ( n->type_id, "str" )) {
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
                 CHECK_UTF8;
-            } else if (strcmp( n->type_id, "null" ) == 0 ) {
+            } else if (strEQ( n->type_id, "null" )) {
                 sv = newSV(0);
-            } else if (strcmp( n->type_id, "bool#yes" ) == 0 ) {
+            } else if (strEQ( n->type_id, "bool#yes" )) {
                 sv = newSVsv(&PL_sv_yes);
-            } else if (strcmp( n->type_id, "bool#no" ) == 0 ) {
+            } else if (strEQ( n->type_id, "bool#no" )) {
                 sv = newSVsv(&PL_sv_no);
-            } else if (strcmp( n->type_id, "default" ) == 0 ) {
+            } else if (strEQ( n->type_id, "default" )) {
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
                 CHECK_UTF8;
-            } else if (strcmp( n->type_id, "float#base60" ) == 0 ) {
+            } else if (strEQ( n->type_id, "float#base60" )) {
                 char *ptr, *end;
                 UV sixty = 1;
                 NV total = 0.0;
@@ -105,21 +107,21 @@ yaml_syck_parser_handler
                 }
                 sv = newSVnv(total);
 #ifdef NV_NAN
-            } else if (strcmp( n->type_id, "float#nan" ) == 0 ) {
+            } else if (strEQ( n->type_id, "float#nan" )) {
                 sv = newSVnv(NV_NAN);
 #endif
 #ifdef NV_INF
-            } else if (strcmp( n->type_id, "float#inf" ) == 0 ) {
+            } else if (strEQ( n->type_id, "float#inf" )) {
                 sv = newSVnv(NV_INF);
-            } else if (strcmp( n->type_id, "float#neginf" ) == 0 ) {
+            } else if (strEQ( n->type_id, "float#neginf" )) {
                 sv = newSVnv(-NV_INF);
 #endif
-            } else if (strncmp( n->type_id, "float", 5 ) == 0) {
+            } else if (strnEQ( n->type_id, "float", 5 )) {
                 NV f;
                 syck_str_blow_away_commas( n );
                 f = strtod( n->data.str->ptr, NULL );
                 sv = newSVnv( f );
-            } else if (strcmp( n->type_id, "int#base60" ) == 0 ) {
+            } else if (strEQ( n->type_id, "int#base60" )) {
                 char *ptr, *end;
                 UV sixty = 1;
                 UV total = 0;
@@ -142,17 +144,17 @@ yaml_syck_parser_handler
                     end = colon;
                 }
                 sv = newSVuv(total);
-            } else if (strcmp( n->type_id, "int#hex" ) == 0 ) {
+            } else if (strEQ( n->type_id, "int#hex" )) {
                 I32 flags = 0;
                 STRLEN len = n->data.str->len;
                 syck_str_blow_away_commas( n );
                 sv = newSVuv( grok_hex( n->data.str->ptr, &len, &flags, NULL) );
-            } else if (strcmp( n->type_id, "int#oct" ) == 0 ) {
+            } else if (strEQ( n->type_id, "int#oct" )) {
                 I32 flags = 0;
                 STRLEN len = n->data.str->len;
                 syck_str_blow_away_commas( n );
                 sv = newSVuv( grok_oct( n->data.str->ptr, &len, &flags, NULL) );
-            } else if (strncmp( n->type_id, "int", 3 ) == 0) {
+            } else if (strnEQ( n->type_id, "int", 3 )) {
                 UV uv = 0;
                 syck_str_blow_away_commas( n );
                 if (grok_number( n->data.str->ptr, n->data.str->len, &uv) & IS_NUMBER_NEG) {
@@ -161,6 +163,18 @@ yaml_syck_parser_handler
                 else {
                     sv = newSVuv(uv);
                 }
+#ifndef YAML_IS_JSON
+            } else if (strnEQ( n->data.str->ptr, REF_LITERAL, 1+REF_LITERAL_LENGTH)) {
+                /* type tag in a scalar ref */
+                char *lang = strtok(n->type_id, "/:");
+                char *type = strtok(NULL, "");
+
+                if (lang == NULL || (strEQ(lang, "perl"))) {
+                    sv = newSVpv(type, 0);
+                } else {
+                    sv = newSVpv(form("%s::%s", lang, type), 0);
+                }
+#endif
             } else {
                 /* croak("unknown node type: %s", n->type_id); */
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
@@ -180,7 +194,7 @@ yaml_syck_parser_handler
                 char *type = strtok(NULL, "");
                 while ((type != NULL) && *type == '@') { type++; }
 
-                if (lang == NULL || (strcmp(lang, "perl") == 0)) {
+                if (lang == NULL || (strEQ(lang, "perl"))) {
                     sv_bless(sv, gv_stashpv(type, TRUE));
                 } else {
                     sv_bless(sv, gv_stashpv(form("%s::%s", lang, type), TRUE));
@@ -191,8 +205,12 @@ yaml_syck_parser_handler
 
         case syck_map_kind:
 #ifndef YAML_IS_JSON
-            if ( (n->type_id != NULL) && (strcmp( n->type_id, "perl/ref:" ) == 0) ) {
+            if ( (n->type_id != NULL) && (strEQ( n->type_id, "perl/ref:" ) ) ) {
+                char *ref_type = SvPVX(perl_syck_lookup_sym(p, syck_map_read(n, map_key, 0) ));
                 sv = newRV_noinc( perl_syck_lookup_sym(p, syck_map_read(n, map_value, 0) ) );
+                if (strnNE(ref_type, REF_LITERAL, REF_LITERAL_LENGTH+1)) {
+                    sv_bless(sv, gv_stashpv(ref_type, TRUE));
+                }
             }
             else
 #endif
@@ -211,7 +229,7 @@ yaml_syck_parser_handler
                 if (n->type_id) {
                     char *lang = strtok(n->type_id, "/:");
                     char *type = strtok(NULL, "");
-                    if (lang == NULL || (strcmp(lang, "perl") == 0)) { /*  || (strchr(lang, '.') != NULL)) { */
+                    if (lang == NULL || strEQ(lang, "perl")) { /*  || (strchr(lang, '.') != NULL)) { */
                         sv_bless(sv, gv_stashpv(type, TRUE));
                     }
                     else if (type == NULL) {
@@ -328,7 +346,7 @@ LoadYAML
     s = perl_json_preprocess(s);
 #else
     /* Special preprocessing to maintain compat with YAML.pm <= 0.35 */
-    if (strncmp( s, "--- #YAML:1.0", 13) == 0) {
+    if (strnEQ( s, "--- #YAML:1.0", 13)) {
         s[4] = '%';
     }
 #endif
@@ -410,7 +428,7 @@ yaml_syck_emitter_handler
             }
             default: {
                 syck_emit_map(e, "tag:perl:ref:", MAP_NONE);
-                syck_emit_item( e, (st_data_t)newSVpvn_share("=", 1, 0) );
+                syck_emit_item( e, (st_data_t)newSVpvn_share(REF_LITERAL, REF_LITERAL_LENGTH, 0) );
                 syck_emit_item( e, (st_data_t)SvRV(sv) );
                 syck_emit_end(e);
             }
