@@ -6,8 +6,8 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.40 of YAML::Syck, released
-March 31, 2006.
+This document describes version 0.41 of YAML::Syck, released
+April 1, 2006.
 
 =head1 SYNOPSIS
 
@@ -86,11 +86,11 @@ L<YAML>, L<JSON::Syck>
 
 =head1 AUTHORS
 
-Audrey Tang E<lt>autrijus@autrijus.orgE<gt>
+Audrey Tang E<lt>cpan@audreyt.orgE<gt>
 
 =head1 COPYRIGHT
 
-Copyright 2005, 2006 by Audrey Tang E<lt>autrijus@autrijus.orgE<gt>.
+Copyright 2005, 2006 by Audrey Tang E<lt>cpan@audreyt.orgE<gt>.
 
 The F<libsyck> code bundled with this library by I<why the lucky stiff>,
 under a BSD-style license.  See the F<COPYING> file for details.

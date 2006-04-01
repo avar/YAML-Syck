@@ -89,7 +89,7 @@ single-quoted string literals.
 
 =head1 AUTHORS
 
-Audrey Tang E<lt>autrijus@autrijus.orgE<gt>
+Audrey Tang E<lt>cpan@audreyt.orgE<gt>
 
 Tatsuhiko Miyagawa E<lt>miyagawa@gmail.comE<gt>
 

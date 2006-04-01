@@ -5,9 +5,10 @@ use strict 'vars';
 use Module::Install::Base;
 use ExtUtils::MakeMaker ();
 
-use vars qw{$VERSION @ISA};
+use vars qw{$VERSION $ISCORE @ISA};
 BEGIN {
-	$VERSION = '0.61';
+	$VERSION = '0.62';
+	$ISCORE  = 1;
 	@ISA     = qw{Module::Install::Base};
 }
 
@@ -65,6 +66,15 @@ sub clean_files {
     %$clean = (
         %$clean, 
         FILES => join(' ', grep length, $clean->{FILES}, @_),
+    );
+}
+
+sub realclean_files {
+    my $self  = shift;
+    my $realclean = $self->makemaker_args->{realclean} ||= {};
+    %$realclean = (
+        %$realclean, 
+        FILES => join(' ', grep length, $realclean->{FILES}, @_),
     );
 }
 
@@ -159,6 +169,9 @@ sub fix_up_makefile {
     $makefile =~ s/^(FULLPERL = .*)/$1 "-Iinc"/m;
     $makefile =~ s/^(PERL = .*)/$1 "-Iinc"/m;
 
+    # XXX - This is currently unused; not sure if it breaks other MM-users
+    # $makefile =~ s/^pm_to_blib\s+:\s+/pm_to_blib :: /mg;
+
     open  MAKEFILE, "> $makefile_name" or die "fix_up_makefile: Couldn't open $makefile_name: $!";
     print MAKEFILE  "$preamble$makefile$postamble" or die $!;
     close MAKEFILE  or die $!;
@@ -183,4 +196,4 @@ sub postamble {
 
 __END__
 
-#line 312
+#line 325

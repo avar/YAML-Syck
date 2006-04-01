@@ -11,10 +11,14 @@ inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
 inc/Module/Install/Compiler.pm
 inc/Module/Install/Fetch.pm
+inc/Module/Install/Include.pm
 inc/Module/Install/Makefile.pm
 inc/Module/Install/Metadata.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
+inc/Test/Builder.pm
+inc/Test/Builder/Module.pm
+inc/Test/More.pm
 lib/JSON/Syck.pm
 lib/YAML/Dumper/Syck.pm
 lib/YAML/Loader/Syck.pm
@@ -44,6 +48,7 @@ t/json-minus.t
 t/json-null.t
 t/json-refs.t
 t/TestYAML.pm
+t/yaml-blessed-ref.t
 t/yaml-tie.t
 token.c
 yaml2byte.c

@@ -5,9 +5,10 @@ use strict;
 use Module::Install::Base;
 use File::Basename ();
 
-use vars qw{$VERSION @ISA};
+use vars qw{$VERSION $ISCORE @ISA};
 BEGIN {
-	$VERSION = '0.61';
+	$VERSION = '0.62';
+	$ISCORE  = 1;
 	@ISA     = qw{Module::Install::Base};
 }
 
@@ -51,4 +52,4 @@ sub cc_optimize_flags {
 
 __END__
 
-#line 109
+#line 110
