@@ -1,4 +1,4 @@
-use t::TestYAML tests => 22; 
+use t::TestYAML tests => 23; 
 
 ok(YAML::Syck->VERSION);
 
@@ -23,6 +23,16 @@ is(Dump('a:b'), "--- a:b\n");
 is(Load("--- ~\n"), undef);
 is(Load("---\n"), undef);
 is(Load("--- ''\n"), '');
+
+my $h = {bar => [qw<baz troz>]};
+$h->{foo} = $h->{bar};
+is(Dump($h), << '.');
+--- 
+bar: &1 
+  - baz
+  - troz
+foo: *1
+.
 
 # RT #17223
 my $y = YAML::Syck::Load("SID:\n type: fixed\n default: ~\n");

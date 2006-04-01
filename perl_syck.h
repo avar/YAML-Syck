@@ -399,7 +399,13 @@ yaml_syck_emitter_handler
             case SVt_PVAV:
             case SVt_PVHV:
             case SVt_PVCV: {
-                PERL_SYCK_EMITTER_HANDLER(e, (st_data_t)SvRV(sv));
+                e->indent = 0;
+                if ( e->lvl_idx == 2 ) {
+                    syck_emit_item(e, (st_data_t)SvRV(sv));
+                }
+                else {
+                    syck_emit_item(e, (st_data_t)SvRV(sv));
+                }
                 break;
             }
             default: {
@@ -441,6 +447,8 @@ yaml_syck_emitter_handler
         switch (ty) {
             case SVt_PVAV: {
                 syck_emit_seq(e, OBJOF("array"), SEQ_NONE);
+                e->indent = 2;
+
                 *tag = '\0';
                 len = av_len((AV*)sv) + 1;
                 for (i = 0; i < len; i++) {
@@ -458,6 +466,8 @@ yaml_syck_emitter_handler
             case SVt_PVHV: {
                 HV *hv = (HV*)sv;
                 syck_emit_map(e, OBJOF("hash"), MAP_NONE);
+                e->indent = 2;
+
                 *tag = '\0';
 #ifdef HAS_RESTRICTED_HASHES
                 len = HvTOTALKEYS((HV*)sv);

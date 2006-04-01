@@ -1,3 +1,9 @@
+[Changes for 0.41 (JSON::Syck 0.10) - 2006-03-31]
+
+* Circular structures in array and hash references are now correctly
+  dumped as anchors.
+  Reported by: Jesse Vincent
+
 [Changes for 0.40 (JSON::Syck 0.10) - 2006-03-31]
 
 * Merge YAML::Syck and JSON::Syck to a single distribution. Unified
