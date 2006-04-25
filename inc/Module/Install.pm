@@ -116,7 +116,7 @@ sub preload {
     my %seen;
     foreach my $obj ( @exts ) {
         while (my ($method, $glob) = each %{ref($obj) . '::'}) {
-            next unless exists &{ref($obj).'::'.$method};
+            next unless $obj->can($method);
             next if $method =~ /^_/;
             next if $method eq uc($method);
             $seen{$method}++;
