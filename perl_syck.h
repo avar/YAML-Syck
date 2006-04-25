@@ -43,7 +43,11 @@ static enum scalar_style json_quote_style = scalar_2quote;
 #  define SCALAR_UTF8   scalar_fold
 #  define SEQ_NONE      seq_none
 #  define MAP_NONE      map_none
+#ifdef SvUTF8
 #  define COND_FOLD(x)  (SvUTF8(sv))
+#else
+#  define COND_FOLD(x)  (0)
+#endif
 #  define TYPE_IS_NULL(x) (x == NULL)
 #  define OBJOF(a)        (*tag ? tag : a)
 #  define PERL_SYCK_PARSER_HANDLER yaml_syck_parser_handler
@@ -243,6 +247,14 @@ yaml_syck_parser_handler
             }
         break;
     }
+
+#ifndef YAML_IS_JSON
+    /* Fix bad anchors using sv_setsv */
+    if (n->id) {
+        sv_setsv( perl_syck_lookup_sym(p, n->id), sv );
+    }
+#endif
+
     return syck_add_sym(p, (char *)sv);
 }
 

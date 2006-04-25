@@ -6,8 +6,8 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.41 of YAML::Syck, released
-April 1, 2006.
+This document describes version 0.42 of YAML::Syck, released
+April 25, 2006.
 
 =head1 SYNOPSIS
 
@@ -78,11 +78,11 @@ the tag contains non-word characters; for example, C<!haskell.org/Foo> is
 blessed into C<haskell.org::Foo>.  Please use L<Class::Rebless> to cast it into
 other user-defined packages.
 
-Loading self-referencial data structures is currently broken.
-
 =head1 SEE ALSO
 
 L<YAML>, L<JSON::Syck>
+
+L<http://www.yaml.org/>
 
 =head1 AUTHORS
 
