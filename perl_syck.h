@@ -243,6 +243,14 @@ yaml_syck_parser_handler
             }
         break;
     }
+
+#ifndef YAML_IS_JSON
+    /* Fix bad anchors using sv_setsv */
+    if (n->id) {
+        sv_setsv( perl_syck_lookup_sym(p, n->id), sv );
+    }
+#endif
+
     return syck_add_sym(p, (char *)sv);
 }
 

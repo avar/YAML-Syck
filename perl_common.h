@@ -82,19 +82,12 @@ void perl_syck_mark_emitter(SyckEmitter *e, SV *sv) {
 }
 
 SyckNode * perl_syck_bad_anchor_handler(SyckParser *p, char *a) {
-    croak(form( "%s parser (line %d, column %d): Unsupported self-recursive anchor *%s", 
-        "Syck",
-        p->linect + 1,
-        p->cursor - p->lineptr,
-        a ));
-    /*
     SyckNode *badanc = syck_new_map(
         (SYMID)newSVpvn_share("name", 4, 0),
         (SYMID)newSVpvn_share(a, strlen(a), 0)
     );
     badanc->type_id = syck_strndup( "perl:YAML::Syck::BadAlias", 25 );
     return badanc;
-    */
 }
 
 void perl_syck_error_handler(SyckParser *p, char *msg) {

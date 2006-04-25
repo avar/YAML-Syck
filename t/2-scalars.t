@@ -1,4 +1,4 @@
-use t::TestYAML tests => 23; 
+use t::TestYAML tests => 25; 
 
 ok(YAML::Syck->VERSION);
 
@@ -32,6 +32,16 @@ bar: &1
   - baz
   - troz
 foo: *1
+.
+
+my $r; $r = \$r;
+is(Dump($r), << '.');
+--- &1 !perl/ref: 
+=: *1
+.
+is(Dump(Load(Dump($r))), << '.');
+--- &1 !perl/ref: 
+=: *1
 .
 
 # RT #17223

@@ -1,3 +1,8 @@
+[Changes for 0.42 (JSON::Syck 0.10) - 2006-04-01]
+
+* Support for loading recursive structures.
+  Reminded by: Adam Kennedy
+
 [Changes for 0.41 (JSON::Syck 0.10) - 2006-04-01]
 
 * Correctly dump circular structures in array and hash references.
