@@ -1,7 +1,9 @@
-[Changes for 0.42 (JSON::Syck 0.10) - 2006-04-01]
+[Changes for 0.42 (JSON::Syck 0.10) - 2006-04-25]
 
 * Support for loading recursive structures.
   Reminded by: Adam Kennedy
+
+* Regained support for Perl 5.005.
 
 [Changes for 0.41 (JSON::Syck 0.10) - 2006-04-01]
 

@@ -2,6 +2,14 @@ use strict;
 use Data::Dumper;
 use Test::More;
 use JSON::Syck;
+
+BEGIN {
+unless (defined &utf8::encode) {
+    plan skip_all => 'No Unicode support';
+    exit;
+}
+}
+
 use Storable;
 
 our $HAS_JSON = 0;
@@ -33,11 +41,6 @@ my @tests = (
     '["\"://\""]',
     '"~foo"',
 );
-
-unless (defined &utf8::encode) {
-    plan skip_all => 'No Unicode support';
-    exit;
-}
 
 plan tests => scalar @tests * (1 + $HAS_JSON) * 2;
 

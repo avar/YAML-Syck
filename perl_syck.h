@@ -43,7 +43,11 @@ static enum scalar_style json_quote_style = scalar_2quote;
 #  define SCALAR_UTF8   scalar_fold
 #  define SEQ_NONE      seq_none
 #  define MAP_NONE      map_none
+#ifdef SvUTF8
 #  define COND_FOLD(x)  (SvUTF8(sv))
+#else
+#  define COND_FOLD(x)  (0)
+#endif
 #  define TYPE_IS_NULL(x) (x == NULL)
 #  define OBJOF(a)        (*tag ? tag : a)
 #  define PERL_SYCK_PARSER_HANDLER yaml_syck_parser_handler

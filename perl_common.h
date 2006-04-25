@@ -7,6 +7,7 @@
 #define NEED_grok_number
 #define NEED_grok_numeric_radix
 #define NEED_newRV_noinc
+#define NEED_sv_2pv_nolen
 #include "ppport.h"
 #include "ppport_math.h"
 #include "ppport_sort.h"
