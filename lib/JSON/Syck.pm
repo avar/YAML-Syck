@@ -2,7 +2,7 @@ package JSON::Syck;
 use strict;
 use YAML::Syck ();
 
-$JSON::Syck::VERSION = '0.10';
+$JSON::Syck::VERSION = '0.11';
 
 *Load = \&YAML::Syck::LoadJSON;
 *Dump = \&YAML::Syck::DumpJSON;

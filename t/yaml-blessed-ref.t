@@ -1,9 +1,7 @@
 use strict;
-use Test::More;
+use t::TestYAML tests => 1;
 use YAML::Syck;
 use Data::Dumper;
-
-plan tests => 1;
 
 my $bref = bless \eval{my $scalar = 'YAML::Syck' }, 'foo';
 my $bref2bref = bless \$bref, 'bar';

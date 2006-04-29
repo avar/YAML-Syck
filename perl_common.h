@@ -30,7 +30,8 @@ struct emitter_xtra {
 };
 
 SV* perl_syck_lookup_sym( SyckParser *p, SYMID v) {
-    SV *obj = &PL_sv_undef;
+    /* Not "undef" becase otherwise we have a warning on self-recursive nodes */
+    SV *obj = &PL_sv_no;
     syck_lookup_sym(p, v, (char **)&obj);
     return obj;
 }

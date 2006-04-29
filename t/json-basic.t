@@ -1,4 +1,5 @@
 use strict;
+use t::TestYAML ();
 use Data::Dumper;
 use Test::More;
 use JSON::Syck;

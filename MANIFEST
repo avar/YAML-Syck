@@ -48,6 +48,7 @@ t/json-minus.t
 t/json-null.t
 t/json-refs.t
 t/TestYAML.pm
+t/json-single-quote.t
 t/yaml-blessed-ref.t
 t/yaml-tie.t
 token.c
