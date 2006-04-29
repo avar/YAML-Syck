@@ -1,9 +1,7 @@
 use strict;
-use Test::More;
+use t::TestYAML tests => 1;
 use YAML::Syck;
 use Tie::Hash;
-
-plan tests => 1;
 
 my($foo, $bar);
 {
