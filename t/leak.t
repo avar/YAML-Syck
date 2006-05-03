@@ -2,57 +2,55 @@
 
 use strict;
 use YAML::Syck;
-use Symbol;
 use Test::More tests => 4;
 
 SKIP: {
-  eval { require Devel::Leak };
-  
-  skip "Devel::Leak not installed", 2 if $@;
+    eval { require Devel::Leak }
+      or skip( "Devel::Leak not installed", 4 );
 
-  # check if arrays leak
+    # check if arrays leak
 
-  my $yaml = q{---
+    my $yaml = q{---
 blah
 };
 
-  my $handle = gensym();
-  my $diff;
-  
-  # For some reason we have to do a full test run of this loop and the
-  # Devel::Leak test before it's stable.  The first time diff ends up
-  # being -2.  This is probably Devel::Leak wonkiness.
-  my $before = Devel::Leak::NoteSV($handle);
-  foreach (1..100) {
-    Load($yaml);
-  }
+    require Symbol;
+    my $handle = Symbol::gensym();
+    my $diff;
 
-  $diff = Devel::Leak::NoteSV($handle) - $before;
-  
-  $before = Devel::Leak::NoteSV($handle);
-  foreach (1..100) {
-    Load($yaml);
-  }
+    # For some reason we have to do a full test run of this loop and the
+    # Devel::Leak test before it's stable.  The first time diff ends up
+    # being -2.  This is probably Devel::Leak wonkiness.
+    my $before = Devel::Leak::NoteSV($handle);
+    foreach ( 1 .. 100 ) {
+        Load($yaml);
+    }
 
-  $diff = Devel::Leak::NoteSV($handle) - $before;
-  is($diff, 0, "No leaks - array");
-  
+    $diff = Devel::Leak::NoteSV($handle) - $before;
 
-  # Check if hashess leak
-  $yaml = q{---
+    $before = Devel::Leak::NoteSV($handle);
+    foreach ( 1 .. 100 ) {
+        Load($yaml);
+    }
+
+    $diff = Devel::Leak::NoteSV($handle) - $before;
+    is( $diff, 0, "No leaks - array" );
+
+    # Check if hashess leak
+    $yaml = q{---
 result: test
 };
-  
-  $before = Devel::Leak::NoteSV($handle);
-  foreach (1..100) {
-    Load($yaml);
-  }
-  
-  $diff = Devel::Leak::NoteSV($handle) - $before;
-  is($diff, 0, "No leaks - hash");
 
-  $before = Devel::Leak::NoteSV($handle);
-  $yaml = q{---
+    $before = Devel::Leak::NoteSV($handle);
+    foreach ( 1 .. 100 ) {
+        Load($yaml);
+    }
+
+    $diff = Devel::Leak::NoteSV($handle) - $before;
+    is( $diff, 0, "No leaks - hash" );
+
+    $before = Devel::Leak::NoteSV($handle);
+    $yaml   = q{---
 a: b
 c:
  - d
@@ -60,10 +58,10 @@ c:
 !
 };
 
-  eval { Load($yaml) };
-  ok($@, "Load failed (expected)");
+    eval { Load($yaml) };
+    ok( $@, "Load failed (expected)" );
 
-  $diff = Devel::Leak::NoteSV($handle) - $before;
-  is($diff, 0, "No leaks - Load failure");
+    $diff = Devel::Leak::NoteSV($handle) - $before;
+    is( $diff, 0, "No leaks - Load failure" );
 
 }

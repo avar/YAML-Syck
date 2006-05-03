@@ -1,3 +1,15 @@
+[Changes for 0.43 (JSON::Syck 0.11) - 2006-04-29]
+
+* Loading self-recursive structures no longer trigger an
+  "Use of uninitialized value" warning.
+
+* Tests now pass for real on Perl 5.005.
+  Reported by: Anton Berezin
+
+* Setting $JSON::Syck::SingleQuote to true did not work for strings
+  ending in whitespaces.
+  Contributed by: Alex Vandiver
+
 [Changes for 0.42 (JSON::Syck 0.10) - 2006-04-25]
 
 * Support for loading recursive structures.

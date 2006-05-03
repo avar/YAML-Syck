@@ -20,7 +20,7 @@ April 29, 2006.
     $data = Load($yaml);
     $data = LoadFile($file);
     $yaml = Dump($data);
-    DumpFile($data);
+    DumpFile($file, $data);
 
 =head1 DESCRIPTION
 
