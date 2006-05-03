@@ -1,4 +1,6 @@
-use t::TestYAML tests => 25; 
+use t::TestYAML tests => 28; 
+
+local $SIG{__WARN__} = sub { 1 } if $Test::VERSION < 1.20;
 
 ok(YAML::Syck->VERSION);
 
@@ -11,6 +13,7 @@ is(${Load("--- !perl/ref: \n=: 42\n")}, 42);
 my $x;
 $x = \$x;
 is(Dump($x),     "--- &1 !perl/ref: \n=: *1\n");
+is(Dump(Load(Dump($x))),     "--- &1 !perl/ref: \n=: *1\n");
 is(Dump(sub{}),  "--- !perl/code: '{ \"DUMMY\" }'\n");
 
 is(Dump(undef), "--- ~\n");
@@ -56,3 +59,32 @@ $YAML::Syck::ImplicitTyping = $YAML::Syck::ImplicitTyping = 1;
 
 is(Load("--- true\n"), 1);
 is(Load("--- false\n"), '');
+
+# RT #18752
+my $recurse1 = << '.';
+--- &1 
+Foo: 
+  parent: *1
+Troz: 
+  parent: *1
+.
+
+is(Dump(Load($recurse1)), $recurse1, 'recurse 1');
+
+my $recurse2 = << '.';
+--- &1 
+Bar: 
+  parent: *1
+Baz: 
+  parent: *1
+Foo: 
+  parent: *1
+Troz: 
+  parent: *1
+Zort: &2 
+  Poit: 
+    parent: *2
+  parent: *1
+.
+
+is(Dump(Load($recurse2)), $recurse2, 'recurse 2');

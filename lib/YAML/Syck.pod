@@ -6,8 +6,8 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.43 of YAML::Syck, released
-April 29, 2006.
+This document describes version 0.44 of YAML::Syck, released
+May 3, 2006.
 
 =head1 SYNOPSIS
 
@@ -20,7 +20,7 @@ April 29, 2006.
     $data = Load($yaml);
     $data = LoadFile($file);
     $yaml = Dump($data);
-    DumpFile($data);
+    DumpFile($file, $data);
 
 =head1 DESCRIPTION
 
@@ -68,9 +68,6 @@ so this flag will affect loading of both variants of strings.
 
 The current implementation bundles libsyck source code; if your system has a
 side-wide shared libsyck, it will I<not> be used.
-
-This module is not currently pluggable to the new L<YAML> (0.50+) framework,
-but that's expected to change in the future.
 
 Tag names such as C<!perl/Foo> is blessed into the package C<Foo>, but the
 C<!hs/Foo> tag is blessed into C<hs::Foo>.  Note that this holds true even if

@@ -1,3 +1,24 @@
+[Changes for 0.44 (JSON::Syck 0.12) - 2006-05-04]
+
+* Fix tests so they work warninglessly on 5.005. 
+
+* Fix incorrect indentation level for scalars initialized twice --
+  once as string and once as references -- such as the ones produced
+  by YAML.pm's Load() function.
+  Reported by: Alex Vandiver
+
+* Multilevel self-recursive structures now no longer generate
+  redundant anchor names.
+  Reported by: Alex Vandiver
+
+* Fix memory leaks when linking child nodes to parent hashes and
+  arrays.  Also fix leaks when libsyck parser encounters an error.
+  Contributed by: Andrew Danforth
+
+* Added test cases to validate the memory leak fixes.  Devel::Leak
+  is an optional dependency for these tests.
+  Contributed by: Clayton O'Neill
+
 [Changes for 0.43 (JSON::Syck 0.11) - 2006-04-29]
 
 * Loading self-recursive structures no longer trigger an

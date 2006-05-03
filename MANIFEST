@@ -42,16 +42,15 @@ syck_st.h
 t/1-basic.t
 t/2-scalars.t
 t/3-objects.t
+t/leak.t
 t/json-basic.t
 t/json-empty.t
 t/json-minus.t
 t/json-null.t
 t/json-refs.t
 t/TestYAML.pm
-t/json-single-quote.t
 t/yaml-blessed-ref.t
 t/yaml-tie.t
 token.c
 yaml2byte.c
 yamlbyte.h
-SIGNATURE                                Public-key signature (added by MakeMaker)

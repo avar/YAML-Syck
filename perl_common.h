@@ -29,6 +29,11 @@ struct emitter_xtra {
     char* tag;
 };
 
+struct parser_xtra {
+   AV *objects;
+   int utf8;
+};
+
 SV* perl_syck_lookup_sym( SyckParser *p, SYMID v) {
     /* Not "undef" becase otherwise we have a warning on self-recursive nodes */
     SV *obj = &PL_sv_no;
@@ -37,7 +42,8 @@ SV* perl_syck_lookup_sym( SyckParser *p, SYMID v) {
 }
 
 #define CHECK_UTF8 \
-    if (p->bonus && is_utf8_string((U8*)n->data.str->ptr, n->data.str->len)) \
+    if (((struct parser_xtra *)p->bonus)->utf8 \
+      && is_utf8_string((U8*)n->data.str->ptr, n->data.str->len)) \
         SvUTF8_on(sv);
 
 void perl_syck_mark_emitter(SyckEmitter *e, SV *sv) {
