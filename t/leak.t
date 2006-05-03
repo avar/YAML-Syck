@@ -49,7 +49,6 @@ result: test
     $diff = Devel::Leak::NoteSV($handle) - $before;
     is( $diff, 0, "No leaks - hash" );
 
-    $before = Devel::Leak::NoteSV($handle);
     $yaml   = q{---
 a: b
 c:
@@ -61,6 +60,8 @@ c:
     eval { Load($yaml) };
     ok( $@, "Load failed (expected)" );
 
+    $before = Devel::Leak::NoteSV($handle);
+    eval { Load($yaml) } for (1..10);
     $diff = Devel::Leak::NoteSV($handle) - $before;
     is( $diff, 0, "No leaks - Load failure" );
 
