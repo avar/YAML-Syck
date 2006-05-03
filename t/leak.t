@@ -3,7 +3,7 @@
 use strict;
 use YAML::Syck;
 use Symbol;
-use Test::More tests => 2;
+use Test::More tests => 4;
 
 SKIP: {
   eval { require Devel::Leak };
@@ -26,14 +26,14 @@ blah
   foreach (1..100) {
     Load($yaml);
   }
-  
+
   $diff = Devel::Leak::NoteSV($handle) - $before;
   
   $before = Devel::Leak::NoteSV($handle);
   foreach (1..100) {
     Load($yaml);
   }
-  
+
   $diff = Devel::Leak::NoteSV($handle) - $before;
   is($diff, 0, "No leaks - array");
   
@@ -50,4 +50,20 @@ result: test
   
   $diff = Devel::Leak::NoteSV($handle) - $before;
   is($diff, 0, "No leaks - hash");
+
+  $before = Devel::Leak::NoteSV($handle);
+  $yaml = q{---
+a: b
+c:
+ - d
+ - e
+!
+};
+
+  eval { Load($yaml) };
+  ok($@, "Load failed (expected)");
+
+  $diff = Devel::Leak::NoteSV($handle) - $before;
+  is($diff, 0, "No leaks - Load failure");
+
 }

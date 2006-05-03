@@ -54,6 +54,9 @@ static enum scalar_style json_quote_style = scalar_2quote;
 #  define PERL_SYCK_EMITTER_HANDLER yaml_syck_emitter_handler
 #endif
 
+#define TRACK_OBJECT(sv) (av_push(((struct parser_xtra *)p->bonus)->objects, sv))
+#define USE_OBJECT(sv) (SvREFCNT_inc(sv))
+
 SYMID
 #ifdef YAML_IS_JSON
 json_syck_parser_handler
@@ -189,7 +192,9 @@ yaml_syck_parser_handler
         case syck_seq_kind:
             seq = newAV();
             for (i = 0; i < n->data.list->idx; i++) {
-                av_push(seq, perl_syck_lookup_sym(p, syck_seq_read(n, i) ));
+                SV *a = perl_syck_lookup_sym(p, syck_seq_read(n, i));
+                av_push(seq, a);
+                USE_OBJECT(a);
             }
             sv = newRV_noinc((SV*)seq);
 #ifndef YAML_IS_JSON
@@ -210,8 +215,12 @@ yaml_syck_parser_handler
         case syck_map_kind:
 #ifndef YAML_IS_JSON
             if ( (n->type_id != NULL) && (strEQ( n->type_id, "perl/ref:" ) ) ) {
-                char *ref_type = SvPVX(perl_syck_lookup_sym(p, syck_map_read(n, map_key, 0) ));
-                sv = newRV_noinc( perl_syck_lookup_sym(p, syck_map_read(n, map_value, 0) ) );
+                SV* key = perl_syck_lookup_sym(p, syck_map_read(n, map_key, 0));
+                SV* val = perl_syck_lookup_sym(p, syck_map_read(n, map_value, 0));
+                char *ref_type = SvPVX(key);
+
+                sv = newRV_noinc(val);
+                USE_OBJECT(val);
                 if (strnNE(ref_type, REF_LITERAL, REF_LITERAL_LENGTH+1)) {
                     sv_bless(sv, gv_stashpv(ref_type, TRUE));
                 }
@@ -223,10 +232,9 @@ yaml_syck_parser_handler
                 for (i = 0; i < n->data.pairs->idx; i++) {
                     SV* key = perl_syck_lookup_sym(p, syck_map_read(n, map_key, i));
                     SV* val = perl_syck_lookup_sym(p, syck_map_read(n, map_value, i));
-                    if (hv_store_ent(map, key, val, 0) == NULL) /* should never fail, but check anyhow */
-                        SvREFCNT_dec(val);
-                    /* hv_store_ent does not take ownership of key, so release it */
-                    SvREFCNT_dec(key);
+
+                    if (hv_store_ent(map, key, val, 0) != NULL)
+                       USE_OBJECT(val);
                 }
                 sv = newRV_noinc((SV*)map);
 #ifndef YAML_IS_JSON
@@ -254,6 +262,8 @@ yaml_syck_parser_handler
         sv_setsv( perl_syck_lookup_sym(p, n->id), sv );
     }
 #endif
+
+    TRACK_OBJECT(sv);
 
     return syck_add_sym(p, (char *)sv);
 }
@@ -340,6 +350,7 @@ LoadYAML
 (char *s) {
     SYMID v;
     SyckParser *parser;
+    struct parser_xtra bonus;
     SV *obj = &PL_sv_undef;
     SV *implicit = GvSV(gv_fetchpv(form("%s::ImplicitTyping", PACKAGE_NAME), TRUE, SVt_PV));
     SV *unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
@@ -371,10 +382,13 @@ LoadYAML
     syck_parser_implicit_typing(parser, SvTRUE(implicit));
     syck_parser_taguri_expansion(parser, 0);
 
-    parser->bonus = (void*)(SvTRUE(unicode) ? unicode : NULL);
+    bonus.objects = (AV*)sv_2mortal((SV*)newAV());
+    bonus.utf8 = SvTRUE(unicode);
+    parser->bonus = &bonus;
 
     v = syck_parse(parser);
-    syck_lookup_sym(parser, v, (char **)&obj);
+    if (syck_lookup_sym(parser, v, (char **)&obj))
+        USE_OBJECT(obj);
     syck_free_parser(parser);
 
 #ifdef YAML_IS_JSON
