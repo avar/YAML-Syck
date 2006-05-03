@@ -444,12 +444,8 @@ yaml_syck_emitter_handler
             case SVt_PVHV:
             case SVt_PVCV: {
                 e->indent = 0;
-                if ( e->lvl_idx == 2 ) {
-                    syck_emit_item(e, (st_data_t)SvRV(sv));
-                }
-                else {
-                    syck_emit_item(e, (st_data_t)SvRV(sv));
-                }
+                syck_emit_item(e, (st_data_t)SvRV(sv));
+                e->indent = 2;
                 break;
             }
             default: {
