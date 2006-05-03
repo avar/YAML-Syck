@@ -596,7 +596,7 @@ DumpJSON
 DumpYAML
 #endif
 (SV *sv) {
-    struct emitter_xtra *bonus;
+    struct emitter_xtra bonus;
     SV* out = newSVpvn("", 0);
     SyckEmitter *emitter = syck_new_emitter();
     SV *headless = GvSV(gv_fetchpv(form("%s::Headless", PACKAGE_NAME), TRUE, SVt_PV));
@@ -614,9 +614,9 @@ DumpYAML
     emitter->sort_keys = SvTRUE(sortkeys);
     emitter->anchor_format = "%d";
 
-    bonus = emitter->bonus = S_ALLOC_N(struct emitter_xtra, 1);
-    bonus->port = out;
-    New(801, bonus->tag, 512, char);
+    bonus.port = out;
+    New(801, bonus.tag, 512, char);
+    emitter->bonus = &bonus;
 
     syck_emitter_handler( emitter, PERL_SYCK_EMITTER_HANDLER );
     syck_output_handler( emitter, perl_syck_output_handler );
@@ -629,7 +629,7 @@ DumpYAML
     syck_emitter_flush( emitter, 0 );
     syck_free_emitter( emitter );
 
-    Safefree(bonus->tag);
+    Safefree(bonus.tag);
 
 #ifdef YAML_IS_JSON
     if (SvCUR(out) > 0) {

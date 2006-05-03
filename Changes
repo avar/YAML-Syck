@@ -1,3 +1,6 @@
+* Fix memory leak on Dump.
+  Contributed by: Andrew Danforth
+
 [Changes for 0.44 (JSON::Syck 0.12) - 2006-05-04]
 
 * Fix tests so they work warninglessly on 5.005. 
