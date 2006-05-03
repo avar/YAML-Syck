@@ -57,8 +57,7 @@ c:
 !
 };
 
-    eval { Load($yaml) };
-    ok( $@, "Load failed (expected)" );
+    ok( !eval { Load($yaml) }, "Load failed (expected)" );
 
     $before = Devel::Leak::NoteSV($handle);
     eval { Load($yaml) } for (1..10);

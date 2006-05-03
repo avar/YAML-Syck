@@ -1,5 +1,7 @@
 use t::TestYAML tests => 25; 
 
+local $SIG{__WARN__} = sub { 1 } if $Test::VERSION < 1.20;
+
 ok(YAML::Syck->VERSION);
 
 is(Dump(42),    "--- 42\n");
