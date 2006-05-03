@@ -191,7 +191,7 @@ yaml_syck_parser_handler
             for (i = 0; i < n->data.list->idx; i++) {
                 av_push(seq, perl_syck_lookup_sym(p, syck_seq_read(n, i) ));
             }
-            sv = newRV_inc((SV*)seq);
+            sv = newRV_noinc((SV*)seq);
 #ifndef YAML_IS_JSON
             if (n->type_id) {
                 char *lang = strtok(n->type_id, "/:");
@@ -221,14 +221,14 @@ yaml_syck_parser_handler
             {
                 map = newHV();
                 for (i = 0; i < n->data.pairs->idx; i++) {
-                    hv_store_ent(
-                        map,
-                        perl_syck_lookup_sym(p, syck_map_read(n, map_key, i) ),
-                        perl_syck_lookup_sym(p, syck_map_read(n, map_value, i) ),
-                        0
-                    );
+                    SV* key = perl_syck_lookup_sym(p, syck_map_read(n, map_key, i));
+                    SV* val = perl_syck_lookup_sym(p, syck_map_read(n, map_value, i));
+                    if (hv_store_ent(map, key, val, 0) == NULL) /* should never fail, but check anyhow */
+                        SvREFCNT_dec(val);
+                    /* hv_store_ent does not take ownership of key, so release it */
+                    SvREFCNT_dec(key);
                 }
-                sv = newRV((SV*)map);
+                sv = newRV_noinc((SV*)map);
 #ifndef YAML_IS_JSON
                 if (n->type_id) {
                     char *lang = strtok(n->type_id, "/:");
