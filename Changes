@@ -1,4 +1,4 @@
-* Fix memory leak on Dump.
+* Fix memory leaks on Dump.
   Contributed by: Andrew Danforth
 
 [Changes for 0.44 (JSON::Syck 0.12) - 2006-05-04]

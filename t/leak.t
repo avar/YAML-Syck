@@ -2,11 +2,11 @@
 
 use strict;
 use YAML::Syck;
-use Test::More tests => 4;
+use Test::More tests => 6;
 
 SKIP: {
     eval { require Devel::Leak }
-      or skip( "Devel::Leak not installed", 4 );
+      or skip( "Devel::Leak not installed", 6 );
 
     # check if arrays leak
 
@@ -64,4 +64,14 @@ c:
     $diff = Devel::Leak::NoteSV($handle) - $before;
     is( $diff, 0, "No leaks - Load failure" );
 
+    my $todump = {a => [{c => {nums => ['1','2','3','4','5']},b => 'foo'}],d => 'e'};
+
+    ok( eval { Dump($todump) }, "Dump succeeded" );
+
+    $before = Devel::Leak::NoteSV($handle);
+    foreach ( 1 .. 100 ) {
+       Dump($todump);
+    }
+    $diff = Devel::Leak::NoteSV($handle) - $before;
+    is( $diff, 0, "No leaks - Dump" );
 }

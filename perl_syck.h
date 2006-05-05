@@ -517,7 +517,7 @@ yaml_syck_emitter_handler
                 hv_iterinit((HV*)sv);
 
                 if (e->sort_keys) {
-                    AV *av = newAV();
+                    AV *av = (AV*)sv_2mortal((SV*)newAV());
                     for (i = 0; i < len; i++) {
 #ifdef HAS_RESTRICTED_HASHES
                         HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
