@@ -13,7 +13,7 @@ BEGIN {
     local $@;
     eval {
         require XSLoader;
-        XSLoader::load(__PACKAGE__ => $VERSION);
+        XSLoader::load(__PACKAGE__, $VERSION);
         1;
     } or do {
         require DynaLoader;
