@@ -13,6 +13,7 @@
 #undef OBJOF
 #undef PERL_SYCK_PARSER_HANDLER
 #undef PERL_SYCK_EMITTER_HANDLER
+#undef PERL_SYCK_INDENT_LEVEL
 
 #ifdef YAML_IS_JSON
 #  define PACKAGE_NAME  "JSON::Syck"
@@ -31,6 +32,7 @@ static enum scalar_style json_quote_style = scalar_2quote;
 #  define OBJOF(a)        (a)
 #  define PERL_SYCK_PARSER_HANDLER json_syck_parser_handler
 #  define PERL_SYCK_EMITTER_HANDLER json_syck_emitter_handler
+#  define PERL_SYCK_INDENT_LEVEL 0
 #else
 #  define PACKAGE_NAME  "YAML::Syck"
 #  define REF_LITERAL  "="
@@ -52,6 +54,7 @@ static enum scalar_style json_quote_style = scalar_2quote;
 #  define OBJOF(a)        (*tag ? tag : a)
 #  define PERL_SYCK_PARSER_HANDLER yaml_syck_parser_handler
 #  define PERL_SYCK_EMITTER_HANDLER yaml_syck_emitter_handler
+#  define PERL_SYCK_INDENT_LEVEL 2
 #endif
 
 #define TRACK_OBJECT(sv) (av_push(((struct parser_xtra *)p->bonus)->objects, sv))
@@ -445,7 +448,7 @@ yaml_syck_emitter_handler
             case SVt_PVCV: {
                 e->indent = 0;
                 syck_emit_item(e, (st_data_t)SvRV(sv));
-                e->indent = 2;
+                e->indent = PERL_SYCK_INDENT_LEVEL;
                 break;
             }
             default: {
@@ -487,7 +490,7 @@ yaml_syck_emitter_handler
         switch (ty) {
             case SVt_PVAV: {
                 syck_emit_seq(e, OBJOF("array"), SEQ_NONE);
-                e->indent = 2;
+                e->indent = PERL_SYCK_INDENT_LEVEL;
 
                 *tag = '\0';
                 len = av_len((AV*)sv) + 1;
@@ -506,7 +509,7 @@ yaml_syck_emitter_handler
             case SVt_PVHV: {
                 HV *hv = (HV*)sv;
                 syck_emit_map(e, OBJOF("hash"), MAP_NONE);
-                e->indent = 2;
+                e->indent = PERL_SYCK_INDENT_LEVEL;
 
                 *tag = '\0';
 #ifdef HAS_RESTRICTED_HASHES
@@ -606,6 +609,7 @@ DumpYAML
     SV *singlequote = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
     json_quote_char = (SvTRUE(singlequote) ? '\'' : '"' );
     json_quote_style = (SvTRUE(singlequote) ? scalar_1quote : scalar_2quote );
+    emitter->indent = PERL_SYCK_INDENT_LEVEL;
 #endif
 
     ENTER; SAVETMPS;
