@@ -1,3 +1,14 @@
+[Changes for 0.45 (JSON::Syck 0.13) - 2006-05-27]
+
+* Bogus indentations are no longer emitted for JSON for strings
+  containing newlines.
+  Reported by: Tatsuhiko Miyagawa
+
+* Fix memory leaks on Dump.
+  Contributed by: Andrew Danforth
+
+* Upgrade to upstream Syck 0.56-trunk; no functional changes.
+
 [Changes for 0.44 (JSON::Syck 0.12) - 2006-05-04]
 
 * Fix tests so they work warninglessly on 5.005. 

@@ -45,6 +45,7 @@ t/3-objects.t
 t/leak.t
 t/json-basic.t
 t/json-empty.t
+t/json-indent.t
 t/json-minus.t
 t/json-null.t
 t/json-refs.t
@@ -54,3 +55,4 @@ t/yaml-tie.t
 token.c
 yaml2byte.c
 yamlbyte.h
+SIGNATURE                                Public-key signature (added by MakeMaker)
