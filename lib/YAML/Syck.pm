@@ -4,7 +4,7 @@ use vars qw( @ISA @EXPORT $VERSION $ImplicitTyping $SortKeys );
 use 5.00307;
 
 BEGIN {
-    $VERSION = '0.44';
+    $VERSION = '0.45';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 
