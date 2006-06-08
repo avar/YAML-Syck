@@ -62,7 +62,9 @@ void perl_syck_mark_emitter(SyckEmitter *e, SV *sv) {
             len = av_len((AV*)sv) + 1;
             for (i = 0; i < len; i++) {
                 SV** sav = av_fetch((AV*)sv, i, 0);
-                perl_syck_mark_emitter( e, *sav );
+                if (sav != NULL) {
+                    perl_syck_mark_emitter( e, *sav );
+                }
             }
             break;
         }
