@@ -27,11 +27,13 @@
 struct emitter_xtra {
     SV* port;
     char* tag;
+	char dump_code;
 };
 
 struct parser_xtra {
    AV *objects;
    int utf8;
+   char load_code;
 };
 
 SV* perl_syck_lookup_sym( SyckParser *p, SYMID v) {

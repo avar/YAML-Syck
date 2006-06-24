@@ -1,4 +1,4 @@
-use t::TestYAML tests => 28; 
+use t::TestYAML tests => 35; 
 
 local $SIG{__WARN__} = sub { 1 } if $Test::VERSION < 1.20;
 
@@ -14,7 +14,36 @@ my $x;
 $x = \$x;
 is(Dump($x),     "--- &1 !perl/ref: \n=: *1\n");
 is(Dump(Load(Dump($x))),     "--- &1 !perl/ref: \n=: *1\n");
-is(Dump(sub{}),  "--- !perl/code: '{ \"DUMMY\" }'\n");
+
+$YAML::Syck::DumpCode = 0;
+is(Dump(sub{ "bar" }),  "--- !perl/code: '{ \"DUMMY\" }'\n");
+$YAML::Syck::DumpCode = 1;
+ok(Dump(sub{ "bar" }) =~ m{---\ !perl/code:\ '{\s*['"]bar['"]\s*;?\s*}'\n$}x, "dump code");
+
+my $like_yaml_pm = 0;
+$YAML::Syck::LoadCode = 0;
+ok( my $not_sub = Load("--- !perl/Class '{ \"foo\" . shift  }'\n") );
+
+if ( $like_yaml_pm ) {
+	is( ref($not_sub), "code" );
+	is( eval { $$not_sub }, '{ "foo" . shift }' );
+} else {
+	is ( $not_sub, '{ "foo" . shift }' );
+	ok(1); # stick with the plan
+}
+
+$YAML::Syck::LoadCode = 1;
+ok( my $sub = Load("--- !perl/code: '{ \"foo\" . shift }'\n") );
+is( ref($sub), "CODE" );
+is( eval { $sub->("bar") }, "foobar" );
+is( $@, "", "no error" );
+
+$YAML::Syck::LoadCode = $YAML::Syck::DumpCode = 0;
+
+$YAML::Syck::UseCode = $YAML::Syck::UseCode = 1;
+
+is( eval { Load(Dump(sub { "foo" . shift }))->("bar") }, "foobar" );
+is( $@, "", "no error" );
 
 is(Dump(undef), "--- ~\n");
 is(Dump('~'), "--- \'~\'\n");

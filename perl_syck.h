@@ -356,6 +356,8 @@ LoadYAML
     struct parser_xtra bonus;
     SV *obj = &PL_sv_undef;
     SV *implicit = GvSV(gv_fetchpv(form("%s::ImplicitTyping", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *use_code = GvSV(gv_fetchpv(form("%s::UseCode", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *load_code = GvSV(gv_fetchpv(form("%s::LoadCode", PACKAGE_NAME), TRUE, SVt_PV));
     SV *unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
 #ifdef YAML_IS_JSON
     SV *singlequote = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
@@ -387,6 +389,7 @@ LoadYAML
 
     bonus.objects = (AV*)sv_2mortal((SV*)newAV());
     bonus.utf8 = SvTRUE(unicode);
+	bonus.load_code = SvTRUE(use_code) || SvTRUE(load_code);
     parser->bonus = &bonus;
 
     v = syck_parse(parser);
@@ -414,6 +417,7 @@ yaml_syck_emitter_handler
     SV*  sv = (SV*)data;
     struct emitter_xtra *bonus = (struct emitter_xtra *)e->bonus;
     char* tag = bonus->tag;
+	char dump_code = bonus->dump_code;
     char* ref = NULL;
     svtype ty = SvTYPE(sv);
 
@@ -569,7 +573,88 @@ yaml_syck_emitter_handler
 #ifdef YAML_IS_JSON
                 syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
 #else
-                syck_emit_scalar(e, "tag:perl:code:", SCALAR_QUOTED, 0, 0, 0, "{ \"DUMMY\" }", 11);
+	
+				/* This following code is mostly copypasted from Storable */
+				if ( !dump_code ) {
+					syck_emit_scalar(e, "tag:perl:code:", SCALAR_QUOTED, 0, 0, 0, "{ \"DUMMY\" }", 11);
+				} else {
+					dSP;
+					I32 len;
+					int count, reallen;
+					SV *text, *bdeparse;
+					CV *cv = (CV*)sv;
+
+					/*
+					 * Require B::Deparse. At least B::Deparse 0.61 is needed for
+					 * blessed code references.
+					 */
+					/* Ownership of both SVs is passed to load_module, which frees them. */
+					load_module(PERL_LOADMOD_NOIMPORT, newSVpvn("B::Deparse",10), newSVnv(0.61));
+
+					ENTER;
+					SAVETMPS;
+
+					/*
+					 * create the B::Deparse object
+					 */
+
+					PUSHMARK(sp);
+					XPUSHs(sv_2mortal(newSVpvn("B::Deparse",10)));
+					PUTBACK;
+					count = call_method("new", G_SCALAR);
+					SPAGAIN;
+					if (count != 1)
+						CROAK(("Unexpected return value from B::Deparse::new\n"));
+					bdeparse = POPs;
+
+					/*
+					 * call the coderef2text method
+					 */
+
+					PUSHMARK(sp);
+					XPUSHs(bdeparse); /* XXX is this already mortal? */
+					XPUSHs(sv_2mortal(newRV_inc((SV*)cv)));
+					PUTBACK;
+					count = call_method("coderef2text", G_SCALAR);
+					SPAGAIN;
+					if (count != 1)
+						CROAK(("Unexpected return value from B::Deparse::coderef2text\n"));
+
+					text = POPs;
+					len = SvLEN(text);
+					reallen = strlen(SvPV_nolen(text));
+
+					/*
+					 * Empty code references or XS functions are deparsed as
+					 * "(prototype) ;" or ";".
+					 */
+
+					if (len == 0 || *(SvPV_nolen(text)+reallen-1) == ';') {
+						CROAK(("The result of B::Deparse::coderef2text was empty - maybe you're trying to serialize an XS function?\n"));
+					}
+
+					/* 
+					 * Signal code by emitting SX_CODE.
+					 */
+
+#if 0
+					/* SYCK adds anchors for us automatically */
+
+					PUTMARK(SX_CODE);
+					cxt->tagnum++;   /* necessary, as SX_CODE is a SEEN() candidate */
+#endif
+
+					/*
+					 * Now store the source code.
+					 */
+
+					syck_emit_scalar(e, "tag:perl:code:", SCALAR_UTF8, 0, 0, 0, SvPV_nolen(text), len-1);
+
+					FREETMPS;
+					LEAVE;
+
+					/* END Storable */
+				}
 #endif
                 break;
             }
@@ -604,6 +689,8 @@ DumpYAML
     SyckEmitter *emitter = syck_new_emitter();
     SV *headless = GvSV(gv_fetchpv(form("%s::Headless", PACKAGE_NAME), TRUE, SVt_PV));
     SV *unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *use_code = GvSV(gv_fetchpv(form("%s::UseCode", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *dump_code = GvSV(gv_fetchpv(form("%s::DumpCode", PACKAGE_NAME), TRUE, SVt_PV));
     SV *sortkeys = GvSV(gv_fetchpv(form("%s::SortKeys", PACKAGE_NAME), TRUE, SVt_PV));
 #ifdef YAML_IS_JSON
     SV *singlequote = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
@@ -620,6 +707,7 @@ DumpYAML
 
     bonus.port = out;
     New(801, bonus.tag, 512, char);
+	bonus.dump_code = SvTRUE(use_code) || SvTRUE(dump_code);
     emitter->bonus = &bonus;
 
     syck_emitter_handler( emitter, PERL_SYCK_EMITTER_HANDLER );
