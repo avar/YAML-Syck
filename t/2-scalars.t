@@ -16,13 +16,13 @@ is(Dump($x),     "--- &1 !perl/ref: \n=: *1\n");
 is(Dump(Load(Dump($x))),     "--- &1 !perl/ref: \n=: *1\n");
 
 $YAML::Syck::DumpCode = 0;
-is(Dump(sub{ "bar" }),  "--- !perl/code: '{ \"DUMMY\" }'\n");
+is(Dump(sub{ 42 }),  "--- !perl/code: '{ \"DUMMY\" }'\n");
 $YAML::Syck::DumpCode = 1;
-ok(Dump(sub{ "bar" }) =~ m{---\ !perl/code:\ '{\s*['"]bar['"]\s*;?\s*}'\n$}x, "dump code");
+ok(Dump(sub{ 42 }) =~ m#--- !perl/code:.*?{.*?42.*?}$#s);
 
 my $like_yaml_pm = 0;
 $YAML::Syck::LoadCode = 0;
-ok( my $not_sub = Load("--- !perl/Class '{ \"foo\" . shift  }'\n") );
+ok( my $not_sub = Load("--- !perl/Class '{ \"foo\" . shift }'\n") );
 
 if ( $like_yaml_pm ) {
 	is( ref($not_sub), "code" );
@@ -44,6 +44,7 @@ $YAML::Syck::UseCode = $YAML::Syck::UseCode = 1;
 
 is( eval { Load(Dump(sub { "foo" . shift }))->("bar") }, "foobar" );
 is( $@, "", "no error" );
+is( eval { Load(Dump(sub { shift() ** 3 }))->(3) }, 27 );
 
 is(Dump(undef), "--- ~\n");
 is(Dump('~'), "--- \'~\'\n");

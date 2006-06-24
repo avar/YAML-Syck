@@ -70,6 +70,8 @@ yaml_syck_parser_handler
     SV *sv;
     AV *seq;
     HV *map;
+	struct parser_xtra *bonus = (struct parser_xtra *)p->bonus;
+	char load_code = bonus->load_code;
     long i;
     switch (n->kind) {
         case syck_str_kind:
@@ -174,13 +176,48 @@ yaml_syck_parser_handler
                     sv = newSVuv(uv);
                 }
 #ifndef YAML_IS_JSON
+			} else if (load_code && strEQ(n->type_id, "perl/code:")) {
+				SV *cv;
+				SV *text, *sub;
+
+				/* This code is copypasted from Storable.xs */
+
+				/*
+				 * prepend "sub " to the source
+				 */
+
+				text = newSVpvn(n->data.str->ptr, n->data.str->len);
+
+				sub = newSVpvn("sub ", 4);
+				sv_catpv(sub, SvPV_nolen(text)); /* XXX no sv_catsv! */
+				SvREFCNT_dec(text);
+
+				ENTER;
+				SAVETMPS;
+
+				cv = eval_pv(SvPV_nolen(sub), TRUE);
+
+				if (cv && SvROK(cv) && SvTYPE(SvRV(cv)) == SVt_PVCV) {
+					sv = cv;
+				} else {
+					croak("code %s did not evaluate to a subroutine reference\n", SvPV_nolen(sub));
+				}
+
+				SvREFCNT_inc(sv); /* XXX seems to be necessary */
+				SvREFCNT_dec(sub);
+
+				FREETMPS;
+				LEAVE;
+
+				/* END Storable */
+
             } else if (strnEQ( n->data.str->ptr, REF_LITERAL, 1+REF_LITERAL_LENGTH)) {
                 /* type tag in a scalar ref */
                 char *lang = strtok(n->type_id, "/:");
                 char *type = strtok(NULL, "");
 
                 if (lang == NULL || (strEQ(lang, "perl"))) {
-                    sv = newSVpv(type, 0);
+					sv = newSVpv(type, 0);
                 } else {
                     sv = newSVpv(form("%s::%s", lang, type), 0);
                 }
