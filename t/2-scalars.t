@@ -1,4 +1,4 @@
-use t::TestYAML tests => 38; 
+use t::TestYAML tests => 39; 
 
 local $SIG{__WARN__} = sub { 1 } if $Test::VERSION < 1.20;
 
