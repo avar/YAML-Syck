@@ -64,6 +64,14 @@ byte strings with high-bit set will be dumped with backslash escaping.
 However, because YAML does not distinguish between these two kinds of strings,
 so this flag will affect loading of both variants of strings.
 
+=head2 $YAML::Syck::UseCode
+
+=head2 $YAML::Syck::LoadCode
+
+=head2 $YAML::Syck::DumpCode
+
+These control whether or not to try and eval/deparse perl source code.
+
 =head1 CAVEATS
 
 The current implementation bundles libsyck source code; if your system has a

@@ -1,3 +1,8 @@
+[Changes for 0.46_01 (JSON::Syck 0.13) - 2006-06-25]
+
+* Add support for code references in YAML
+  Contributed by: Yuval Kogman, based on Storable.xs
+
 [Changes for 0.45 (JSON::Syck 0.13) - 2006-05-27]
 
 * Bogus indentations are no longer emitted for JSON for strings
