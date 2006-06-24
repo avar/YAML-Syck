@@ -641,7 +641,7 @@ yaml_syck_emitter_handler
 					count = call_method("new", G_SCALAR);
 					SPAGAIN;
 					if (count != 1)
-						CROAK(("Unexpected return value from B::Deparse::new\n"));
+						croak("Unexpected return value from B::Deparse::new\n");
 					bdeparse = POPs;
 
 					/*
@@ -655,7 +655,7 @@ yaml_syck_emitter_handler
 					count = call_method("coderef2text", G_SCALAR);
 					SPAGAIN;
 					if (count != 1)
-						CROAK(("Unexpected return value from B::Deparse::coderef2text\n"));
+						croak("Unexpected return value from B::Deparse::coderef2text\n");
 
 					text = POPs;
 					len = SvLEN(text);
@@ -667,7 +667,7 @@ yaml_syck_emitter_handler
 					 */
 
 					if (len == 0 || *(SvPV_nolen(text)+reallen-1) == ';') {
-						CROAK(("The result of B::Deparse::coderef2text was empty - maybe you're trying to serialize an XS function?\n"));
+						croak("The result of B::Deparse::coderef2text was empty - maybe you're trying to serialize an XS function?\n");
 					}
 
 					/* 
