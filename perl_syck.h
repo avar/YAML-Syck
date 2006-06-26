@@ -618,7 +618,7 @@ yaml_syck_emitter_handler
 	
 				/* This following code is mostly copypasted from Storable */
 				if ( !dump_code ) {
-					syck_emit_scalar(e, "tag:perl:code:", SCALAR_QUOTED, 0, 0, 0, "{ \"DUMMY\" }", 11);
+					syck_emit_scalar(e, OBJOF("tag:perl:code:"), SCALAR_QUOTED, 0, 0, 0, "{ \"DUMMY\" }", 11);
 				} else {
 					dSP;
 					I32 len;
@@ -690,7 +690,7 @@ yaml_syck_emitter_handler
 					 * Now store the source code.
 					 */
 
-					syck_emit_scalar(e, tag, SCALAR_UTF8, 0, 0, 0, SvPV_nolen(text), len-1);
+					syck_emit_scalar(e, OBJOF("tag:perl:code:"), SCALAR_UTF8, 0, 0, 0, SvPV_nolen(text), len-1);
 
 					FREETMPS;
 					LEAVE;
