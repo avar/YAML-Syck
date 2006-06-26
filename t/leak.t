@@ -86,12 +86,12 @@ result: !perl/code: '{ 42 + + 54ih a; $" }'
 #;
    
 	{ local $SIG{__WARN__} = sub { };
-	local $TODO = "It looks like evals leak, but we're better than Storable";
 	ok( !eval { Load($yaml) }, "Load failed on code syntax error (expected)" );
 
     $before = Devel::Leak::NoteSV($handle);
     eval { Load($yaml) } for (1..10);
     $diff = Devel::Leak::NoteSV($handle) - $before;
+	local $TODO = "It looks like evals leak, but we're better than Storable";
     is( $diff, 0, "No leaks - Load failure (code)" );
 	}
 
