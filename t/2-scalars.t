@@ -32,8 +32,13 @@ if ( $like_yaml_pm ) {
 	ok(1); # stick with the plan
 }
 
+
 $YAML::Syck::LoadCode = 1;
-ok( my $sub = Load("--- !perl/code: '{ \"foo\" . shift }'\n") );
+use Data::Dumper;
+my $sub = Load("--- !perl/code: '{ \"foo\" . \$_[0] }'\n");
+
+ok( defined $sub );
+
 is( ref($sub), "CODE" );
 is( eval { $sub->("bar") }, "foobar" );
 is( $@, "", "no error" );
