@@ -893,7 +893,7 @@ void syck_emit_2quoted( SyckEmitter *e, int width, char *str, long len )
             case '\n':
                 end = mark + 1;
                 syck_emitter_write( e, "\\n", 2 );
-                do_indent = 2;
+                do_indent = e->indent;
                 start = mark + 1;
                 if ( start < str + len && ( *start == ' ' || *start == '\n' ) ) {
                     do_indent = 0;
