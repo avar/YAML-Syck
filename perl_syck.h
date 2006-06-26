@@ -197,6 +197,8 @@ yaml_syck_parser_handler
 
 				cv = eval_pv(SvPV_nolen(sub), TRUE);
 
+				sv_2mortal(sub);
+
 				if (cv && SvROK(cv) && SvTYPE(SvRV(cv)) == SVt_PVCV) {
 					sv = cv;
 				} else {
@@ -204,7 +206,6 @@ yaml_syck_parser_handler
 				}
 
 				SvREFCNT_inc(sv); /* XXX seems to be necessary */
-				SvREFCNT_dec(sub);
 
 				FREETMPS;
 				LEAVE;
