@@ -2,11 +2,11 @@
 
 use strict;
 use YAML::Syck;
-use Test::More tests => 9;
+use Test::More tests => 11;
 
 SKIP: {
     eval { require Devel::Leak }
-      or skip( "Devel::Leak not installed", 9 );
+      or skip( "Devel::Leak not installed", 11 );
 
     # check if arrays leak
 
@@ -79,6 +79,22 @@ c:
     eval { Load($yaml) } for (1..10);
     $diff = Devel::Leak::NoteSV($handle) - $before;
     is( $diff, 0, "No leaks - Load failure" );
+
+
+	$yaml = q#---
+result: !perl/code: '{ 42 + + 54ih a; $" }'
+#;
+   
+	{ local $SIG{__WARN__} = sub { };
+	local $TODO = "It looks like evals leak, but we're better than Storable";
+	ok( !eval { Load($yaml) }, "Load failed on code syntax error (expected)" );
+
+    $before = Devel::Leak::NoteSV($handle);
+    eval { Load($yaml) } for (1..10);
+    $diff = Devel::Leak::NoteSV($handle) - $before;
+    is( $diff, 0, "No leaks - Load failure (code)" );
+	}
+
 
     my $todump = {a => [{c => {nums => ['1','2','3','4','5']},b => 'foo'}],d => 'e'};
 
