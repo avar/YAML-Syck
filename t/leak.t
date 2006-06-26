@@ -2,11 +2,11 @@
 
 use strict;
 use YAML::Syck;
-use Test::More tests => 6;
+use Test::More tests => 9;
 
 SKIP: {
     eval { require Devel::Leak }
-      or skip( "Devel::Leak not installed", 6 );
+      or skip( "Devel::Leak not installed", 9 );
 
     # check if arrays leak
 
@@ -49,6 +49,22 @@ result: test
     $diff = Devel::Leak::NoteSV($handle) - $before;
     is( $diff, 0, "No leaks - hash" );
 
+	
+    # Check if subs leak
+	$YAML::Syck::UseCode = 1;
+    $yaml = q#---
+result: !perl/code: '{ 42 + $_[0] }'
+#;
+
+    $before = Devel::Leak::NoteSV($handle);
+    foreach ( 1 .. 100 ) {
+        Load($yaml);
+    }
+
+    $diff = Devel::Leak::NoteSV($handle) - $before;
+    is( $diff, 0, "No leaks - code" );
+
+
     $yaml   = q{---
 a: b
 c:
@@ -74,4 +90,23 @@ c:
     }
     $diff = Devel::Leak::NoteSV($handle) - $before;
     is( $diff, 0, "No leaks - Dump" );
+
+
+    $todump = sub { 42 };
+
+    ok( eval { Dump($todump) }, "Dump succeeded" );
+
+    # For some reason we have to do a full test run of this loop and the
+    # Devel::Leak test before it's stable.  The first time diff ends up
+    # being -1.  This is probably Devel::Leak wonkiness.
+	foreach ( 1 .. 100 ) {
+       Dump($todump);
+    }
+
+    $before = Devel::Leak::NoteSV($handle);
+    foreach ( 1 .. 100 ) {
+       Dump($todump);
+    }
+    $diff = Devel::Leak::NoteSV($handle) - $before;
+    is( $diff, 0, "No leaks - Dump code" );
 }
