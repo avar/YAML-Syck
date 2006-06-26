@@ -1,4 +1,4 @@
-use t::TestYAML tests => 11;
+use t::TestYAML tests => 17;
 
 ok(YAML::Syck->VERSION);
 
@@ -20,3 +20,24 @@ is(ref($a), 'haskell.org::Foo');
 is($a->{a}, 'b');
 
 is(Dump(bless({1..10}, 'foo')),  "--- !perl/foo \n1: 2\n3: 4\n5: 6\n7: 8\n9: 10\n");
+
+$YAML::Syck::UseCode = 1;
+
+{
+	my $hash = Load(Dump(bless({1 .. 4}, "code")));
+	is(ref($hash), "code", "blessed to code");
+	is(eval { $hash->{1} }, 2, "it's a hash");
+}
+
+{
+	my $sub = Load(Dump(bless(sub { 42 }, "foobar")));
+	is(ref($sub), "foobar", "blessed to foobar");
+	is(eval { $sub->() }, 42, "it's a CODE");
+}
+
+{
+	my $sub = Load(Dump(bless(sub { 42 }, "code")));
+	is(ref($sub), "code", "blessed to code");
+	is(eval { $sub->() }, 42, "it's a CODE");
+}
+

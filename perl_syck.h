@@ -176,7 +176,7 @@ yaml_syck_parser_handler
                     sv = newSVuv(uv);
                 }
 #ifndef YAML_IS_JSON
-			} else if (load_code && strEQ(n->type_id, "perl/code:")) {
+			} else if (load_code && strnEQ(n->type_id, "perl/code:", 10)) {
 				SV *cv;
 				SV *text, *sub;
 
@@ -204,6 +204,10 @@ yaml_syck_parser_handler
 				} else {
 					croak("code %s did not evaluate to a subroutine reference\n", SvPV_nolen(sub));
 				}
+				
+				char *pkg = n->type_id + 10;
+				if ( *pkg != '\0' )
+                    sv_bless(sv, gv_stashpv(pkg, TRUE));
 
 				SvREFCNT_inc(sv); /* XXX seems to be necessary */
 
@@ -473,8 +477,8 @@ yaml_syck_emitter_handler
         switch (SvTYPE(SvRV(sv))) {
             case SVt_PVAV: { strcat(tag, "@"); break; }
             case SVt_RV:   { strcat(tag, "$"); break; }
-            case SVt_PVCV: { strcat(tag, "code"); break; }
-            case SVt_PVGV: { strcat(tag, "glob"); break; }
+			case SVt_PVCV: { strcat(tag, "code:"); break; }
+			case SVt_PVGV: { strcat(tag, "glob:"); break; }
         }
         strcat(tag, ref);
     }
@@ -686,7 +690,7 @@ yaml_syck_emitter_handler
 					 * Now store the source code.
 					 */
 
-					syck_emit_scalar(e, "tag:perl:code:", SCALAR_UTF8, 0, 0, 0, SvPV_nolen(text), len-1);
+					syck_emit_scalar(e, tag, SCALAR_UTF8, 0, 0, 0, SvPV_nolen(text), len-1);
 
 					FREETMPS;
 					LEAVE;
