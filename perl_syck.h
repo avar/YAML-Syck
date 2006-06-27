@@ -470,21 +470,33 @@ yaml_syck_emitter_handler
     }
 
 #ifndef YAML_IS_JSON
+    /* Handle blessing into the right class */
     if (sv_isobject(sv)) {
         ref = savepv(sv_reftype(SvRV(sv), TRUE));
         *tag = '\0';
         strcat(tag, OBJECT_TAG);
         switch (SvTYPE(SvRV(sv))) {
-            case SVt_PVAV: { strcat(tag, "@"); break; }
-            case SVt_RV:   { strcat(tag, "$"); break; }
-			case SVt_PVCV: { strcat(tag, "code:"); break; }
-			case SVt_PVGV: { strcat(tag, "glob:"); break; }
+            case SVt_PVAV: { strcat(tag, "array:");  break; }
+            case SVt_PVHV: { strcat(tag, "hash:");   break; }
+			case SVt_PVCV: { strcat(tag, "code:");   break; }
+			case SVt_PVGV: { strcat(tag, "glob:");   break; }
+            /* flatten scalar ref objects so that they dump as !perl/scalar:Foo::Bar foo */
+            case SVt_PVMG: {
+                               if ( !SvROK(SvRV(sv)) ) {
+                                   strcat(tag, "scalar:"); sv = SvRV(sv);
+                                   break;
+                               } else {
+                                   strcat(tag, "ref:");
+                                   break;
+                               }
+                           }
         }
         strcat(tag, ref);
     }
 #endif
 
     if (SvROK(sv)) {
+        /* emit a scalar ref ??? XXX FIXME */
 #ifdef YAML_IS_JSON
         PERL_SYCK_EMITTER_HANDLER(e, (st_data_t)SvRV(sv));
 #else
@@ -492,13 +504,15 @@ yaml_syck_emitter_handler
             case SVt_PVAV:
             case SVt_PVHV:
             case SVt_PVCV: {
+                /* Arrays, hashes and code values are inlined, and will be wrapped by a ref in the undumping */
                 e->indent = 0;
                 syck_emit_item(e, (st_data_t)SvRV(sv));
                 e->indent = PERL_SYCK_INDENT_LEVEL;
                 break;
             }
             default: {
-                syck_emit_map(e, "tag:perl:ref:", MAP_NONE);
+                syck_emit_map(e, (*tag ? tag : "tag:perl:ref"), MAP_NONE);
+                *tag = '\0';
                 syck_emit_item( e, (st_data_t)newSVpvn_share(REF_LITERAL, REF_LITERAL_LENGTH, 0) );
                 syck_emit_item( e, (st_data_t)SvRV(sv) );
                 syck_emit_end(e);
@@ -507,34 +521,40 @@ yaml_syck_emitter_handler
 #endif
     }
     else if (ty == SVt_NULL) {
+        /* emit an undef */
         syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
     }
     else if (SvNIOKp(sv) && (sv_len(sv) != 0)) {
+        /* emit a number with a stringified version */
         syck_emit_scalar(e, OBJOF("string"), SCALAR_NUMBER, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
     }
     else if (SvPOKp(sv)) {
+        /* emit a string */
         STRLEN len = sv_len(sv);
         if (len == 0) {
             syck_emit_scalar(e, OBJOF("string"), SCALAR_QUOTED, 0, 0, 0, "", 0);
         }
 #ifndef YAML_IS_JSON
-        else if ((len == NULL_LITERAL_LENGTH) && *(SvPV_nolen(sv)) == '~') {
+        else if (strEQ(SvPV_nolen(sv), NULL_LITERAL)) {
+            /* escape ~ as a quoted string */
             syck_emit_scalar(e, OBJOF("string"), SCALAR_QUOTED, 0, 0, 0, NULL_LITERAL, 1);
         }
 #endif
         else if (COND_FOLD(sv)) {
+            /* if we support UTF8 and the string contains UTF8 */
             enum scalar_style old_s = e->style;
             e->style = SCALAR_UTF8;
             syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), len);
             e->style = old_s;
         }
         else {
+            /* just a simple string */
             syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), len);
         }
     }
     else {
         switch (ty) {
-            case SVt_PVAV: {
+            case SVt_PVAV: { /* array */
                 syck_emit_seq(e, OBJOF("array"), SEQ_NONE);
                 e->indent = PERL_SYCK_INDENT_LEVEL;
 
@@ -552,7 +572,7 @@ yaml_syck_emitter_handler
                 syck_emit_end(e);
                 return;
             }
-            case SVt_PVHV: {
+            case SVt_PVHV: { /* hash */
                 HV *hv = (HV*)sv;
                 syck_emit_map(e, OBJOF("hash"), MAP_NONE);
                 e->indent = PERL_SYCK_INDENT_LEVEL;
@@ -610,7 +630,7 @@ yaml_syck_emitter_handler
                 syck_emit_end(e);
                 return;
             }
-            case SVt_PVCV: {
+            case SVt_PVCV: { /* code */
 #ifdef YAML_IS_JSON
                 syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
 #else
@@ -699,13 +719,13 @@ yaml_syck_emitter_handler
 #endif
                 break;
             }
-            case SVt_PVGV:
-            case SVt_PVFM: {
+            case SVt_PVGV:   /* glob (not a filehandle, a symbol table entry) */
+            case SVt_PVFM: { /* format */
                 /* XXX TODO XXX */
                 syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
                 break;
             }
-            case SVt_PVIO: {
+            case SVt_PVIO: { /* filehandle */
                 syck_emit_scalar(e, OBJOF("string"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
                 break;
             }
