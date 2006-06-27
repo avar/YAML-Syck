@@ -2,7 +2,7 @@ use t::TestYAML tests => 17;
 
 ok(YAML::Syck->VERSION);
 
-is(Dump(bless({}, 'foo')),    "--- !perl/foo {}\n\n");
+is(Dump(bless({}, 'foo')),    "--- !perl/hash:foo {}\n\n");
 my $x = Load("--- !perl/foo {a: b}\n");
 is(ref($x), 'foo');
 is($x->{a}, 'b');
@@ -19,7 +19,7 @@ my $a = Load("--- !haskell.org/^Foo {a: b}\n");
 is(ref($a), 'haskell.org::Foo');
 is($a->{a}, 'b');
 
-is(Dump(bless({1..10}, 'foo')),  "--- !perl/foo \n1: 2\n3: 4\n5: 6\n7: 8\n9: 10\n");
+is(Dump(bless({1..10}, 'foo')),  "--- !perl/hash:foo \n1: 2\n3: 4\n5: 6\n7: 8\n9: 10\n");
 
 $YAML::Syck::UseCode = 1;
 

@@ -70,8 +70,8 @@ yaml_syck_parser_handler
     SV *sv;
     AV *seq;
     HV *map;
-	struct parser_xtra *bonus = (struct parser_xtra *)p->bonus;
-	char load_code = bonus->load_code;
+    struct parser_xtra *bonus = (struct parser_xtra *)p->bonus;
+    char load_code = bonus->load_code;
     long i;
     switch (n->kind) {
         case syck_str_kind:
@@ -176,7 +176,7 @@ yaml_syck_parser_handler
                     sv = newSVuv(uv);
                 }
 #ifndef YAML_IS_JSON
-            } else if (load_code && strnEQ(n->type_id, "perl/code:", 10)) {
+            } else if (load_code && (strEQ(n->type_id, "perl/code") || strnEQ(n->type_id, "perl/code:", 10))) {
                 SV *cv;
                 SV *text, *sub;
 
@@ -222,10 +222,18 @@ yaml_syck_parser_handler
                 char *type = strtok(NULL, "");
 
                 if (lang == NULL || (strEQ(lang, "perl"))) {
-					sv = newSVpv(type, 0);
+                    sv = newSVpv(type, 0);
                 } else {
                     sv = newSVpv(form("%s::%s", lang, type), 0);
                 }
+            } else if ( strnEQ( n->type_id, "perl/scalar:", 12 ) ) {
+                char *pkg = n->type_id + 12;
+                sv = newSVpvn(n->data.str->ptr, n->data.str->len);
+                CHECK_UTF8;
+
+                sv = newRV_inc(sv);
+                if ( *pkg != '\0' )
+                    sv_bless(sv, gv_stashpv(pkg, TRUE));
 #endif
             } else {
                 /* croak("unknown node type: %s", n->type_id); */
@@ -235,21 +243,36 @@ yaml_syck_parser_handler
         break;
 
         case syck_seq_kind:
+            /* load the seq into a new AV and place a ref to it in the SV */
             seq = newAV();
             for (i = 0; i < n->data.list->idx; i++) {
                 SV *a = perl_syck_lookup_sym(p, syck_seq_read(n, i));
                 av_push(seq, a);
                 USE_OBJECT(a);
             }
+            /* create the ref to the new array in the sv */
             sv = newRV_noinc((SV*)seq);
 #ifndef YAML_IS_JSON
+
             if (n->type_id) {
+                /* bless it if necessary */
                 char *lang = strtok(n->type_id, "/:");
                 char *type = strtok(NULL, "");
-                while ((type != NULL) && *type == '@') { type++; }
+
+                if ( type != NULL ) {
+                    if (strnEQ(type, "array:", 6)) {
+                        /* !perl/array:Foo::Bar blesses into Foo::Bar */
+                        type += 6;
+                    }
+                    
+                    /* FIXME deprecated - here compatibility with @Foo::Bar style blessing */
+                    while ( *type == '@' ) { type++; }
+                }
 
                 if (lang == NULL || (strEQ(lang, "perl"))) {
-                    sv_bless(sv, gv_stashpv(type, TRUE));
+                    /* !perl/array on it's own causes no blessing */
+                    if ( !strEQ(type, "array") )
+                        sv_bless(sv, gv_stashpv(type, TRUE));
                 } else {
                     sv_bless(sv, gv_stashpv(form("%s::%s", lang, type), TRUE));
                 }
@@ -259,20 +282,40 @@ yaml_syck_parser_handler
 
         case syck_map_kind:
 #ifndef YAML_IS_JSON
-            if ( (n->type_id != NULL) && (strEQ( n->type_id, "perl/ref:" ) ) ) {
+            if ( (n->type_id != NULL) && (strEQ(n->type_id, "perl/ref") || strnEQ( n->type_id, "perl/ref:", 9 ) ) ) {
+                /* handle scalar references, that are a weird type of mappings */
                 SV* key = perl_syck_lookup_sym(p, syck_map_read(n, map_key, 0));
                 SV* val = perl_syck_lookup_sym(p, syck_map_read(n, map_value, 0));
-                char *ref_type = SvPVX(key);
 
                 sv = newRV_noinc(val);
                 USE_OBJECT(val);
-                if (strnNE(ref_type, REF_LITERAL, REF_LITERAL_LENGTH+1)) {
+
+                char *ref_type = SvPVX(key);
+
+                if (strnNE(ref_type, REF_LITERAL, REF_LITERAL_LENGTH+1)) { /* handle the weird audrey scalar ref stuff */
                     sv_bless(sv, gv_stashpv(ref_type, TRUE));
+                } else {
+                    /* bless it if necessary */
+                    char *lang = strtok(n->type_id, "/:");
+                    char *type = strtok(NULL, "");
+
+                    if ( type != NULL && strnEQ(type, "ref:", 4))
+                        /* !perl/ref:Foo::Bar blesses into Foo::Bar */
+                        type += 4;
+
+                    if (lang == NULL || (strEQ(lang, "perl"))) {
+                        /* !perl/ref on it's own causes no blessing */
+                        if ( !strEQ(type, "ref") )
+                            sv_bless(sv, gv_stashpv(type, TRUE));
+                    } else {
+                        sv_bless(sv, gv_stashpv(form("%s::%s", lang, type), TRUE));
+                    }
                 }
             }
             else
 #endif
             {
+                /* load the map into a new HV and place a ref to it in the SV */
                 map = newHV();
                 for (i = 0; i < n->data.pairs->idx; i++) {
                     SV* key = perl_syck_lookup_sym(p, syck_map_read(n, map_key, i));
@@ -283,16 +326,26 @@ yaml_syck_parser_handler
                 }
                 sv = newRV_noinc((SV*)map);
 #ifndef YAML_IS_JSON
-                if (n->type_id) {
+                if (n->type_id)  {
+                    /* bless it if necessary */
                     char *lang = strtok(n->type_id, "/:");
                     char *type = strtok(NULL, "");
-                    if (lang == NULL || strEQ(lang, "perl")) { /*  || (strchr(lang, '.') != NULL)) { */
-                        sv_bless(sv, gv_stashpv(type, TRUE));
+
+                    if ( type != NULL ) {
+                        if (strnEQ(type, "hash:", 5)) {
+                            /* !perl/hash:Foo::Bar blesses into Foo::Bar */
+                            type += 5;
+                        }
+
+                        /* FIXME deprecated - here compatibility with %Foo::Bar style blessing */
+                        while ( *type == '%' ) { type++; }
                     }
-                    else if (type == NULL) {
-                        sv_bless(sv, gv_stashpv(lang, TRUE));
-                    }
-                    else {
+
+                    if (lang == NULL || (strEQ(lang, "perl"))) {
+                        /* !perl/hash on it's own causes no blessing */
+                        if ( !strEQ(type, "hash") ) /* WTF TRAILING NEWLINE?!!! FIXME */
+                            sv_bless(sv, gv_stashpv(type, TRUE));
+                    } else {
                         sv_bless(sv, gv_stashpv(form("%s::%s", lang, type), TRUE));
                     }
                 }
@@ -431,7 +484,7 @@ LoadYAML
 
     bonus.objects = (AV*)sv_2mortal((SV*)newAV());
     bonus.utf8 = SvTRUE(unicode);
-	bonus.load_code = SvTRUE(use_code) || SvTRUE(load_code);
+    bonus.load_code = SvTRUE(use_code) || SvTRUE(load_code);
     parser->bonus = &bonus;
 
     v = syck_parse(parser);
@@ -459,7 +512,7 @@ yaml_syck_emitter_handler
     SV*  sv = (SV*)data;
     struct emitter_xtra *bonus = (struct emitter_xtra *)e->bonus;
     char* tag = bonus->tag;
-	char dump_code = bonus->dump_code;
+    char dump_code = bonus->dump_code;
     char* ref = NULL;
     svtype ty = SvTYPE(sv);
 
@@ -470,6 +523,7 @@ yaml_syck_emitter_handler
     }
 
 #ifndef YAML_IS_JSON
+
     /* Handle blessing into the right class */
     if (sv_isobject(sv)) {
         ref = savepv(sv_reftype(SvRV(sv), TRUE));
@@ -478,8 +532,8 @@ yaml_syck_emitter_handler
         switch (SvTYPE(SvRV(sv))) {
             case SVt_PVAV: { strcat(tag, "array:");  break; }
             case SVt_PVHV: { strcat(tag, "hash:");   break; }
-			case SVt_PVCV: { strcat(tag, "code:");   break; }
-			case SVt_PVGV: { strcat(tag, "glob:");   break; }
+            case SVt_PVCV: { strcat(tag, "code:");   break; }
+            case SVt_PVGV: { strcat(tag, "glob:");   break; }
             /* flatten scalar ref objects so that they dump as !perl/scalar:Foo::Bar foo */
             case SVt_PVMG: {
                                if ( !SvROK(SvRV(sv)) ) {
@@ -511,7 +565,7 @@ yaml_syck_emitter_handler
                 break;
             }
             default: {
-                syck_emit_map(e, (*tag ? tag : "tag:perl:ref"), MAP_NONE);
+                syck_emit_map(e, OBJOF("tag:perl:ref"), MAP_NONE);
                 *tag = '\0';
                 syck_emit_item( e, (st_data_t)newSVpvn_share(REF_LITERAL, REF_LITERAL_LENGTH, 0) );
                 syck_emit_item( e, (st_data_t)SvRV(sv) );
@@ -594,7 +648,7 @@ yaml_syck_emitter_handler
                         HE *he = hv_iternext(hv);
 #endif
                         SV *key = hv_iterkeysv(he);
-                        av_store(av, AvFILLp(av)+1, key);	/* av_push(), really */
+                        av_store(av, AvFILLp(av)+1, key); /* av_push(), really */
                     }
                     STORE_HASH_SORT;
                     for (i = 0; i < len; i++) {
@@ -637,7 +691,7 @@ yaml_syck_emitter_handler
 
                 /* This following code is mostly copypasted from Storable */
                 if ( !dump_code ) {
-                    syck_emit_scalar(e, OBJOF("tag:perl:code:"), SCALAR_QUOTED, 0, 0, 0, "{ \"DUMMY\" }", 11);
+                    syck_emit_scalar(e, OBJOF("tag:perl:code"), SCALAR_QUOTED, 0, 0, 0, "{ \"DUMMY\" }", 11);
                 } else {
                     dSP;
                     I32 len;
@@ -717,6 +771,7 @@ yaml_syck_emitter_handler
                     /* END Storable */
                 }
 #endif
+                *tag = '\0';
                 break;
             }
             case SVt_PVGV:   /* glob (not a filehandle, a symbol table entry) */
@@ -768,7 +823,8 @@ DumpYAML
 
     bonus.port = out;
     New(801, bonus.tag, 512, char);
-	bonus.dump_code = SvTRUE(use_code) || SvTRUE(dump_code);
+    *(bonus.tag) = '\0';
+    bonus.dump_code = SvTRUE(use_code) || SvTRUE(dump_code);
     emitter->bonus = &bonus;
 
     syck_emitter_handler( emitter, PERL_SYCK_EMITTER_HANDLER );

@@ -12,4 +12,8 @@ my $edd;
     no strict 'vars';
     $edd = eval $dd;
 }
+
+my $x = 42;
+bless \$x, "numifyffoo";
+
 is Dumper(Load(Dump($bref2bref))),   $dd, 'YAML::Syck'
