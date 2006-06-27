@@ -176,45 +176,45 @@ yaml_syck_parser_handler
                     sv = newSVuv(uv);
                 }
 #ifndef YAML_IS_JSON
-			} else if (load_code && strnEQ(n->type_id, "perl/code:", 10)) {
-				SV *cv;
-				SV *text, *sub;
+            } else if (load_code && strnEQ(n->type_id, "perl/code:", 10)) {
+                SV *cv;
+                SV *text, *sub;
 
-				/* This code is copypasted from Storable.xs */
+                /* This code is copypasted from Storable.xs */
 
-				/*
-				 * prepend "sub " to the source
-				 */
+                /*
+                 * prepend "sub " to the source
+                 */
 
-				text = newSVpvn(n->data.str->ptr, n->data.str->len);
+                text = newSVpvn(n->data.str->ptr, n->data.str->len);
 
-				sub = newSVpvn("sub ", 4);
-				sv_catpv(sub, SvPV_nolen(text)); /* XXX no sv_catsv! */
-				SvREFCNT_dec(text);
+                sub = newSVpvn("sub ", 4);
+                sv_catpv(sub, SvPV_nolen(text)); /* XXX no sv_catsv! */
+                SvREFCNT_dec(text);
 
-				ENTER;
-				SAVETMPS;
+                ENTER;
+                SAVETMPS;
 
-				cv = eval_pv(SvPV_nolen(sub), TRUE);
+                cv = eval_pv(SvPV_nolen(sub), TRUE);
 
-				sv_2mortal(sub);
+                sv_2mortal(sub);
 
-				if (cv && SvROK(cv) && SvTYPE(SvRV(cv)) == SVt_PVCV) {
-					sv = cv;
-				} else {
-					croak("code %s did not evaluate to a subroutine reference\n", SvPV_nolen(sub));
-				}
-				
-				char *pkg = n->type_id + 10;
-				if ( *pkg != '\0' )
+                if (cv && SvROK(cv) && SvTYPE(SvRV(cv)) == SVt_PVCV) {
+                    sv = cv;
+                } else {
+                    croak("code %s did not evaluate to a subroutine reference\n", SvPV_nolen(sub));
+                }
+
+                char *pkg = n->type_id + 10;
+                if ( *pkg != '\0' )
                     sv_bless(sv, gv_stashpv(pkg, TRUE));
 
-				SvREFCNT_inc(sv); /* XXX seems to be necessary */
+                SvREFCNT_inc(sv); /* XXX seems to be necessary */
 
-				FREETMPS;
-				LEAVE;
+                FREETMPS;
+                LEAVE;
 
-				/* END Storable */
+                /* END Storable */
 
             } else if (strnEQ( n->data.str->ptr, REF_LITERAL, 1+REF_LITERAL_LENGTH)) {
                 /* type tag in a scalar ref */
@@ -611,92 +611,91 @@ yaml_syck_emitter_handler
                 return;
             }
             case SVt_PVCV: {
-                /* XXX TODO XXX */
 #ifdef YAML_IS_JSON
                 syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
 #else
-	
-				/* This following code is mostly copypasted from Storable */
-				if ( !dump_code ) {
-					syck_emit_scalar(e, OBJOF("tag:perl:code:"), SCALAR_QUOTED, 0, 0, 0, "{ \"DUMMY\" }", 11);
-				} else {
-					dSP;
-					I32 len;
-					int count, reallen;
-					SV *text, *bdeparse;
-					CV *cv = (CV*)sv;
 
-					/*
-					 * Require B::Deparse. At least B::Deparse 0.61 is needed for
-					 * blessed code references.
-					 */
-					/* Ownership of both SVs is passed to load_module, which frees them. */
-					load_module(PERL_LOADMOD_NOIMPORT, newSVpvn("B::Deparse",10), newSVnv(0.61));
+                /* This following code is mostly copypasted from Storable */
+                if ( !dump_code ) {
+                    syck_emit_scalar(e, OBJOF("tag:perl:code:"), SCALAR_QUOTED, 0, 0, 0, "{ \"DUMMY\" }", 11);
+                } else {
+                    dSP;
+                    I32 len;
+                    int count, reallen;
+                    SV *text, *bdeparse;
+                    CV *cv = (CV*)sv;
 
-					ENTER;
-					SAVETMPS;
+                    /*
+                     * Require B::Deparse. At least B::Deparse 0.61 is needed for
+                     * blessed code references.
+                     */
+                    /* Ownership of both SVs is passed to load_module, which frees them. */
+                    load_module(PERL_LOADMOD_NOIMPORT, newSVpvn("B::Deparse",10), newSVnv(0.61));
 
-					/*
-					 * create the B::Deparse object
-					 */
+                    ENTER;
+                    SAVETMPS;
 
-					PUSHMARK(sp);
-					XPUSHs(sv_2mortal(newSVpvn("B::Deparse",10)));
-					PUTBACK;
-					count = call_method("new", G_SCALAR);
-					SPAGAIN;
-					if (count != 1)
-						croak("Unexpected return value from B::Deparse::new\n");
-					bdeparse = POPs;
+                    /*
+                     * create the B::Deparse object
+                     */
 
-					/*
-					 * call the coderef2text method
-					 */
+                    PUSHMARK(sp);
+                    XPUSHs(sv_2mortal(newSVpvn("B::Deparse",10)));
+                    PUTBACK;
+                    count = call_method("new", G_SCALAR);
+                    SPAGAIN;
+                    if (count != 1)
+                        croak("Unexpected return value from B::Deparse::new\n");
+                    bdeparse = POPs;
 
-					PUSHMARK(sp);
-					XPUSHs(bdeparse); /* XXX is this already mortal? */
-					XPUSHs(sv_2mortal(newRV_inc((SV*)cv)));
-					PUTBACK;
-					count = call_method("coderef2text", G_SCALAR);
-					SPAGAIN;
-					if (count != 1)
-						croak("Unexpected return value from B::Deparse::coderef2text\n");
+                    /*
+                     * call the coderef2text method
+                     */
 
-					text = POPs;
-					len = SvLEN(text);
-					reallen = strlen(SvPV_nolen(text));
+                    PUSHMARK(sp);
+                    XPUSHs(bdeparse); /* XXX is this already mortal? */
+                    XPUSHs(sv_2mortal(newRV_inc((SV*)cv)));
+                    PUTBACK;
+                    count = call_method("coderef2text", G_SCALAR);
+                    SPAGAIN;
+                    if (count != 1)
+                        croak("Unexpected return value from B::Deparse::coderef2text\n");
 
-					/*
-					 * Empty code references or XS functions are deparsed as
-					 * "(prototype) ;" or ";".
-					 */
+                    text = POPs;
+                    len = SvLEN(text);
+                    reallen = strlen(SvPV_nolen(text));
 
-					if (len == 0 || *(SvPV_nolen(text)+reallen-1) == ';') {
-						croak("The result of B::Deparse::coderef2text was empty - maybe you're trying to serialize an XS function?\n");
-					}
+                    /*
+                     * Empty code references or XS functions are deparsed as
+                     * "(prototype) ;" or ";".
+                     */
 
-					/* 
-					 * Signal code by emitting SX_CODE.
-					 */
+                    if (len == 0 || *(SvPV_nolen(text)+reallen-1) == ';') {
+                        croak("The result of B::Deparse::coderef2text was empty - maybe you're trying to serialize an XS function?\n");
+                    }
+
+                    /* 
+                     * Signal code by emitting SX_CODE.
+                     */
 
 #if 0
-					/* SYCK adds anchors for us automatically */
+                    /* SYCK adds anchors for us automatically */
 
-					PUTMARK(SX_CODE);
-					cxt->tagnum++;   /* necessary, as SX_CODE is a SEEN() candidate */
+                    PUTMARK(SX_CODE);
+                    cxt->tagnum++;   /* necessary, as SX_CODE is a SEEN() candidate */
 #endif
 
-					/*
-					 * Now store the source code.
-					 */
+                    /*
+                     * Now store the source code.
+                     */
 
-					syck_emit_scalar(e, OBJOF("tag:perl:code:"), SCALAR_UTF8, 0, 0, 0, SvPV_nolen(text), len-1);
+                    syck_emit_scalar(e, OBJOF("tag:perl:code"), SCALAR_UTF8, 0, 0, 0, SvPV_nolen(text), len-1);
 
-					FREETMPS;
-					LEAVE;
+                    FREETMPS;
+                    LEAVE;
 
-					/* END Storable */
-				}
+                    /* END Storable */
+                }
 #endif
                 break;
             }
