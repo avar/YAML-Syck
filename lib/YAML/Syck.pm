@@ -1,11 +1,11 @@
 package YAML::Syck;
 use strict;
-use vars qw( @ISA @EXPORT $VERSION $ImplicitTyping $UseCode $LoadCode $DumpCode $SortKeys );
+use vars qw( @ISA @EXPORT $VERSION $ImplicitTyping $UseCode $LoadCode $DumpCode $SortKeys $DeparseObject );
 use 5.00307;
 use Exporter;
 
 BEGIN {
-    $VERSION = '0.60';
+    $VERSION = '0.61';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 
@@ -24,6 +24,11 @@ BEGIN {
 
     *Load = \&YAML::Syck::LoadYAML;
     *Dump = \&YAML::Syck::DumpYAML;
+
+    eval {
+        require B::Deparse;
+        $DeparseObject = B::Deparse->new;
+    }
 }
 
 

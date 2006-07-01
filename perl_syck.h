@@ -705,36 +705,20 @@ yaml_syck_emitter_handler
                 if ( !dump_code ) {
                     syck_emit_scalar(e, OBJOF("tag:!perl:code:"), SCALAR_QUOTED, 0, 0, 0, "{ \"DUMMY\" }", 11);
                 }
-#ifdef PERL_LOADMOD_NOIMPORT
                 else {
                     dSP;
                     I32 len;
                     int count, reallen;
-                    SV *text, *bdeparse;
+                    SV *text;
                     CV *cv = (CV*)sv;
+                    SV *bdeparse = GvSV(gv_fetchpv(form("%s::DeparseObject", PACKAGE_NAME), TRUE, SVt_PV));
 
-                    /*
-                     * Require B::Deparse. At least B::Deparse 0.61 is needed for
-                     * blessed code references.
-                     */
-                    /* Ownership of both SVs is passed to load_module, which frees them. */
-                    load_module(PERL_LOADMOD_NOIMPORT, newSVpvn("B::Deparse",10), newSVnv(0.61));
+                    if (!SvTRUE(bdeparse)) {
+                        croak("B::Deparse initialization failed -- cannot dump code object");
+                    }
 
                     ENTER;
                     SAVETMPS;
-
-                    /*
-                     * create the B::Deparse object
-                     */
-
-                    PUSHMARK(sp);
-                    XPUSHs(sv_2mortal(newSVpvn("B::Deparse",10)));
-                    PUTBACK;
-                    count = call_method("new", G_SCALAR);
-                    SPAGAIN;
-                    if (count != 1)
-                        croak("Unexpected return value from B::Deparse::new\n");
-                    bdeparse = POPs;
 
                     /*
                      * call the coderef2text method
@@ -746,8 +730,9 @@ yaml_syck_emitter_handler
                     PUTBACK;
                     count = call_method("coderef2text", G_SCALAR);
                     SPAGAIN;
-                    if (count != 1)
+                    if (count != 1) {
                         croak("Unexpected return value from B::Deparse::coderef2text\n");
+                    }
 
                     text = POPs;
                     len = SvLEN(text);
@@ -784,7 +769,6 @@ yaml_syck_emitter_handler
 
                     /* END Storable */
                 }
-#endif
 #endif
                 *tag = '\0';
                 break;

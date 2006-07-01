@@ -1,3 +1,8 @@
+[Changes for 0.61 (JSON::Syck 0.13) - 2006-07-01]
+
+* Fix segmentation faults introduced by pre-loading B::Deparse.
+  Reported by: Randal Schwartz, Tatsuhiko Miyagawa
+
 [Changes for 0.60 (JSON::Syck 0.13) - 2006-06-30]
 
 * Completely change the way YAML tagging of references again, this time
