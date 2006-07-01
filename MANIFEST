@@ -1,5 +1,6 @@
 bytecode.c
 Changes
+COMPATIBILITY
 COPYING
 emitter.c
 gram.c
@@ -47,6 +48,7 @@ t/json-basic.t
 t/json-empty.t
 t/json-indent.t
 t/json-minus.t
+t/json-newline.t
 t/json-null.t
 t/json-refs.t
 t/TestYAML.pm

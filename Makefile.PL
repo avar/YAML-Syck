@@ -14,7 +14,7 @@ See the COMPATIBILITY file for more information.
 _
 
 if (!is_admin()) {
-    exit() unless prompt("Continue installing YAML.pm?", 'y') =~ /^y/i;
+    exit() unless prompt("Continue installing YAML::Syck?", 'y') =~ /^y/i;
 }
 
 name            'YAML-Syck';
