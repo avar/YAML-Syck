@@ -179,6 +179,7 @@ yaml_syck_parser_handler
                 else {
                     sv = newSVuv(uv);
                 }
+#ifdef PERL_LOADMOD_NOIMPORT
 #ifndef YAML_IS_JSON
             } else if (load_code && (strEQ(id, "perl/code") || strnEQ(id, "perl/code:", 10))) {
                 SV *cv;
@@ -240,6 +241,7 @@ yaml_syck_parser_handler
                 if ( *pkg != '\0' ) {
                     sv_bless(sv, gv_stashpv(pkg, TRUE));
                 }
+#endif
 #endif
             } else {
                 /* croak("unknown node type: %s", id); */
@@ -702,7 +704,9 @@ yaml_syck_emitter_handler
                 /* This following code is mostly copypasted from Storable */
                 if ( !dump_code ) {
                     syck_emit_scalar(e, OBJOF("tag:!perl:code:"), SCALAR_QUOTED, 0, 0, 0, "{ \"DUMMY\" }", 11);
-                } else {
+                }
+#ifdef PERL_LOADMOD_NOIMPORT
+                else {
                     dSP;
                     I32 len;
                     int count, reallen;
@@ -781,6 +785,7 @@ yaml_syck_emitter_handler
                     /* END Storable */
                 }
 #endif
+#endif
                 *tag = '\0';
                 break;
             }
@@ -856,9 +861,11 @@ DumpYAML
     }
 #endif
 
+#ifdef SvUTF8_on
     if (SvTRUE(unicode)) {
         SvUTF8_on(out);
     }
+#endif
 
     FREETMPS; LEAVE;
 

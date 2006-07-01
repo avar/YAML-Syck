@@ -12,6 +12,10 @@
 #include "ppport_math.h"
 #include "ppport_sort.h"
 
+#ifndef is_utf8_string
+#define is_utf8_string(x, y) (0==1)
+#endif
+
 #undef DEBUG /* maybe defined in perl.h */
 #include <syck.h>
 
@@ -43,10 +47,14 @@ SV* perl_syck_lookup_sym( SyckParser *p, SYMID v) {
     return obj;
 }
 
+#ifdef SvUTF8_on
 #define CHECK_UTF8 \
     if (((struct parser_xtra *)p->bonus)->utf8 \
       && is_utf8_string((U8*)n->data.str->ptr, n->data.str->len)) \
         SvUTF8_on(sv);
+#else
+#define CHECK_UTF8 ;
+#endif
 
 void perl_syck_mark_emitter(SyckEmitter *e, SV *sv) {
     if (syck_emitter_mark_node(e, (st_data_t)sv) == 0) {
