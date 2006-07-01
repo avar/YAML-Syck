@@ -1,5 +1,6 @@
 package JSON::Syck;
 use strict;
+use Exporter;
 use YAML::Syck ();
 
 $JSON::Syck::VERSION = '0.13';
