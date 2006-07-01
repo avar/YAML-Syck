@@ -710,17 +710,11 @@ yaml_syck_emitter_handler
                     dSP;
                     I32 len;
                     int count, reallen;
-                    SV *text, *bdeparse;
+                    SV *text;
                     CV *cv = (CV*)sv;
+                    SV *bdeparse = GvSV(gv_fetchpv(form("%s::DeparseObject", PACKAGE_NAME), TRUE, SVt_PV));
 
                     warn("1 little");
-                    /*
-                     * Require B::Deparse. At least B::Deparse 0.61 is needed for
-                     * blessed code references.
-                     */
-                    /* Ownership of both SVs is passed to load_module, which frees them. */
-                    load_module(PERL_LOADMOD_NOIMPORT, newSVpvn("B::Deparse",10), newSVnv(0.61));
-
                     warn("2 little");
                     ENTER;
                     SAVETMPS;
@@ -730,16 +724,8 @@ yaml_syck_emitter_handler
                      */
 
                     warn("3 little indians");
-                    PUSHMARK(sp);
-                    XPUSHs(sv_2mortal(newSVpvn("B::Deparse",10)));
-                    PUTBACK;
                     warn("4 little");
-                    count = call_method("new", G_SCALAR);
-                    SPAGAIN;
                     warn("5 little");
-                    if (count != 1)
-                        croak("Unexpected return value from B::Deparse::new\n");
-                    bdeparse = POPs;
                     warn("6 little indians");
 
                     /*
