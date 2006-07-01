@@ -6,8 +6,8 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.45 of YAML::Syck, released
-May 27, 2006.
+This document describes version 0.60 of YAML::Syck, released
+June 30, 2006.
 
 =head1 SYNOPSIS
 
@@ -77,11 +77,11 @@ These control whether or not to try and eval/deparse perl source code.
 The current implementation bundles libsyck source code; if your system has a
 side-wide shared libsyck, it will I<not> be used.
 
-Tag names such as C<!perl/Foo> is blessed into the package C<Foo>, but the
-C<!hs/Foo> tag is blessed into C<hs::Foo>.  Note that this holds true even if
-the tag contains non-word characters; for example, C<!haskell.org/Foo> is
-blessed into C<haskell.org::Foo>.  Please use L<Class::Rebless> to cast it into
-other user-defined packages.
+Tag names such as C<!!perl/hash:Foo> is blessed into the package C<Foo>, but
+the C<!hs/foo> and C<!!hs/Foo> tags are blessed into C<hs::Foo>.  Note that
+this holds true even if the tag contains non-word characters; for example,
+C<!haskell.org/Foo> is blessed into C<haskell.org::Foo>.  Please use
+L<Class::Rebless> to cast it into other user-defined packages.
 
 =head1 SEE ALSO
 

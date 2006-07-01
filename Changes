@@ -1,3 +1,21 @@
+[Changes for 0.60 (JSON::Syck 0.13) - 2006-06-30]
+
+* Completely change the way YAML tagging of references again, this time
+  using !!perl instead of !perl for compatibility with YAML.pm and other
+  YAML 1.1 implementations.
+
+[Changes for 0.46_02 (JSON::Syck 0.13) - 2006-06-29]
+
+* Completely change the way YAML tagging of references and
+  blessed references work: See http://pyyaml.org/wiki/PerlTagScheme
+  for the new specification.
+
+  Note that this means the emitter BREAKS COMPATIBILITY with earlier
+  versions of YAML loaders (both YAML::Syck and YAML.pm), although it
+  will still load YAML streams produced by earlier loaders.
+
+  Contributed by: Yuval Kogman
+
 [Changes for 0.46_01 (JSON::Syck 0.13) - 2006-06-25]
 
 * Add support for code references in YAML

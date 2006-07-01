@@ -2,6 +2,21 @@ use strict;
 use lib '.';
 use inc::Module::Install;
 
+print << '_';
+
+*** WARNING ***
+
+This release breaks compatibility with versions earlier than version 0.60 of
+YAML::Syck and YAML.pm when serializing blessed references.
+
+See the COMPATIBILITY file for more information.
+
+_
+
+if (!is_admin()) {
+    exit() unless prompt("Continue installing YAML::Syck?", 'y') =~ /^y/i;
+}
+
 name            'YAML-Syck';
 all_from        'lib/YAML/Syck.pm';
 cc_inc_paths    '.';
