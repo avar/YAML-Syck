@@ -13,7 +13,17 @@ See the COMPATIBILITY file for more information.
 
 _
 
-if (!is_admin()) {
+my $bad;
+if (eval { require YAML; $YAML::VERSION < 0.60 }) {
+    print "*** Pre-0.60 version of YAML.pm ($YAML::VERSION) detected.\n";
+    $bad++;
+}
+if (eval { require YAML::Syck; $YAML::Syck::VERSION < 0.60 }) {
+    print "*** Pre-0.60 version of YAML::Syck ($YAML::Syck::VERSION) detected.\n";
+    $bad++;
+}
+
+if ($bad and !is_admin()) {
     exit() unless prompt("Continue installing YAML::Syck?", 'y') =~ /^y/i;
 }
 
