@@ -13,6 +13,9 @@ See the COMPATABILITY file for more information.
 
 _
 
+if (!is_admin()) {
+    exit() unless prompt("Continue installing YAML.pm?", 'y') =~ /^y/i;
+}
 
 name            'YAML-Syck';
 all_from        'lib/YAML/Syck.pm';
