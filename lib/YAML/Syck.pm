@@ -4,7 +4,7 @@ use vars qw( @ISA @EXPORT $VERSION $ImplicitTyping $UseCode $LoadCode $DumpCode 
 use 5.00307;
 
 BEGIN {
-    $VERSION = '0.46_02';
+    $VERSION = '0.60';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 

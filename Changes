@@ -1,4 +1,4 @@
-[Changes for 0.46_03 (JSON::Syck 0.13) - 2006-06-30]
+[Changes for 0.60 (JSON::Syck 0.13) - 2006-06-30]
 
 * Completely change the way YAML tagging of references again, this time
   using !!perl instead of !perl for compatibility with YAML.pm and other
