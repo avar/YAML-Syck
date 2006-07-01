@@ -1,9 +1,13 @@
-use t::TestYAML tests => 17;
+use t::TestYAML tests => 19;
 
 ok(YAML::Syck->VERSION);
 
 is(Dump(bless({}, 'foo')),    "--- !!perl/hash:foo {}\n\n");
-my $x = Load("--- !!perl/foo {a: b}\n");
+my $w = Load("--- !!perl/hash:foo {a: b}\n");
+is(ref($w), 'foo');
+is($w->{a}, 'b');
+
+my $x = Load("--- !perl/foo {a: b}\n");
 is(ref($x), 'foo');
 is($x->{a}, 'b');
 

@@ -210,8 +210,9 @@ yaml_syck_parser_handler
                 }
 
                 char *pkg = id + 10;
-                if ( *pkg != '\0' )
+                if ( *pkg != '\0' ) {
                     sv_bless(sv, gv_stashpv(pkg, TRUE));
+                }
 
                 SvREFCNT_inc(sv); /* XXX seems to be necessary */
 
@@ -236,8 +237,9 @@ yaml_syck_parser_handler
                 CHECK_UTF8;
 
                 sv = newRV_inc(sv);
-                if ( *pkg != '\0' )
+                if ( *pkg != '\0' ) {
                     sv_bless(sv, gv_stashpv(pkg, TRUE));
+                }
 #endif
             } else {
                 /* croak("unknown node type: %s", id); */
@@ -275,8 +277,9 @@ yaml_syck_parser_handler
 
                 if (lang == NULL || (strEQ(lang, "perl"))) {
                     /* !perl/array on it's own causes no blessing */
-                    if ( !strEQ(type, "array") )
+                    if ( !strEQ(type, "array") ) {
                         sv_bless(sv, gv_stashpv(type, TRUE));
+                    }
                 } else {
                     sv_bless(sv, gv_stashpv(form("%s::%s", lang, type), TRUE));
                 }
@@ -303,14 +306,16 @@ yaml_syck_parser_handler
                     char *lang = strtok(id, "/:");
                     char *type = strtok(NULL, "");
 
-                    if ( type != NULL && strnEQ(type, "ref:", 4))
+                    if ( type != NULL && strnEQ(type, "ref:", 4)) {
                         /* !perl/ref:Foo::Bar blesses into Foo::Bar */
                         type += 4;
+                    }
 
                     if (lang == NULL || (strEQ(lang, "perl"))) {
                         /* !perl/ref on it's own causes no blessing */
-                        if ( !strEQ(type, "ref") )
+                        if ( !strEQ(type, "ref:") && (*type != NULL)) {
                             sv_bless(sv, gv_stashpv(type, TRUE));
+                        }
                     } else {
                         sv_bless(sv, gv_stashpv(form("%s::%s", lang, type), TRUE));
                     }
@@ -347,8 +352,9 @@ yaml_syck_parser_handler
 
                     if (lang == NULL || (strEQ(lang, "perl"))) {
                         /* !perl/hash on it's own causes no blessing */
-                        if ( !strEQ(type, "hash") ) /* WTF TRAILING NEWLINE?!!! FIXME */
+                        if ( !strEQ(type, "hash") ) /* WTF TRAILING NEWLINE?!!! FIXME */ {
                             sv_bless(sv, gv_stashpv(type, TRUE));
+                        }
                     } else {
                         sv_bless(sv, gv_stashpv(form("%s::%s", lang, type), TRUE));
                     }
@@ -569,7 +575,7 @@ yaml_syck_emitter_handler
                 break;
             }
             default: {
-                syck_emit_map(e, OBJOF("tag:!perl:ref"), MAP_NONE);
+                syck_emit_map(e, OBJOF("tag:!perl:ref:"), MAP_NONE);
                 *tag = '\0';
                 syck_emit_item( e, (st_data_t)newSVpvn_share(REF_LITERAL, REF_LITERAL_LENGTH, 0) );
                 syck_emit_item( e, (st_data_t)SvRV(sv) );
@@ -695,7 +701,7 @@ yaml_syck_emitter_handler
 
                 /* This following code is mostly copypasted from Storable */
                 if ( !dump_code ) {
-                    syck_emit_scalar(e, OBJOF("tag:!perl:code"), SCALAR_QUOTED, 0, 0, 0, "{ \"DUMMY\" }", 11);
+                    syck_emit_scalar(e, OBJOF("tag:!perl:code:"), SCALAR_QUOTED, 0, 0, 0, "{ \"DUMMY\" }", 11);
                 } else {
                     dSP;
                     I32 len;
@@ -767,7 +773,7 @@ yaml_syck_emitter_handler
                      * Now store the source code.
                      */
 
-                    syck_emit_scalar(e, OBJOF("tag:!perl:code"), SCALAR_UTF8, 0, 0, 0, SvPV_nolen(text), len-1);
+                    syck_emit_scalar(e, OBJOF("tag:!perl:code:"), SCALAR_UTF8, 0, 0, 0, SvPV_nolen(text), len-1);
 
                     FREETMPS;
                     LEAVE;
