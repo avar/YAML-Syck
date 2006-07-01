@@ -7,22 +7,22 @@ ok(YAML::Syck->VERSION);
 is(Dump(42),    "--- 42\n");
 is(Load("--- 42\n"), 42);
 
-is(Dump(\42),    "--- !perl/ref \n=: 42\n");
-is(${Load("--- !perl/ref: \n=: 42\n")}, 42);
+is(Dump(\42),    "--- !!perl/ref \n=: 42\n");
+is(${Load("--- !!perl/ref: \n=: 42\n")}, 42);
 
 my $x;
 $x = \$x;
-is(Dump($x),     "--- &1 !perl/ref \n=: *1\n");
-is(Dump(Load(Dump($x))),     "--- &1 !perl/ref \n=: *1\n");
+is(Dump($x),     "--- &1 !!perl/ref \n=: *1\n");
+is(Dump(Load(Dump($x))),     "--- &1 !!perl/ref \n=: *1\n");
 
 $YAML::Syck::DumpCode = 0;
-is(Dump(sub{ 42 }),  "--- !perl/code '{ \"DUMMY\" }'\n");
+is(Dump(sub{ 42 }),  "--- !!perl/code '{ \"DUMMY\" }'\n");
 $YAML::Syck::DumpCode = 1;
-ok(Dump(sub{ 42 }) =~ m#--- !perl/code.*?{.*?42.*?}$#s);
+ok(Dump(sub{ 42 }) =~ m#--- !!perl/code.*?{.*?42.*?}$#s);
 
 my $like_yaml_pm = 0;
 $YAML::Syck::LoadCode = 0;
-ok( my $not_sub = Load("--- !perl/Class '{ \"foo\" . shift }'\n") );
+ok( my $not_sub = Load("--- !!perl/Class '{ \"foo\" . shift }'\n") );
 
 if ( $like_yaml_pm ) {
 	is( ref($not_sub), "code" );
@@ -34,7 +34,7 @@ if ( $like_yaml_pm ) {
 
 
 $YAML::Syck::LoadCode = 1;
-my $sub = Load("--- !perl/code: '{ \"foo\" . \$_[0] }'\n");
+my $sub = Load("--- !!perl/code: '{ \"foo\" . \$_[0] }'\n");
 
 ok( defined $sub );
 
@@ -73,11 +73,11 @@ foo: *1
 
 my $r; $r = \$r;
 is(Dump($r), << '.');
---- &1 !perl/ref 
+--- &1 !!perl/ref 
 =: *1
 .
 is(Dump(Load(Dump($r))), << '.');
---- &1 !perl/ref 
+--- &1 !!perl/ref 
 =: *1
 .
 

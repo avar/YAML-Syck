@@ -98,7 +98,7 @@ SyckNode * perl_syck_bad_anchor_handler(SyckParser *p, char *a) {
         (SYMID)newSVpvn_share("name", 4, 0),
         (SYMID)newSVpvn_share(a, strlen(a), 0)
     );
-    badanc->type_id = syck_strndup( "perl:YAML::Syck::BadAlias", 25 );
+    badanc->type_id = syck_strndup( "!perl:YAML::Syck::BadAlias", 25 );
     return badanc;
 }
 
