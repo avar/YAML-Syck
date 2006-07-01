@@ -713,6 +713,7 @@ yaml_syck_emitter_handler
                     SV *text, *bdeparse;
                     CV *cv = (CV*)sv;
 
+                    warn("1 little");
                     /*
                      * Require B::Deparse. At least B::Deparse 0.61 is needed for
                      * blessed code references.
@@ -720,6 +721,7 @@ yaml_syck_emitter_handler
                     /* Ownership of both SVs is passed to load_module, which frees them. */
                     load_module(PERL_LOADMOD_NOIMPORT, newSVpvn("B::Deparse",10), newSVnv(0.61));
 
+                    warn("2 little");
                     ENTER;
                     SAVETMPS;
 
@@ -727,14 +729,18 @@ yaml_syck_emitter_handler
                      * create the B::Deparse object
                      */
 
+                    warn("3 little indians");
                     PUSHMARK(sp);
                     XPUSHs(sv_2mortal(newSVpvn("B::Deparse",10)));
                     PUTBACK;
+                    warn("4 little");
                     count = call_method("new", G_SCALAR);
                     SPAGAIN;
+                    warn("5 little");
                     if (count != 1)
                         croak("Unexpected return value from B::Deparse::new\n");
                     bdeparse = POPs;
+                    warn("6 little indians");
 
                     /*
                      * call the coderef2text method
@@ -744,11 +750,13 @@ yaml_syck_emitter_handler
                     XPUSHs(bdeparse); /* XXX is this already mortal? */
                     XPUSHs(sv_2mortal(newRV_inc((SV*)cv)));
                     PUTBACK;
+                    warn("7 little");
                     count = call_method("coderef2text", G_SCALAR);
                     SPAGAIN;
                     if (count != 1)
                         croak("Unexpected return value from B::Deparse::coderef2text\n");
 
+                    warn("8 little");
                     text = POPs;
                     len = SvLEN(text);
                     reallen = strlen(SvPV_nolen(text));
@@ -758,6 +766,7 @@ yaml_syck_emitter_handler
                      * "(prototype) ;" or ";".
                      */
 
+                    warn("9 little indians");
                     if (len == 0 || *(SvPV_nolen(text)+reallen-1) == ';') {
                         croak("The result of B::Deparse::coderef2text was empty - maybe you're trying to serialize an XS function?\n");
                     }
@@ -778,6 +787,7 @@ yaml_syck_emitter_handler
                      */
 
                     syck_emit_scalar(e, OBJOF("tag:!perl:code:"), SCALAR_UTF8, 0, 0, 0, SvPV_nolen(text), len-1);
+                    warn("10 little indian perls");
 
                     FREETMPS;
                     LEAVE;
