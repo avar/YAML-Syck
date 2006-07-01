@@ -5,7 +5,7 @@ use 5.00307;
 use Exporter;
 
 BEGIN {
-    $VERSION = '0.60';
+    $VERSION = '0.61';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 

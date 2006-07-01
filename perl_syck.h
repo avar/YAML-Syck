@@ -705,7 +705,6 @@ yaml_syck_emitter_handler
                 if ( !dump_code ) {
                     syck_emit_scalar(e, OBJOF("tag:!perl:code:"), SCALAR_QUOTED, 0, 0, 0, "{ \"DUMMY\" }", 11);
                 }
-#ifdef PERL_LOADMOD_NOIMPORT
                 else {
                     dSP;
                     I32 len;
@@ -714,19 +713,12 @@ yaml_syck_emitter_handler
                     CV *cv = (CV*)sv;
                     SV *bdeparse = GvSV(gv_fetchpv(form("%s::DeparseObject", PACKAGE_NAME), TRUE, SVt_PV));
 
-                    warn("1 little");
-                    warn("2 little");
+                    if (!SvTRUE(bdeparse)) {
+                        croak("B::Deparse initialization failed -- cannot dump code object");
+                    }
+
                     ENTER;
                     SAVETMPS;
-
-                    /*
-                     * create the B::Deparse object
-                     */
-
-                    warn("3 little indians");
-                    warn("4 little");
-                    warn("5 little");
-                    warn("6 little indians");
 
                     /*
                      * call the coderef2text method
@@ -736,13 +728,12 @@ yaml_syck_emitter_handler
                     XPUSHs(bdeparse); /* XXX is this already mortal? */
                     XPUSHs(sv_2mortal(newRV_inc((SV*)cv)));
                     PUTBACK;
-                    warn("7 little");
                     count = call_method("coderef2text", G_SCALAR);
                     SPAGAIN;
-                    if (count != 1)
+                    if (count != 1) {
                         croak("Unexpected return value from B::Deparse::coderef2text\n");
+                    }
 
-                    warn("8 little");
                     text = POPs;
                     len = SvLEN(text);
                     reallen = strlen(SvPV_nolen(text));
@@ -752,7 +743,6 @@ yaml_syck_emitter_handler
                      * "(prototype) ;" or ";".
                      */
 
-                    warn("9 little indians");
                     if (len == 0 || *(SvPV_nolen(text)+reallen-1) == ';') {
                         croak("The result of B::Deparse::coderef2text was empty - maybe you're trying to serialize an XS function?\n");
                     }
@@ -773,14 +763,12 @@ yaml_syck_emitter_handler
                      */
 
                     syck_emit_scalar(e, OBJOF("tag:!perl:code:"), SCALAR_UTF8, 0, 0, 0, SvPV_nolen(text), len-1);
-                    warn("10 little indian perls");
 
                     FREETMPS;
                     LEAVE;
 
                     /* END Storable */
                 }
-#endif
 #endif
                 *tag = '\0';
                 break;
