@@ -6,10 +6,10 @@ print << '_';
 
 *** WARNING ***
 
-This release breaks compatability with versions earlier than version 0.60 of
+This release breaks compatibility with versions earlier than version 0.60 of
 YAML::Syck and YAML.pm when serializing blessed references.
 
-See the COMPATABILITY file for more information.
+See the COMPATIBILITY file for more information.
 
 _
 
