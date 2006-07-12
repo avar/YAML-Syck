@@ -92,7 +92,6 @@ void perl_syck_mark_emitter(SyckEmitter *e, SV *sv) {
 #else
                 HE *he = hv_iternext((HV*)sv);
 #endif
-                I32 keylen;
                 SV *val = hv_iterval((HV*)sv, he);
                 perl_syck_mark_emitter( e, val );
             }
