@@ -32,7 +32,7 @@ all_from        'lib/YAML/Syck.pm';
 cc_inc_paths    '.';
 cc_files        (glob("*.c"), (-e 'Syck.c' ? () : 'Syck.c'));
 
-# cc_optimize_flags '-g3';
+#cc_optimize_flags '-g4';
 
 can_cc or die "This module requires a C compiler";
 

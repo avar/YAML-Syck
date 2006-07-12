@@ -70,10 +70,12 @@ yaml_syck_parser_handler
     SV *sv;
     AV *seq;
     HV *map;
-    struct parser_xtra *bonus = (struct parser_xtra *)p->bonus;
-    char load_code = bonus->load_code;
     long i;
     char *id = n->type_id;
+#ifndef YAML_IS_JSON
+    struct parser_xtra *bonus = (struct parser_xtra *)p->bonus;
+    char load_code = bonus->load_code;
+#endif
 
     while (id && (*id == '!')) { id++; }
 
@@ -184,6 +186,7 @@ yaml_syck_parser_handler
             } else if (load_code && (strEQ(id, "perl/code") || strnEQ(id, "perl/code:", 10))) {
                 SV *cv;
                 SV *text, *sub;
+                char *pkg = id + 10;
 
                 /* This code is copypasted from Storable.xs */
 
@@ -210,7 +213,6 @@ yaml_syck_parser_handler
                     croak("code %s did not evaluate to a subroutine reference\n", SvPV_nolen(sub));
                 }
 
-                char *pkg = id + 10;
                 if ( *pkg != '\0' ) {
                     sv_bless(sv, gv_stashpv(pkg, TRUE));
                 }
@@ -295,11 +297,10 @@ yaml_syck_parser_handler
                 /* handle scalar references, that are a weird type of mappings */
                 SV* key = perl_syck_lookup_sym(p, syck_map_read(n, map_key, 0));
                 SV* val = perl_syck_lookup_sym(p, syck_map_read(n, map_value, 0));
+                char *ref_type = SvPVX(key);
 
                 sv = newRV_noinc(val);
                 USE_OBJECT(val);
-
-                char *ref_type = SvPVX(key);
 
                 if (strnNE(ref_type, REF_LITERAL, REF_LITERAL_LENGTH+1)) { /* handle the weird audrey scalar ref stuff */
                     sv_bless(sv, gv_stashpv(ref_type, TRUE));
@@ -315,7 +316,7 @@ yaml_syck_parser_handler
 
                     if (lang == NULL || (strEQ(lang, "perl"))) {
                         /* !perl/ref on it's own causes no blessing */
-                        if ( !strEQ(type, "ref:") && (*type != NULL)) {
+                        if ( !strEQ(type, "ref:") && (*type != '\0')) {
                             sv_bless(sv, gv_stashpv(type, TRUE));
                         }
                     } else {
@@ -451,13 +452,11 @@ void perl_json_postprocess(SV *sv) {
 }
 #endif
 
-static SV *
 #ifdef YAML_IS_JSON
-LoadJSON
+static SV * LoadJSON (char *s) {
 #else
-LoadYAML
+static SV * LoadYAML (char *s) {
 #endif
-(char *s) {
     SYMID v;
     SyckParser *parser;
     struct parser_xtra bonus;
@@ -524,9 +523,11 @@ yaml_syck_emitter_handler
     SV*  sv = (SV*)data;
     struct emitter_xtra *bonus = (struct emitter_xtra *)e->bonus;
     char* tag = bonus->tag;
+    svtype ty = SvTYPE(sv);
+#ifndef YAML_IS_JSON
     char dump_code = bonus->dump_code;
     char* ref = NULL;
-    svtype ty = SvTYPE(sv);
+#endif
 
 #define OBJECT_TAG     "tag:!perl:"
     
@@ -667,10 +668,6 @@ yaml_syck_emitter_handler
 #ifdef HAS_RESTRICTED_HASHES
                         int placeholders = (int)HvPLACEHOLDERS_get(hv);
 #endif
-                        unsigned char flags = 0;
-                        char *keyval;
-                        STRLEN keylen_tmp;
-                        I32 keylen;
                         SV *key = av_shift(av);
                         HE *he  = hv_fetch_ent(hv, key, 0, 0);
                         SV *val = HeVAL(he);
@@ -686,7 +683,6 @@ yaml_syck_emitter_handler
 #else
                         HE *he = hv_iternext(hv);
 #endif
-                        I32 keylen;
                         SV *key = hv_iterkeysv(he);
                         SV *val = hv_iterval(hv, he);
                         syck_emit_item( e, (st_data_t)key );
@@ -788,7 +784,7 @@ yaml_syck_emitter_handler
             }
         }
     }
-cleanup:
+/* cleanup: */
     *tag = '\0';
 }
 
