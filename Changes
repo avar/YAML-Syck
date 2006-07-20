@@ -1,3 +1,9 @@
+[Changes for 0.63 (JSON::Syck 0.14) - 2006-07-20]
+
+* When JSON's SingleQuote mode is set to true, single quotes
+  inside JSON strings is now escaped properly.
+  Reported by: Nelson Elhage
+
 [Changes for 0.62 (JSON::Syck 0.13) - 2006-07-11]
 
 * Fix compilation with Microsoft Visual C++.
