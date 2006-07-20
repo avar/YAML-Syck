@@ -3,7 +3,7 @@ use strict;
 use Exporter;
 use YAML::Syck ();
 
-$JSON::Syck::VERSION = '0.13';
+$JSON::Syck::VERSION = '0.14';
 
 *Load = \&YAML::Syck::LoadJSON;
 *Dump = \&YAML::Syck::DumpJSON;

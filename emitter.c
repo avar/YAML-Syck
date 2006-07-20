@@ -827,7 +827,7 @@ void syck_emit_1quoted( SyckEmitter *e, int width, char *str, long len )
             do_indent = 0;
         }
         switch ( *mark ) {
-            case '\'':  syck_emitter_write( e, "'", 1 ); break;
+            case '\'':  syck_emitter_write( e, "\\'", 2 ); break;
 
             case '\n':
                 end = mark + 1;

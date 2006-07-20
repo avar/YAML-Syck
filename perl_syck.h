@@ -397,6 +397,9 @@ static char* perl_json_preprocess(char *s) {
         *pos++ = ch;
         if (in_quote) {
             in_quote = !in_quote;
+            if (ch == '\'') {
+                *(pos - 2) = '\'';
+            }
         }
         else if (ch == '\\') {
             in_quote = 1;
