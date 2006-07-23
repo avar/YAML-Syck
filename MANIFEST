@@ -51,6 +51,7 @@ t/json-minus.t
 t/json-newline.t
 t/json-null.t
 t/json-refs.t
+t/json-singlequote.t
 t/TestYAML.pm
 t/yaml-blessed-ref.t
 t/yaml-tie.t

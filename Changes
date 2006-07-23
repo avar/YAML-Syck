@@ -1,3 +1,9 @@
+[Changes for 0.64 (JSON::Syck 0.14) - 2006-07-22]
+
+* Deparsing code references was erroneously generating extra
+  NUL bytes on 64-bit platforms.
+  Reported by: Jesse Vincent
+
 [Changes for 0.63 (JSON::Syck 0.14) - 2006-07-20]
 
 * When JSON's SingleQuote mode is set to true, single quotes
