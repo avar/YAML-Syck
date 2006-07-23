@@ -761,7 +761,7 @@ yaml_syck_emitter_handler
                      * Now store the source code.
                      */
 
-                    syck_emit_scalar(e, OBJOF("tag:!perl:code:"), SCALAR_UTF8, 0, 0, 0, SvPV_nolen(text), len-1);
+                    syck_emit_scalar(e, OBJOF("tag:!perl:code:"), SCALAR_UTF8, 0, 0, 0, SvPV_nolen(text), reallen);
 
                     FREETMPS;
                     LEAVE;
