@@ -7,13 +7,13 @@ ok(YAML::Syck->VERSION);
 is(Dump(42),    "--- 42\n");
 is(Load("--- 42\n"), 42);
 
-is(Dump(\42),    "--- !!perl/ref: \n=: 42\n");
-is(${Load("--- !!perl/ref: \n=: 42\n")}, 42);
+is(Dump(\42),    "--- !!perl/ref \n=: 42\n");
+is(${Load("--- !!perl/ref \n=: 42\n")}, 42);
 
 my $x;
 $x = \$x;
-is(Dump($x),     "--- &1 !!perl/ref: \n=: *1\n");
-is(Dump(Load(Dump($x))),     "--- &1 !!perl/ref: \n=: *1\n");
+is(Dump($x),     "--- &1 !!perl/ref \n=: *1\n");
+is(Dump(Load(Dump($x))),     "--- &1 !!perl/ref \n=: *1\n");
 
 $YAML::Syck::DumpCode = 0;
 is(Dump(sub{ 42 }),  "--- !!perl/code: '{ \"DUMMY\" }'\n");
@@ -73,11 +73,11 @@ foo: *1
 
 my $r; $r = \$r;
 is(Dump($r), << '.');
---- &1 !!perl/ref: 
+--- &1 !!perl/ref 
 =: *1
 .
 is(Dump(Load(Dump($r))), << '.');
---- &1 !!perl/ref: 
+--- &1 !!perl/ref 
 =: *1
 .
 
