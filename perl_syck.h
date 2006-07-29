@@ -316,7 +316,7 @@ yaml_syck_parser_handler
 
                     if (lang == NULL || (strEQ(lang, "perl"))) {
                         /* !perl/ref on it's own causes no blessing */
-                        if ( !strEQ(type, "ref:") && (*type != '\0')) {
+                        if ( !strEQ(type, "ref") && (*type != '\0')) {
                             sv_bless(sv, gv_stashpv(type, TRUE));
                         }
                     } else {
@@ -581,7 +581,7 @@ yaml_syck_emitter_handler
                 break;
             }
             default: {
-                syck_emit_map(e, OBJOF("tag:!perl:ref:"), MAP_NONE);
+                syck_emit_map(e, OBJOF("tag:!perl:ref"), MAP_NONE);
                 *tag = '\0';
                 syck_emit_item( e, (st_data_t)newSVpvn_share(REF_LITERAL, REF_LITERAL_LENGTH, 0) );
                 syck_emit_item( e, (st_data_t)SvRV(sv) );
