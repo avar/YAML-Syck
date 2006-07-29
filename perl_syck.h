@@ -815,6 +815,16 @@ DumpYAML
 
     ENTER; SAVETMPS;
 
+#ifndef YAML_IS_JSON
+    if (SvTRUE(use_code) || SvTRUE(dump_code)) {
+        SV *bdeparse = GvSV(gv_fetchpv(form("%s::DeparseObject", PACKAGE_NAME), TRUE, SVt_PV));
+
+        if (!SvTRUE(bdeparse)) {
+            call_pv(form("%s::_init_deparse", PACKAGE_NAME), G_DISCARD|G_NOARGS);
+        }
+    }
+#endif
+
     emitter->headless = SvTRUE(headless);
     emitter->sort_keys = SvTRUE(sortkeys);
     emitter->anchor_format = "%d";

@@ -5,7 +5,7 @@ use 5.00307;
 use Exporter;
 
 BEGIN {
-    $VERSION = '0.64';
+    $VERSION = '0.65';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 
@@ -24,13 +24,14 @@ BEGIN {
 
     *Load = \&YAML::Syck::LoadYAML;
     *Dump = \&YAML::Syck::DumpYAML;
-
-    eval {
-        require B::Deparse;
-        $DeparseObject = B::Deparse->new;
-    }
 }
 
+sub _init_deparse {
+    $DeparseObject ||= do {
+        require B::Deparse;
+        B::Deparse->new;
+    };
+}
 
 sub DumpFile {
     my $file = shift;
