@@ -5,7 +5,7 @@ use 5.00307;
 use Exporter;
 
 BEGIN {
-    $VERSION = '0.65';
+    $VERSION = '0.66';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 
@@ -26,19 +26,13 @@ BEGIN {
     *Dump = \&YAML::Syck::DumpYAML;
 }
 
-sub _init_deparse {
-    $DeparseObject ||= do {
-        require B::Deparse;
-        B::Deparse->new;
-    };
-}
-
 sub DumpFile {
     my $file = shift;
     local *FH;
     open FH, "> $file" or die "Cannot write to $file: $!";
     print FH Dump($_[0]);
 }
+
 sub LoadFile {
     my $file = shift;
     local *FH;
