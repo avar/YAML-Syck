@@ -4,6 +4,9 @@
   time UseCode or LoadCode is in active use.
   Reported by: Chia-Liang Kao
 
+* Emit '!perl/ref' instead of '!perl/ref:' for consistency with other tags
+  Contributed by: Yuval Kogman
+
 [Changes for 0.64 (JSON::Syck 0.14) - 2006-07-22]
 
 * Deparsing code references was erroneously generating extra
