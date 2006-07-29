@@ -820,7 +820,10 @@ DumpYAML
         SV *bdeparse = GvSV(gv_fetchpv(form("%s::DeparseObject", PACKAGE_NAME), TRUE, SVt_PV));
 
         if (!SvTRUE(bdeparse)) {
-            call_pv(form("%s::_init_deparse", PACKAGE_NAME), G_DISCARD|G_NOARGS);
+            eval_pv(form(
+                "local $@; require B::Deparse; $%s::DeparseObject = B::Deparse->new",
+                PACKAGE_NAME
+            ), 1);
         }
     }
 #endif

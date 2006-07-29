@@ -1,11 +1,18 @@
+[Changes for 0.66 (JSON::Syck 0.14) - 2006-07-29]
+
+* The initialization sequence could cause segfaults on
+  FreeBSD systems.
+  Reported by: Chia-Liang Kao
+
+* Emit '!perl/ref' instead of '!perl/ref:' for consistency with
+  other language's tagging systems.
+  Contributed by: Yuval Kogman
+
 [Changes for 0.65 (JSON::Syck 0.14) - 2006-07-28]
 
 * Delay initialization of B::Deparse objects until the first
   time UseCode or LoadCode is in active use.
   Reported by: Chia-Liang Kao
-
-* Emit '!perl/ref' instead of '!perl/ref:' for consistency with other tags
-  Contributed by: Yuval Kogman
 
 [Changes for 0.64 (JSON::Syck 0.14) - 2006-07-22]
 
