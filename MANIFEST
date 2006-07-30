@@ -43,7 +43,7 @@ syck_st.h
 t/1-basic.t
 t/2-scalars.t
 t/3-objects.t
-t/4-perl_tag_scheme.t 
+t/4-perl_tag_scheme.t
 t/leak.t
 t/json-basic.t
 t/json-empty.t
