@@ -234,15 +234,12 @@ yaml_syck_parser_handler
                 } else {
                     sv = newSVpv(form("%s::%s", lang, type), 0);
                 }
-            } else if ( strnEQ( id, "perl/scalar:", 12 ) ) {
-                char *pkg = id + 12;
+            } else if ( strnEQ( id, "perl/scalar:", 12 ) && !strEQ( id, "perl/scalar:" )) {
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
                 CHECK_UTF8;
 
                 sv = newRV_inc(sv);
-                if ( *pkg != '\0' ) {
-                    sv_bless(sv, gv_stashpv(pkg, TRUE));
-                }
+                sv_bless(sv, gv_stashpv(id + 12, TRUE));
 #endif
 #endif
             } else {
@@ -281,7 +278,7 @@ yaml_syck_parser_handler
 
                 if (lang == NULL || (strEQ(lang, "perl"))) {
                     /* !perl/array on it's own causes no blessing */
-                    if ( !strEQ(type, "array") ) {
+                    if ( !strEQ(type, "array") && *type != '\0' ) {
                         sv_bless(sv, gv_stashpv(type, TRUE));
                     }
                 } else {
@@ -355,7 +352,7 @@ yaml_syck_parser_handler
 
                     if (lang == NULL || (strEQ(lang, "perl"))) {
                         /* !perl/hash on it's own causes no blessing */
-                        if ( !strEQ(type, "hash") ) /* WTF TRAILING NEWLINE?!!! FIXME */ {
+                        if ( !strEQ(type, "hash") && *type != '\0' ) {
                             sv_bless(sv, gv_stashpv(type, TRUE));
                         }
                     } else {
