@@ -17,7 +17,7 @@ sub _carp {
 
 
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.64';
+$VERSION = '0.62';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 use Test::Builder::Module;
@@ -130,12 +130,6 @@ sub can_ok ($@) {
     my $class = ref $proto || $proto;
     my $tb = Test::More->builder;
 
-    unless( $class ) {
-        my $ok = $tb->ok( 0, "->can(...)" );
-        $tb->diag('    can_ok() called with empty class or reference');
-        return $ok;
-    }
-
     unless( @methods ) {
         my $ok = $tb->ok( 0, "$class->can(...)" );
         $tb->diag('    can_ok() called with no methods');
@@ -152,7 +146,7 @@ sub can_ok ($@) {
     my $name;
     $name = @methods == 1 ? "$class->can('$methods[0]')" 
                           : "$class->can(...)";
-
+    
     my $ok = $tb->ok( !@nok, $name );
 
     $tb->diag(map "    $class->can('$_') failed\n", @nok);
@@ -160,7 +154,7 @@ sub can_ok ($@) {
     return $ok;
 }
 
-#line 525
+#line 519
 
 sub isa_ok ($$;$) {
     my($object, $class, $obj_name) = @_;
@@ -215,7 +209,7 @@ WHOA
 }
 
 
-#line 595
+#line 589
 
 sub pass (;$) {
     my $tb = Test::More->builder;
@@ -227,7 +221,7 @@ sub fail (;$) {
     $tb->ok(0, @_);
 }
 
-#line 656
+#line 650
 
 sub use_ok ($;@) {
     my($module, @imports) = @_;
@@ -269,7 +263,7 @@ DIAGNOSTIC
     return $ok;
 }
 
-#line 705
+#line 699
 
 sub require_ok ($) {
     my($module) = shift;
@@ -312,7 +306,7 @@ sub _is_module_name {
     $module =~ /^[a-zA-Z]\w*$/;
 }
 
-#line 781
+#line 775
 
 use vars qw(@Data_Stack %Refs_Seen);
 my $DNE = bless [], 'Does::Not::Exist';
@@ -413,7 +407,7 @@ sub _type {
     return '';
 }
 
-#line 921
+#line 915
 
 sub diag {
     my $tb = Test::More->builder;
@@ -422,7 +416,7 @@ sub diag {
 }
 
 
-#line 990
+#line 984
 
 #'#
 sub skip {
@@ -436,11 +430,6 @@ sub skip {
         $how_many = 1;
     }
 
-    if( defined $how_many and $how_many =~ /\D/ ) {
-        _carp "skip() was passed a non-numeric number of tests.  Did you get the arguments backwards?";
-        $how_many = 1;
-    }
-
     for( 1..$how_many ) {
         $tb->skip($why);
     }
@@ -450,7 +439,7 @@ sub skip {
 }
 
 
-#line 1077
+#line 1066
 
 sub todo_skip {
     my($why, $how_many) = @_;
@@ -471,7 +460,7 @@ sub todo_skip {
     last TODO;
 }
 
-#line 1130
+#line 1119
 
 sub BAIL_OUT {
     my $reason = shift;
@@ -480,7 +469,7 @@ sub BAIL_OUT {
     $tb->BAIL_OUT($reason);
 }
 
-#line 1169
+#line 1158
 
 #'#
 sub eq_array {
@@ -604,7 +593,7 @@ WHOA
 }
 
 
-#line 1300
+#line 1289
 
 sub eq_hash {
     local @Data_Stack;
@@ -637,7 +626,7 @@ sub _eq_hash {
     return $ok;
 }
 
-#line 1357
+#line 1346
 
 sub eq_set  {
     my($a1, $a2) = @_;
@@ -663,6 +652,6 @@ sub eq_set  {
     );
 }
 
-#line 1545
+#line 1534
 
 1;

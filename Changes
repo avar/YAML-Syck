@@ -1,5 +1,12 @@
 [Changes for 0.66 (JSON::Syck 0.14) - 2006-07-29]
 
+* Further improvements of loading semantics for explicitly
+  tagged nodes.
+  Contributed by: Yuval Kogman
+
+
+[Changes for 0.66 (JSON::Syck 0.14) - 2006-07-29]
+
 * The initialization sequence could cause segfaults on
   FreeBSD systems.
   Reported by: Chia-Liang Kao
