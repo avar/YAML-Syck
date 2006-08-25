@@ -67,17 +67,36 @@ YAML which supports it.
 
 When you pass subroutine reference, JSON::Syck dumps it as null.
 
-=head1 UNICODE FLAGS
+=head1 UTF-8 FLAGS
 
-By default this module doesn't touch any of Unicode flags, and assumes
-UTF-8 bytes to be passed and emit as an interface. However, when you
-set C<$JSON::Syck::ImplicitUnicode> to 1, this module properly decodes
-UTF-8 binaries and sets Unicode flag everywhere, as in:
+By default this module doesn't touch any of utf-8 flags set in
+strings, and assumes UTF-8 bytes to be passed and emit.
 
-  JSON (UTF-8 bytes)     => Perl (Unicode flagged)
-  JSON (Unicode flagged) => Perl (Unicode flagged)
-  Perl (UTF-8 bytes)     => JSON (Unicode flagged)
-  Perl (Unicode flagged) => JSON (Unicode flagged)
+However, when you set C<$JSON::Syck::ImplicitUnicode> to 1, this
+module properly decodes UTF-8 binaries and sets UTF-8 flag everywhere,
+as in:
+
+  JSON (UTF-8 bytes)   => Perl (UTF-8 flagged)
+  JSON (UTF-8 flagged) => Perl (UTF-8 flagged)
+  Perl (UTF-8 bytes)   => JSON (UTF-8 flagged)
+  Perl (UTF-8 flagged) => JSON (UTF-8 flagged)
+
+Unfortunately, there's no implicit way to dump Perl UTF-8 flagged data
+structure to utf-8 encoded JSON. To do this, simply use Encode module, e.g.:
+
+  use Encode;
+  use JSON::Syck qw(Dump);
+
+  my $json = encode_utf8( Dump($data) );
+
+Alternatively you can use Encode::JavaScript::UCS to encode Unicode
+strings as in I<%uXXXX> form.
+
+  use Encode;
+  use Encode::JavaScript::UCS;
+  use JSON::Syck qw(Dump);
+
+  my $json_unicode_escaped = encode( 'JavaScript-UCS', Dump($data) );
 
 =head1 QUOTING
 
