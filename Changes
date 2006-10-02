@@ -1,3 +1,10 @@
+[Changes for 0.70 (JSON::Syck 0.14) - 2006-10-02]
+
+* Load()/Dump()/LoadFile()/DumpFile() in YAML::Syck now support
+  multiple YAML streams -- i.e. dumping multiple Perl values into a
+  string composed of several YAML streams, and loading such a string
+  into several values under list context.
+
 [Changes for 0.66 (JSON::Syck 0.14) - 2006-07-29]
 
 * Further improvements of loading semantics for explicitly

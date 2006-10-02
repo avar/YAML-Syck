@@ -5,7 +5,7 @@ use 5.00307;
 use Exporter;
 
 BEGIN {
-    $VERSION = '0.68';
+    $VERSION = '0.70';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 
@@ -24,7 +24,8 @@ BEGIN {
 }
 
 sub Dump {
-    $#_ ? YAML::Syck::DumpYAML(@_) : join('', map { YAML::Syck::DumpYAML($_) } @_);
+    $#_ ? join('', map { YAML::Syck::DumpYAML($_) } @_)
+        : YAML::Syck::DumpYAML($_[0]);
 }
 
 sub Load {

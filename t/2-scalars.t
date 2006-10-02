@@ -1,4 +1,4 @@
-use t::TestYAML tests => 39; 
+use t::TestYAML tests => 41; 
 
 local $SIG{__WARN__} = sub { 1 } if $Test::VERSION < 1.20;
 
@@ -122,3 +122,6 @@ Zort: &2
 .
 
 is(Dump(scalar Load($recurse2)), $recurse2, 'recurse 2');
+
+is(Dump(1, 2, 3), "--- 1\n--- 2\n--- 3\n");
+is("@{[Load(Dump(1, 2, 3))]}", "1 2 3");
