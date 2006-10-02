@@ -56,9 +56,17 @@ result: test
 result: !perl/code: '{ 42 + $_[0] }'
 #;
 
+    # Initial load to offset one-time load cost of B::Deparse
+    Load($yaml);
+
     $before = Devel::Leak::NoteSV($handle);
     foreach ( 1 .. 100 ) {
         Load($yaml);
+    }
+
+    # Load in list context again
+    foreach ( 1 .. 100 ) {
+        () = Load($yaml);
     }
 
     $diff = Devel::Leak::NoteSV($handle) - $before;

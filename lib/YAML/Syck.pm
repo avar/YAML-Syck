@@ -5,7 +5,7 @@ use 5.00307;
 use Exporter;
 
 BEGIN {
-    $VERSION = '0.67';
+    $VERSION = '0.68';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 
@@ -21,9 +21,20 @@ BEGIN {
         push @ISA, 'DynaLoader';
         __PACKAGE__->bootstrap($VERSION);
     };
+}
 
-    *Load = \&YAML::Syck::LoadYAML;
-    *Dump = \&YAML::Syck::DumpYAML;
+sub Dump {
+    $#_ ? YAML::Syck::DumpYAML(@_) : join('', map { YAML::Syck::DumpYAML($_) } @_);
+}
+
+sub Load {
+    if (wantarray) {
+        my ($rv) = YAML::Syck::LoadYAML($_[0]);
+        @{$rv};
+    }
+    else {
+        YAML::Syck::LoadYAML($_[0]);
+    }
 }
 
 sub DumpFile {
