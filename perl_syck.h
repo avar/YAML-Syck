@@ -465,11 +465,9 @@ static SV * LoadYAML (char *s) {
     SV *use_code = GvSV(gv_fetchpv(form("%s::UseCode", PACKAGE_NAME), TRUE, SVt_PV));
     SV *load_code = GvSV(gv_fetchpv(form("%s::LoadCode", PACKAGE_NAME), TRUE, SVt_PV));
     SV *unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
-#ifdef YAML_IS_JSON
     SV *singlequote = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
     json_quote_char = (SvTRUE(singlequote) ? '\'' : '"' );
     json_quote_style = (SvTRUE(singlequote) ? scalar_1quote : scalar_2quote );
-#endif
 
     ENTER; SAVETMPS;
 
@@ -498,9 +496,33 @@ static SV * LoadYAML (char *s) {
     bonus.load_code = SvTRUE(use_code) || SvTRUE(load_code);
     parser->bonus = &bonus;
 
-    v = syck_parse(parser);
-    if (syck_lookup_sym(parser, v, (char **)&obj))
-        USE_OBJECT(obj);
+#ifndef YAML_IS_JSON
+    if (GIMME_V == G_ARRAY) {
+        SYMID prev_v = 0;
+
+        obj = (SV*)newAV();
+        while ((v = syck_parse(parser)) && (v != prev_v)) {
+            SV *cur = &PL_sv_undef;
+            if (!syck_lookup_sym(parser, v, (char **)&cur)) {
+                break;
+            }
+
+            av_push((AV*)obj, cur);
+            USE_OBJECT(cur);
+
+            prev_v = v;
+        }
+        obj = newRV_noinc(obj);
+    }
+    else
+#endif
+    {
+        v = syck_parse(parser);
+        if (syck_lookup_sym(parser, v, (char **)&obj)) {
+            USE_OBJECT(obj);
+        }
+    }
+
     syck_free_parser(parser);
 
 #ifdef YAML_IS_JSON

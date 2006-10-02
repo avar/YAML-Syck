@@ -1,4 +1,4 @@
-use t::TestYAML tests => 39; 
+use t::TestYAML tests => 41; 
 
 local $SIG{__WARN__} = sub { 1 } if $Test::VERSION < 1.20;
 
@@ -13,7 +13,7 @@ is(${Load("--- !!perl/ref \n=: 42\n")}, 42);
 my $x;
 $x = \$x;
 is(Dump($x),     "--- &1 !!perl/ref \n=: *1\n");
-is(Dump(Load(Dump($x))),     "--- &1 !!perl/ref \n=: *1\n");
+is(Dump(scalar Load(Dump($x))),     "--- &1 !!perl/ref \n=: *1\n");
 
 $YAML::Syck::DumpCode = 0;
 is(Dump(sub{ 42 }),  "--- !!perl/code: '{ \"DUMMY\" }'\n");
@@ -76,7 +76,7 @@ is(Dump($r), << '.');
 --- &1 !!perl/ref 
 =: *1
 .
-is(Dump(Load(Dump($r))), << '.');
+is(Dump(scalar Load(Dump($r))), << '.');
 --- &1 !!perl/ref 
 =: *1
 .
@@ -103,7 +103,7 @@ Troz:
   parent: *1
 .
 
-is(Dump(Load($recurse1)), $recurse1, 'recurse 1');
+is(Dump(scalar Load($recurse1)), $recurse1, 'recurse 1');
 
 my $recurse2 = << '.';
 --- &1 
@@ -121,4 +121,7 @@ Zort: &2
   parent: *1
 .
 
-is(Dump(Load($recurse2)), $recurse2, 'recurse 2');
+is(Dump(scalar Load($recurse2)), $recurse2, 'recurse 2');
+
+is(Dump(1, 2, 3), "--- 1\n--- 2\n--- 3\n");
+is("@{[Load(Dump(1, 2, 3))]}", "1 2 3");
