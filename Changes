@@ -1,4 +1,49 @@
+[Changes for 0.71 (JSON::Syck 0.14) - 2006-10-03]
+* Double-quoted strings in YAML output no longer contains continuation
+  lines, which confused YAML.pm terribly.
+  Reported by: Nelson Elhage
+
 [Changes for 0.70 (JSON::Syck 0.14) - 2006-10-02]
+
+* Load()/Dump()/LoadFile()/DumpFile() in YAML::Syck now support
+  multiple YAML streams -- i.e. dumping multiple Perl values into a
+  string composed of several YAML streams, and loading such a string
+  into several values under list context.
+
+[Changes for 0.66 (JSON::Syck 0.14) - 2006-07-29]
+
+* Further improvements of loading semantics for explicitly
+  tagged nodes.
+  Contributed by: Yuval Kogman
+
+
+[Changes for 0.66 (JSON::Syck 0.14) - 2006-07-29]
+
+* The initialization sequence could cause segfaults on
+  FreeBSD systems.
+  Reported by: Chia-Liang Kao
+
+* Emit '!perl/ref' instead of '!perl/ref:' for consistency with
+  other language's tagging systems.
+  Contributed by: Yuval Kogman
+
+[Changes for 0.65 (JSON::Syck 0.14) - 2006-07-28]
+
+* Delay initialization of B::Deparse objects until the first
+  time UseCode or LoadCode is in active use.
+  Reported by: Chia-Liang Kao
+
+[Changes for 0.64 (JSON::Syck 0.14) - 2006-07-22]
+
+* Deparsing code references was erroneously generating extra
+  NUL bytes on 64-bit platforms.
+  Reported by: Jesse Vincent
+
+[Changes for 0.63 (JSON::Syck 0.14) - 2006-07-20]
+
+* When JSON's SingleQuote mode is set to true, single quotes
+  inside JSON strings is now escaped properly.
+  Reported by: [Changes for 0.70 (JSON::Syck 0.14) - 2006-10-02]
 
 * Load()/Dump()/LoadFile()/DumpFile() in YAML::Syck now support
   multiple YAML streams -- i.e. dumping multiple Perl values into a

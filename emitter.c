@@ -889,7 +889,9 @@ void syck_emit_2quoted( SyckEmitter *e, int width, char *str, long len )
             case '\t': syck_emitter_write( e, "\\t",  2 ); break;
             case '\v': syck_emitter_write( e, "\\v",  2 ); break;
             case 0x1b: syck_emitter_write( e, "\\e",  2 ); break;
+            case '\n': syck_emitter_write( e, "\\n",  2 ); break;
 
+            /* XXX - Disabled by Audrey Tang for YAML.pm compat
             case '\n':
                 end = mark + 1;
                 syck_emitter_write( e, "\\n", 2 );
@@ -899,6 +901,7 @@ void syck_emit_2quoted( SyckEmitter *e, int width, char *str, long len )
                     do_indent = 0;
                 }
             break;
+            */
 
             case ' ':
                 if ( width > 0 && *start != ' ' && mark - end > width ) {
