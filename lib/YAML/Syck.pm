@@ -1,6 +1,6 @@
 package YAML::Syck;
 use strict;
-use vars qw( @ISA @EXPORT $VERSION $ImplicitTyping $UseCode $LoadCode $DumpCode $SortKeys $DeparseObject );
+use vars qw( @ISA @EXPORT $VERSION $ImplicitTyping $UseCode $LoadCode $DumpCode $SortKeys $DeparseObject $ImplicitUnicode );
 use 5.00307;
 use Exporter;
 
