@@ -1,11 +1,17 @@
 package YAML::Syck;
 use strict;
-use vars qw( @ISA @EXPORT $VERSION $ImplicitTyping $UseCode $LoadCode $DumpCode $SortKeys $DeparseObject );
+use vars qw(
+    @ISA @EXPORT $VERSION
+    $Headless $SortKeys
+    $ImplicitTyping $ImplicitUnicode 
+    $UseCode $LoadCode $DumpCode
+    $DeparseObject
+);
 use 5.00307;
 use Exporter;
 
 BEGIN {
-    $VERSION = '0.71';
+    $VERSION = '0.72';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 

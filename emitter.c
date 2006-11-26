@@ -700,7 +700,7 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
     }
 
     /* Determine block style */
-    if ( scan & SCAN_NONPRINT ) {
+    if ( (scan & SCAN_NONPRINT) && (e->style != scalar_fold) ) {
         force_style = scalar_2quote;
     } else if ( force_style != scalar_1quote && ( scan & SCAN_WHITEEDGE ) ) {
         force_style = scalar_2quote;

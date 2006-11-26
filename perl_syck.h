@@ -425,6 +425,12 @@ void perl_json_postprocess(SV *sv) {
 
     pos = s;
 
+    /* Horrible kluge */
+    if ( (json_quote_char == '\'') && (len > 1) && (*s == '\"') && (*(s+len-2) == '\"') ) {
+        *s = '\'';
+        *(s+len-2) = '\'';
+    }
+
     for (i = 0; i < len; i++) {
         ch = *(s+i);
         *pos++ = ch;
