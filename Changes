@@ -1,4 +1,12 @@
+[Changes for 0.72 (JSON::Syck 0.15) - 2006-11-26]
+
+* $JSON::Syck::SingleQuote did not take effect for Unicode strings.
+
+* Squashed "mentioned only once" warnings for $ImplicitUnicode and $Headless.
+  Reported by: Agent Zhang
+
 [Changes for 0.71 (JSON::Syck 0.14) - 2006-10-03]
+
 * Double-quoted strings in YAML output no longer contains continuation
   lines, which confused YAML.pm terribly.
   Reported by: Nelson Elhage

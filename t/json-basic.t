@@ -43,11 +43,20 @@ my @tests = (
     '"~foo"',
 );
 
-plan tests => scalar @tests * (1 + $HAS_JSON) * 2;
+plan tests => scalar @tests * (2 + $HAS_JSON) * 2;
 
+for my $single_quote (0, 1) {
 for my $unicode (0, 1) {
+    local $JSON::Syck::SingleQuote = $single_quote;
     local $JSON::Syck::ImplicitUnicode = $unicode;
-    for my $test (@tests) {
+
+    for my $test_orig (@tests) {
+        my $test = $test_orig;
+        if ($single_quote) {
+            $test =~ s/'/\\'/g;
+            $test =~ s/"/'/g;
+        }
+
         my $data = eval { JSON::Syck::Load($test) };
         my $json = JSON::Syck::Dump($data);
         utf8::encode($json) if !ref($json) && $unicode;
@@ -62,7 +71,7 @@ for my $unicode (0, 1) {
         is $json, $test, $desc;
 
         # try parsing the data with JSON.pm
-        if ($HAS_JSON) {
+        if ($HAS_JSON and !$single_quote) {
             $SIG{__WARN__} = sub { 1 };
             utf8::encode($data) if defined($data) && !ref($data) && $unicode;
             my $data_pp = eval { JSON::jsonToObj($json) };
@@ -70,4 +79,6 @@ for my $unicode (0, 1) {
         }
     }
 }
+}
+
 
