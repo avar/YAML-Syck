@@ -7,6 +7,6 @@ my $foo = bless { }, "Foo";
 my $bar = bless { foo => $foo }, "Bar";
 $foo->{bar} = $bar;
 
-JSON::Syck::Dump($foo);
+eval { JSON::Syck::Dump($foo) };
 
 ok 1, "No segfault";

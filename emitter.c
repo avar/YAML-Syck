@@ -51,12 +51,15 @@ syck_base64enc( char *s, long len )
         buff[i++] = padding;
         buff[i++] = padding;
     }
-    buff[i++] = '\n';
+
+    /* XXX - Changed by Audrey Tang to terminate the string instead of adding an useless \n */
+    buff[i++] = '\0';
     return buff;
 }
 
+/* XXX - Changed by Audrey Tang to deal with \0 in decoded base64 buffers */
 char *
-syck_base64dec( char *s, long len )
+syck_base64dec( char *s, long len, long *out_len )
 {
     int a = -1,b = -1,c = 0,d;
     static int first = 1;
@@ -97,6 +100,8 @@ syck_base64dec( char *s, long len )
     }
     *end = '\0';
     /*RSTRING(buf)->len = ptr - RSTRING(buf)->ptr;*/
+
+    *out_len = end - ptr;
     return ptr;
 }
 

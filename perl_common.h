@@ -31,13 +31,14 @@
 struct emitter_xtra {
     SV* port;
     char* tag;
-	char dump_code;
+    char dump_code;
+    bool implicit_binary;
 };
 
 struct parser_xtra {
-   AV *objects;
-   int utf8;
-   char load_code;
+    AV *objects;
+    bool implicit_unicode;
+    bool load_code;
 };
 
 SV* perl_syck_lookup_sym( SyckParser *p, SYMID v) {
@@ -49,56 +50,12 @@ SV* perl_syck_lookup_sym( SyckParser *p, SYMID v) {
 
 #ifdef SvUTF8_on
 #define CHECK_UTF8 \
-    if (((struct parser_xtra *)p->bonus)->utf8 \
+    if (((struct parser_xtra *)p->bonus)->implicit_unicode \
       && is_utf8_string((U8*)n->data.str->ptr, n->data.str->len)) \
         SvUTF8_on(sv);
 #else
 #define CHECK_UTF8 ;
 #endif
-
-void perl_syck_mark_emitter(SyckEmitter *e, SV *sv) {
-    if (syck_emitter_mark_node(e, (st_data_t)sv) == 0) {
-        return;
-    }
-
-    if (SvROK(sv)) {
-        perl_syck_mark_emitter(e, SvRV(sv));
-        return;
-    }
-
-    switch (SvTYPE(sv)) {
-        case SVt_PVAV: {
-            I32 len, i;
-            len = av_len((AV*)sv) + 1;
-            for (i = 0; i < len; i++) {
-                SV** sav = av_fetch((AV*)sv, i, 0);
-                if (sav != NULL) {
-                    perl_syck_mark_emitter( e, *sav );
-                }
-            }
-            break;
-        }
-        case SVt_PVHV: {
-            I32 len, i;
-#ifdef HAS_RESTRICTED_HASHES
-            len = HvTOTALKEYS((HV*)sv);
-#else
-            len = HvKEYS((HV*)sv);
-#endif
-            hv_iterinit((HV*)sv);
-            for (i = 0; i < len; i++) {
-#ifdef HV_ITERNEXT_WANTPLACEHOLDERS
-                HE *he = hv_iternext_flags((HV*)sv, HV_ITERNEXT_WANTPLACEHOLDERS);
-#else
-                HE *he = hv_iternext((HV*)sv);
-#endif
-                SV *val = hv_iterval((HV*)sv, he);
-                perl_syck_mark_emitter( e, val );
-            }
-            break;
-        }
-    }
-}
 
 SyckNode * perl_syck_bad_anchor_handler(SyckParser *p, char *a) {
     SyckNode *badanc = syck_new_map(

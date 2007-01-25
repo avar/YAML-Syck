@@ -3,7 +3,7 @@ use strict;
 use Exporter;
 use YAML::Syck ();
 
-$JSON::Syck::VERSION = '0.20';
+$JSON::Syck::VERSION = '0.21';
 
 *Load = \&YAML::Syck::LoadJSON;
 *Dump = \&YAML::Syck::DumpJSON;
@@ -56,9 +56,9 @@ Oh, and JSON::Syck doesn't use camelCase method names :-)
 =head2 SCALAR REFERNECE
 
 For now, when you pass a scalar reference to JSON::Syck, it
-derefernces to get the actual scalar value. It means when you pass
-self-referencing reference, JSON::Syck goes into infinite loop. Don't
-do it.
+dereferences to get the actual scalar value.
+
+JSON::Syck raises an exception when you pass in circular references.
 
 If you want to serialize self refernecing stuff, you should use
 YAML which supports it.

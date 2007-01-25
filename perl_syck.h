@@ -8,12 +8,13 @@
 #undef SCALAR_UTF8
 #undef SEQ_NONE
 #undef MAP_NONE
-#undef COND_FOLD
+#undef IS_UTF8
 #undef TYPE_IS_NULL
 #undef OBJOF
 #undef PERL_SYCK_PARSER_HANDLER
 #undef PERL_SYCK_EMITTER_HANDLER
 #undef PERL_SYCK_INDENT_LEVEL
+#undef PERL_SYCK_MARK_EMITTER
 
 #ifdef YAML_IS_JSON
 #  define PACKAGE_NAME  "JSON::Syck"
@@ -27,11 +28,12 @@ static enum scalar_style json_quote_style = scalar_2quote;
 #  define SCALAR_UTF8   scalar_fold
 #  define SEQ_NONE      seq_inline
 #  define MAP_NONE      map_inline
-#  define COND_FOLD(x)  TRUE
-#  define TYPE_IS_NULL(x) ((x == NULL) || strnEQ( x, "str", 3 ))
+#  define IS_UTF8(x)    TRUE
+#  define TYPE_IS_NULL(x) ((x == NULL) || strEQ( x, "str" ))
 #  define OBJOF(a)        (a)
 #  define PERL_SYCK_PARSER_HANDLER json_syck_parser_handler
 #  define PERL_SYCK_EMITTER_HANDLER json_syck_emitter_handler
+#  define PERL_SYCK_MARK_EMITTER json_syck_mark_emitter
 #  define PERL_SYCK_INDENT_LEVEL 0
 #else
 #  define PACKAGE_NAME  "YAML::Syck"
@@ -46,14 +48,15 @@ static enum scalar_style json_quote_style = scalar_2quote;
 #  define SEQ_NONE      seq_none
 #  define MAP_NONE      map_none
 #ifdef SvUTF8
-#  define COND_FOLD(x)  (SvUTF8(sv))
+#  define IS_UTF8(x)    (SvUTF8(sv))
 #else
-#  define COND_FOLD(x)  (0)
+#  define IS_UTF8(x)    (FALSE)
 #endif
 #  define TYPE_IS_NULL(x) (x == NULL)
 #  define OBJOF(a)        (*tag ? tag : a)
 #  define PERL_SYCK_PARSER_HANDLER yaml_syck_parser_handler
 #  define PERL_SYCK_EMITTER_HANDLER yaml_syck_emitter_handler
+#  define PERL_SYCK_MARK_EMITTER yaml_syck_mark_emitter
 #  define PERL_SYCK_INDENT_LEVEL 2
 #endif
 
@@ -74,7 +77,7 @@ yaml_syck_parser_handler
     char *id = n->type_id;
 #ifndef YAML_IS_JSON
     struct parser_xtra *bonus = (struct parser_xtra *)p->bonus;
-    char load_code = bonus->load_code;
+    bool load_code = bonus->load_code;
 #endif
 
     while (id && (*id == '!')) { id++; }
@@ -90,9 +93,6 @@ yaml_syck_parser_handler
                     sv = newSVpvn(n->data.str->ptr, n->data.str->len);
                     CHECK_UTF8;
                 }
-            } else if (strEQ( id, "str" )) {
-                sv = newSVpvn(n->data.str->ptr, n->data.str->len);
-                CHECK_UTF8;
             } else if (strEQ( id, "null" )) {
                 sv = newSV(0);
             } else if (strEQ( id, "bool#yes" )) {
@@ -173,7 +173,7 @@ yaml_syck_parser_handler
                 STRLEN len = n->data.str->len;
                 syck_str_blow_away_commas( n );
                 sv = newSVuv( grok_oct( n->data.str->ptr, &len, &flags, NULL) );
-            } else if (strnEQ( id, "int", 3 )) {
+            } else if (strEQ( id, "int" ) ) {
                 UV uv = 0;
                 syck_str_blow_away_commas( n );
                 if (grok_number( n->data.str->ptr, n->data.str->len, &uv) & IS_NUMBER_NEG) {
@@ -182,6 +182,10 @@ yaml_syck_parser_handler
                 else {
                     sv = newSVuv(uv);
                 }
+            } else if (strEQ( id, "binary" )) {
+                long len = 0;
+                char *blob = syck_base64dec(n->data.str->ptr, n->data.str->len, &len);
+                sv = newSVpv(blob, len);
 #ifdef PERL_LOADMOD_NOIMPORT
 #ifndef YAML_IS_JSON
             } else if (load_code && (strEQ(id, "perl/code") || strnEQ(id, "perl/code:", 10))) {
@@ -486,7 +490,8 @@ static SV * LoadYAML (char *s) {
     SV *implicit = GvSV(gv_fetchpv(form("%s::ImplicitTyping", PACKAGE_NAME), TRUE, SVt_PV));
     SV *use_code = GvSV(gv_fetchpv(form("%s::UseCode", PACKAGE_NAME), TRUE, SVt_PV));
     SV *load_code = GvSV(gv_fetchpv(form("%s::LoadCode", PACKAGE_NAME), TRUE, SVt_PV));
-    SV *unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *implicit_unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *implicit_binary = GvSV(gv_fetchpv(form("%s::ImplicitBinary", PACKAGE_NAME), TRUE, SVt_PV));
     SV *singlequote = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
     json_quote_char = (SvTRUE(singlequote) ? '\'' : '"' );
     json_quote_style = (SvTRUE(singlequote) ? scalar_1quote : scalar_2quote );
@@ -514,7 +519,7 @@ static SV * LoadYAML (char *s) {
     syck_parser_taguri_expansion(parser, 0);
 
     bonus.objects = (AV*)sv_2mortal((SV*)newAV());
-    bonus.utf8 = SvTRUE(unicode);
+    bonus.implicit_unicode = SvTRUE(implicit_unicode);
     bonus.load_code = SvTRUE(use_code) || SvTRUE(load_code);
     parser->bonus = &bonus;
 
@@ -558,6 +563,67 @@ static SV * LoadYAML (char *s) {
 
 void
 #ifdef YAML_IS_JSON
+json_syck_mark_emitter
+#else
+yaml_syck_mark_emitter
+#endif
+(SyckEmitter *e, SV *sv) {
+    if (syck_emitter_mark_node(e, (st_data_t)sv) == 0) {
+#ifdef YAML_IS_JSON
+        croak("Dumping circular structures is not supported with JSON::Syck");
+#endif
+        return;
+    }
+
+    if (SvROK(sv)) {
+        PERL_SYCK_MARK_EMITTER(e, SvRV(sv));
+#ifdef YAML_IS_JSON
+        st_insert(e->markers, (st_data_t)sv, 0);
+#endif
+        return;
+    }
+
+    switch (SvTYPE(sv)) {
+        case SVt_PVAV: {
+            I32 len, i;
+            len = av_len((AV*)sv) + 1;
+            for (i = 0; i < len; i++) {
+                SV** sav = av_fetch((AV*)sv, i, 0);
+                if (sav != NULL) {
+                    PERL_SYCK_MARK_EMITTER( e, *sav );
+                }
+            }
+            break;
+        }
+        case SVt_PVHV: {
+            I32 len, i;
+#ifdef HAS_RESTRICTED_HASHES
+            len = HvTOTALKEYS((HV*)sv);
+#else
+            len = HvKEYS((HV*)sv);
+#endif
+            hv_iterinit((HV*)sv);
+            for (i = 0; i < len; i++) {
+#ifdef HV_ITERNEXT_WANTPLACEHOLDERS
+                HE *he = hv_iternext_flags((HV*)sv, HV_ITERNEXT_WANTPLACEHOLDERS);
+#else
+                HE *he = hv_iternext((HV*)sv);
+#endif
+                SV *val = hv_iterval((HV*)sv, he);
+                PERL_SYCK_MARK_EMITTER( e, val );
+            }
+            break;
+        }
+    }
+
+#ifdef YAML_IS_JSON
+    st_insert(e->markers, (st_data_t)sv, 0);
+#endif
+}
+
+
+void
+#ifdef YAML_IS_JSON
 json_syck_emitter_handler
 #else
 yaml_syck_emitter_handler
@@ -570,6 +636,7 @@ yaml_syck_emitter_handler
     svtype ty = SvTYPE(sv);
 #ifndef YAML_IS_JSON
     char dump_code = bonus->dump_code;
+    char implicit_binary = bonus->implicit_binary;
     char* ref = NULL;
 #endif
 
@@ -640,6 +707,7 @@ yaml_syck_emitter_handler
         syck_emit_scalar(e, "str", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
     }
     else if ((ty == SVt_PVMG) && !SvOK(sv)) {
+        /* emit an undef (typically pointed from a blesed SvRV) */
         syck_emit_scalar(e, OBJOF("str"), scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
     }
     else if (SvNIOKp(sv) && (sv_len(sv) != 0)) {
@@ -658,15 +726,35 @@ yaml_syck_emitter_handler
             syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, NULL_LITERAL, 1);
         }
 #endif
-        else if (COND_FOLD(sv)) {
+        else if (IS_UTF8(sv)) {
             /* if we support UTF8 and the string contains UTF8 */
             enum scalar_style old_s = e->style;
             e->style = SCALAR_UTF8;
             syck_emit_scalar(e, OBJOF("str"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), len);
             e->style = old_s;
         }
+#ifndef YAML_IS_JSON
+        else if (implicit_binary) {
+            /* scan string for high-bits in the SV */
+            bool is_ascii = TRUE;
+            char *str = SvPV_nolen(sv);
+
+            for (i = 0; i < len; i++) {
+                if (*(str + i) | 0x80) {
+                    /* Binary here */
+                    char *base64 = syck_base64enc( str, len );
+                    syck_emit_scalar(e, "tag:yaml.org,2002:binary", SCALAR_STRING, 0, 0, 0, base64, strlen(base64));
+                    is_ascii = FALSE;
+                    break;
+                }
+            }
+
+            if (is_ascii) {
+                syck_emit_scalar(e, OBJOF("str"), SCALAR_STRING, 0, 0, 0, str, len);
+            }
+        }
+#endif
         else {
-            /* just a simple string */
             syck_emit_scalar(e, OBJOF("str"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), len);
         }
     }
@@ -839,7 +927,8 @@ DumpYAML
     SV* out = newSVpvn("", 0);
     SyckEmitter *emitter = syck_new_emitter();
     SV *headless = GvSV(gv_fetchpv(form("%s::Headless", PACKAGE_NAME), TRUE, SVt_PV));
-    SV *unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *implicit_unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *implicit_binary = GvSV(gv_fetchpv(form("%s::ImplicitBinary", PACKAGE_NAME), TRUE, SVt_PV));
     SV *use_code = GvSV(gv_fetchpv(form("%s::UseCode", PACKAGE_NAME), TRUE, SVt_PV));
     SV *dump_code = GvSV(gv_fetchpv(form("%s::DumpCode", PACKAGE_NAME), TRUE, SVt_PV));
     SV *sortkeys = GvSV(gv_fetchpv(form("%s::SortKeys", PACKAGE_NAME), TRUE, SVt_PV));
@@ -873,13 +962,17 @@ DumpYAML
     New(801, bonus.tag, 512, char);
     *(bonus.tag) = '\0';
     bonus.dump_code = SvTRUE(use_code) || SvTRUE(dump_code);
+    bonus.implicit_binary = SvTRUE(implicit_binary);
     emitter->bonus = &bonus;
 
     syck_emitter_handler( emitter, PERL_SYCK_EMITTER_HANDLER );
     syck_output_handler( emitter, perl_syck_output_handler );
 
-#ifndef YAML_IS_JSON
-    perl_syck_mark_emitter( emitter, sv );
+    PERL_SYCK_MARK_EMITTER( emitter, sv );
+
+#ifdef YAML_IS_JSON
+    st_free_table(emitter->markers);
+    emitter->markers = st_init_numtable();
 #endif
 
     syck_emit( emitter, (st_data_t)sv );
@@ -895,7 +988,7 @@ DumpYAML
 #endif
 
 #ifdef SvUTF8_on
-    if (SvTRUE(unicode)) {
+    if (SvTRUE(implicit_unicode)) {
         SvUTF8_on(out);
     }
 #endif

@@ -46,6 +46,7 @@ t/3-objects.t
 t/4-perl_tag_scheme.t
 t/leak.t
 t/json-basic.t
+t/json-circular-ref.t
 t/json-empty.t
 t/json-indent.t
 t/json-minus.t
