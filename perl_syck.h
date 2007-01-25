@@ -738,9 +738,10 @@ yaml_syck_emitter_handler
             /* scan string for high-bits in the SV */
             bool is_ascii = TRUE;
             char *str = SvPV_nolen(sv);
+            STRLEN len = sv_len(sv);
 
             for (i = 0; i < len; i++) {
-                if (*(str + i) | 0x80) {
+                if (*(str + i) & 0x80) {
                     /* Binary here */
                     char *base64 = syck_base64enc( str, len );
                     syck_emit_scalar(e, "tag:yaml.org,2002:binary", SCALAR_STRING, 0, 0, 0, base64, strlen(base64));
