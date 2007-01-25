@@ -1,27 +1,32 @@
-use t::TestYAML tests => 19;
+use t::TestYAML tests => 25;
 
 ok(YAML::Syck->VERSION);
 
 is(Dump(bless({}, 'foo')),    "--- !!perl/hash:foo {}\n\n");
-my $w = Load("--- !!perl/hash:foo {a: b}\n");
-is(ref($w), 'foo');
-is($w->{a}, 'b');
 
-my $x = Load("--- !perl/foo {a: b}\n");
-is(ref($x), 'foo');
-is($x->{a}, 'b');
+sub ref_ok {
+    my $x = Load("--- $_[0] {a: b}\n");
+    is(ref($x), $_[1], "ref - $_[0]");
+    is($x->{a}, 'b', "data - $_[0]");
+}
 
-my $y = Load("--- !hs/Foo {a: b}\n");
-is(ref($y), 'hs::Foo');
-is($y->{a}, 'b');
+sub run_ref_ok {
+    ref_ok(splice(@_, 0, 2)) while @_;
+}
 
-my $z = Load("--- !haskell.org/Foo {a: b}\n");
-is(ref($z), 'haskell.org::Foo');
-is($z->{a}, 'b');
+run_ref_ok(qw(
+    !!perl/hash:foo     foo
+    !perl/foo           foo
+    !hs/Foo             hs::Foo
+    !haskell.org/Foo    haskell.org::Foo
+    !haskell.org/^Foo   haskell.org::Foo
+    !!perl              HASH
+    !!moose             moose
+));
 
-my $a = Load("--- !haskell.org/^Foo {a: b}\n");
-is(ref($a), 'haskell.org::Foo');
-is($a->{a}, 'b');
+my $obj = bless(\(my $undef) => 'Foo');
+is(Dump($obj), "--- !!perl/scalar:Foo ~\n");
+is(Dump(Load(Dump($obj))), "--- !!perl/scalar:Foo ~\n");
 
 is(Dump(bless({1..10}, 'foo')),  "--- !!perl/hash:foo \n1: 2\n3: 4\n5: 6\n7: 8\n9: 10\n");
 

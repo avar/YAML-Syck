@@ -1,3 +1,19 @@
+[Changes for 0.80 (JSON::Syck 0.20) - 2007-01-26]
+
+* LICENSING CHANGE: This compilation and all individual files in it
+  (except for the bundled libsyck code) are now under the permissive
+  "MIT" license.  See the COPYRIGHT section in README for the new terms.
+
+* Load("!! []") no longer segfaults due to empty tag names.
+
+* Load("!!Foo []") now blesses into "Foo", not "Foo::\0".
+
+* Load("!!perl/scalar 123") is now \123, not 123.
+
+* Load("!!perl/scalar:Foo ~") is now \"Foo", not undef.
+
+* Dump(bless(\$undef, 'Foo')) is now "!!perl/scalar:Foo ~", not "~".
+
 [Changes for 0.72 (JSON::Syck 0.15) - 2006-11-26]
 
 * $JSON::Syck::SingleQuote did not take effect for Unicode strings.
