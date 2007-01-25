@@ -1,3 +1,13 @@
+[Changes for 0.81 (JSON::Syck 0.21) - 2007-01-26]
+
+* Support for loading Base64-encoded "!binary" type.
+
+* Support for dumping non-unicode bytes containing high bits as
+  Base64-encoded binary" type.
+
+* JSON::Syck now raises an exception, instead of segfaults,
+  when dumping a circular structure.
+
 [Changes for 0.80 (JSON::Syck 0.20) - 2007-01-26]
 
 * LICENSING CHANGE: This compilation and all individual files in it

@@ -6,8 +6,8 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.72 of YAML::Syck, released
-November 26, 2006.
+This document describes version 0.81 of YAML::Syck, released
+January 26, 2007.
 
 =head1 SYNOPSIS
 
@@ -67,6 +67,12 @@ byte strings with high-bit set will be dumped with backslash escaping.
 
 However, because YAML does not distinguish between these two kinds of strings,
 so this flag will affect loading of both variants of strings.
+
+=head2 $YAML::Syck::ImplicitBinary
+
+Defaults to false.  For Perl 5.8.0 or later, setting this to a true value will
+make C<Dump> generate Base64-encoded C<!!binary> data for all non-Unicode
+scalars containing high-bit bytes.
 
 =head2 $YAML::Syck::UseCode
 
