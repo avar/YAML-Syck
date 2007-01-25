@@ -3,7 +3,7 @@ use strict;
 use Exporter;
 use YAML::Syck ();
 
-$JSON::Syck::VERSION = '0.15';
+$JSON::Syck::VERSION = '0.20';
 
 *Load = \&YAML::Syck::LoadJSON;
 *Dump = \&YAML::Syck::DumpJSON;
@@ -113,14 +113,34 @@ Audrey Tang E<lt>cpan@audreyt.orgE<gt>
 
 Tatsuhiko Miyagawa E<lt>miyagawa@gmail.comE<gt>
 
-This module is originally forked from Audrey Tang's excellent
-YAML::Syck module and 99.9% of the XS code is written by Audrey.
+=head1 COPYRIGHT
 
-The F<libsyck> code bundled with this module is written by I<why the
-lucky stiff>, under a BSD-style license.  See the F<COPYING> file for
-details.
+Copyright 2005, 2006, 2007 by Audrey Tang E<lt>cpan@audreyt.orgE<gt>.
 
-This program is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
+This software is released under the MIT license cited below.
+
+The F<libsyck> code bundled with this library is released by
+"why the lucky stiff", under a BSD-style license.  See the F<COPYING>
+file for details.
+
+=head2 The "MIT" License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
 
 =cut

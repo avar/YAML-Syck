@@ -85,7 +85,8 @@ yaml_syck_parser_handler
                 if (strnEQ( n->data.str->ptr, NULL_LITERAL, 1+NULL_LITERAL_LENGTH)
                     && (n->data.str->style == scalar_plain)) {
                     sv = newSV(0);
-                } else {
+                }
+                else {
                     sv = newSVpvn(n->data.str->ptr, n->data.str->len);
                     CHECK_UTF8;
                 }
@@ -213,7 +214,7 @@ yaml_syck_parser_handler
                     croak("code %s did not evaluate to a subroutine reference\n", SvPV_nolen(sub));
                 }
 
-                if ( *pkg != '\0' ) {
+                if ( (*(pkg - 1) != '\0') && (*pkg != '\0') ) {
                     sv_bless(sv, gv_stashpv(pkg, TRUE));
                 }
 
@@ -231,15 +232,26 @@ yaml_syck_parser_handler
 
                 if (lang == NULL || (strEQ(lang, "perl"))) {
                     sv = newSVpv(type, 0);
-                } else {
-                    sv = newSVpv(form("%s::%s", lang, type), 0);
                 }
-            } else if ( strnEQ( id, "perl/scalar:", 12 ) && !strEQ( id, "perl/scalar:" )) {
-                sv = newSVpvn(n->data.str->ptr, n->data.str->len);
-                CHECK_UTF8;
+                else {
+                    sv = newSVpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), 0);
+                }
+            } else if ( strEQ( id, "perl/scalar" ) || strnEQ( id, "perl/scalar:", 12 ) ) {
+                char *pkg = id + 12;
+
+                if (strnEQ( n->data.str->ptr, NULL_LITERAL, 1+NULL_LITERAL_LENGTH)
+                    && (n->data.str->style == scalar_plain)) {
+                    sv = newSV(0);
+                }
+                else {
+                    sv = newSVpvn(n->data.str->ptr, n->data.str->len);
+                    CHECK_UTF8;
+                }
 
                 sv = newRV_inc(sv);
-                sv_bless(sv, gv_stashpv(id + 12, TRUE));
+                if ( (*(pkg - 1) != '\0') && (*pkg != '\0') ) {
+                    sv_bless(sv, gv_stashpv(id + 12, TRUE));
+                }
 #endif
 #endif
             } else {
@@ -278,11 +290,12 @@ yaml_syck_parser_handler
 
                 if (lang == NULL || (strEQ(lang, "perl"))) {
                     /* !perl/array on it's own causes no blessing */
-                    if ( !strEQ(type, "array") && *type != '\0' ) {
+                    if ( (type != NULL) && strNE(type, "array") && *type != '\0' ) {
                         sv_bless(sv, gv_stashpv(type, TRUE));
                     }
-                } else {
-                    sv_bless(sv, gv_stashpv(form("%s::%s", lang, type), TRUE));
+                }
+                else {
+                    sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
                 }
             }
 #endif
@@ -299,9 +312,11 @@ yaml_syck_parser_handler
                 sv = newRV_noinc(val);
                 USE_OBJECT(val);
 
-                if (strnNE(ref_type, REF_LITERAL, REF_LITERAL_LENGTH+1)) { /* handle the weird audrey scalar ref stuff */
+                if (strnNE(ref_type, REF_LITERAL, REF_LITERAL_LENGTH+1)) {
+                    /* handle the weird audrey scalar ref stuff */
                     sv_bless(sv, gv_stashpv(ref_type, TRUE));
-                } else {
+                }
+                else {
                     /* bless it if necessary */
                     char *lang = strtok(id, "/:");
                     char *type = strtok(NULL, "");
@@ -313,11 +328,12 @@ yaml_syck_parser_handler
 
                     if (lang == NULL || (strEQ(lang, "perl"))) {
                         /* !perl/ref on it's own causes no blessing */
-                        if ( !strEQ(type, "ref") && (*type != '\0')) {
+                        if ( (type != NULL) && strNE(type, "ref") && (*type != '\0')) {
                             sv_bless(sv, gv_stashpv(type, TRUE));
                         }
-                    } else {
-                        sv_bless(sv, gv_stashpv(form("%s::%s", lang, type), TRUE));
+                    }
+                    else {
+                        sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
                     }
                 }
             }
@@ -352,11 +368,11 @@ yaml_syck_parser_handler
 
                     if (lang == NULL || (strEQ(lang, "perl"))) {
                         /* !perl/hash on it's own causes no blessing */
-                        if ( !strEQ(type, "hash") && *type != '\0' ) {
+                        if ( (type != NULL) && strNE(type, "hash") && *type != '\0' ) {
                             sv_bless(sv, gv_stashpv(type, TRUE));
                         }
                     } else {
-                        sv_bless(sv, gv_stashpv(form("%s::%s", lang, type), TRUE));
+                        sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
                     }
                 }
 #endif
@@ -570,28 +586,32 @@ yaml_syck_emitter_handler
         ref = savepv(sv_reftype(SvRV(sv), TRUE));
         *tag = '\0';
         strcat(tag, OBJECT_TAG);
+
         switch (SvTYPE(SvRV(sv))) {
             case SVt_PVAV: { strcat(tag, "array:");  break; }
             case SVt_PVHV: { strcat(tag, "hash:");   break; }
             case SVt_PVCV: { strcat(tag, "code:");   break; }
             case SVt_PVGV: { strcat(tag, "glob:");   break; }
+
             /* flatten scalar ref objects so that they dump as !perl/scalar:Foo::Bar foo */
             case SVt_PVMG: {
-                               if ( !SvROK(SvRV(sv)) ) {
-                                   strcat(tag, "scalar:"); sv = SvRV(sv);
-                                   break;
-                               } else {
-                                   strcat(tag, "ref:");
-                                   break;
-                               }
-                           }
+                if ( !SvROK(SvRV(sv)) ) {
+                    strcat(tag, "scalar:");
+                    sv = SvRV(sv);
+                    ty = SvTYPE(sv);
+                    break;
+                } else {
+                    strcat(tag, "ref:");
+                    break;
+                }
+            }
         }
         strcat(tag, ref);
     }
 #endif
 
     if (SvROK(sv)) {
-        /* emit a scalar ref ??? XXX FIXME */
+        /* emit a scalar ref */
 #ifdef YAML_IS_JSON
         PERL_SYCK_EMITTER_HANDLER(e, (st_data_t)SvRV(sv));
 #else
@@ -618,6 +638,9 @@ yaml_syck_emitter_handler
     else if (ty == SVt_NULL) {
         /* emit an undef */
         syck_emit_scalar(e, "string", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
+    }
+    else if ((ty == SVt_PVMG) && !SvOK(sv)) {
+        syck_emit_scalar(e, OBJOF("string"), scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
     }
     else if (SvNIOKp(sv) && (sv_len(sv) != 0)) {
         /* emit a number with a stringified version */
@@ -770,17 +793,6 @@ yaml_syck_emitter_handler
                     if (len == 0 || *(SvPV_nolen(text)+reallen-1) == ';') {
                         croak("The result of B::Deparse::coderef2text was empty - maybe you're trying to serialize an XS function?\n");
                     }
-
-                    /* 
-                     * Signal code by emitting SX_CODE.
-                     */
-
-#if 0
-                    /* SYCK adds anchors for us automatically */
-
-                    PUTMARK(SX_CODE);
-                    cxt->tagnum++;   /* necessary, as SX_CODE is a SEEN() candidate */
-#endif
 
                     /*
                      * Now store the source code.

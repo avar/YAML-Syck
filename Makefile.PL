@@ -28,11 +28,12 @@ if ($bad and !is_admin()) {
 }
 
 name            'YAML-Syck';
+license         'MIT';
 all_from        'lib/YAML/Syck.pm';
 cc_inc_paths    '.';
 cc_files        (glob("*.c"), (-e 'Syck.c' ? () : 'Syck.c'));
 
-#cc_optimize_flags '-g4';
+cc_optimize_flags '-g3';
 
 can_cc or die "This module requires a C compiler";
 
