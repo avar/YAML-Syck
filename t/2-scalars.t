@@ -1,4 +1,4 @@
-use t::TestYAML tests => 44; 
+use t::TestYAML tests => 50; 
 
 local $SIG{__WARN__} = sub { 1 } if $Test::VERSION < 1.20;
 
@@ -93,6 +93,14 @@ $YAML::Syck::ImplicitTyping = $YAML::Syck::ImplicitTyping = 1;
 
 is(Load("--- true\n"), 1);
 is(Load("--- false\n"), '');
+
+# Various edge cases at grok_number boundary
+is(Load("--- 42949672\n"), 42949672);
+is(Load("--- -42949672\n"), -42949672);
+is(Load("--- 429496729\n"), 429496729);
+is(Load("--- -429496729\n"), -429496729);
+is(Load("--- 4294967296\n"), 4294967296);
+is(Load("--- -4294967296\n"), -4294967296);
 
 # RT #18752
 my $recurse1 = << '.';

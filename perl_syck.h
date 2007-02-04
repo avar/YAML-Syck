@@ -174,13 +174,25 @@ yaml_syck_parser_handler
                 syck_str_blow_away_commas( n );
                 sv = newSVuv( grok_oct( n->data.str->ptr, &len, &flags, NULL) );
             } else if (strEQ( id, "int" ) ) {
-                UV uv = 0;
+                UV uv;
+                int flags;
+
                 syck_str_blow_away_commas( n );
-                if (grok_number( n->data.str->ptr, n->data.str->len, &uv) & IS_NUMBER_NEG) {
-                    sv = newSViv(-uv);
+                flags = grok_number( n->data.str->ptr, n->data.str->len, &uv);
+
+                if (flags == IS_NUMBER_IN_UV) {
+                    if (uv <= IV_MAX) {
+                        sv = newSViv(uv);
+                    }
+                    else {
+                        sv = newSVuv(uv);
+                    }
+                }
+                else if ((flags == (IS_NUMBER_IN_UV | IS_NUMBER_NEG)) && (uv <= (UV) IV_MIN)) {
+                    sv = newSViv(-(IV)uv);
                 }
                 else {
-                    sv = newSVuv(uv);
+                    sv = newSVnv(Atof( n->data.str->ptr ));
                 }
             } else if (strEQ( id, "binary" )) {
                 long len = 0;
