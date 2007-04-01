@@ -1,4 +1,4 @@
-use t::TestYAML tests => 50; 
+use t::TestYAML tests => 52; 
 
 local $SIG{__WARN__} = sub { 1 } if $Test::VERSION < 1.20;
 
@@ -139,4 +139,9 @@ $YAML::Syck::ImplicitBinary = $YAML::Syck::ImplicitBinary = 1;
 is(Dump("\xff\xff"), "--- !binary //8=\n");
 is(Load("--- !binary //8=\n"), "\xff\xff");
 is(Dump("ascii"), "--- ascii\n");
+
+$YAML::Syck::SingleQuote = $YAML::Syck::SingleQuote = 1;
+
+is(Dump('042'),    "--- '042'\n");
+is(Load("--- '042'\n"), '042');
 

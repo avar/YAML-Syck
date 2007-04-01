@@ -42,7 +42,8 @@ static enum scalar_style json_quote_style = scalar_2quote;
 #  define NULL_LITERAL  "~"
 #  define NULL_LITERAL_LENGTH 1
 #  define SCALAR_NUMBER scalar_none
-#  define SCALAR_STRING scalar_none
+static enum scalar_style yaml_quote_style = scalar_none;
+#  define SCALAR_STRING yaml_quote_style
 #  define SCALAR_QUOTED scalar_1quote
 #  define SCALAR_UTF8   scalar_fold
 #  define SEQ_NONE      seq_none
@@ -499,14 +500,14 @@ static SV * LoadYAML (char *s) {
     SyckParser *parser;
     struct parser_xtra bonus;
     SV *obj = &PL_sv_undef;
-    SV *implicit = GvSV(gv_fetchpv(form("%s::ImplicitTyping", PACKAGE_NAME), TRUE, SVt_PV));
     SV *use_code = GvSV(gv_fetchpv(form("%s::UseCode", PACKAGE_NAME), TRUE, SVt_PV));
     SV *load_code = GvSV(gv_fetchpv(form("%s::LoadCode", PACKAGE_NAME), TRUE, SVt_PV));
-    SV *implicit_unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
     SV *implicit_binary = GvSV(gv_fetchpv(form("%s::ImplicitBinary", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *implicit_typing = GvSV(gv_fetchpv(form("%s::ImplicitTyping", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *implicit_unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
     SV *singlequote = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
     json_quote_char = (SvTRUE(singlequote) ? '\'' : '"' );
-    json_quote_style = (SvTRUE(singlequote) ? scalar_1quote : scalar_2quote );
+/*    json_quote_style = (SvTRUE(singlequote) ? scalar_1quote : scalar_2quote ); */
 
     ENTER; SAVETMPS;
 
@@ -527,7 +528,7 @@ static SV * LoadYAML (char *s) {
     syck_parser_handler(parser, PERL_SYCK_PARSER_HANDLER);
     syck_parser_error_handler(parser, perl_syck_error_handler);
     syck_parser_bad_anchor_handler( parser, perl_syck_bad_anchor_handler );
-    syck_parser_implicit_typing(parser, SvTRUE(implicit));
+    syck_parser_implicit_typing(parser, SvTRUE(implicit_typing));
     syck_parser_taguri_expansion(parser, 0);
 
     bonus.objects = (AV*)sv_2mortal((SV*)newAV());
@@ -948,8 +949,11 @@ DumpYAML
 #ifdef YAML_IS_JSON
     SV *singlequote = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
     json_quote_char = (SvTRUE(singlequote) ? '\'' : '"' );
-    json_quote_style = (SvTRUE(singlequote) ? scalar_1quote : scalar_2quote );
+    json_quote_style = (SvTRUE(singlequote) ? scalar_literal : scalar_2quote );
     emitter->indent = PERL_SYCK_INDENT_LEVEL;
+#else
+    SV *singlequote = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
+    yaml_quote_style = (SvTRUE(singlequote) ? scalar_1quote : scalar_none);
 #endif
 
     ENTER; SAVETMPS;

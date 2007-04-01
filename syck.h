@@ -404,6 +404,7 @@ void syck_emit( SyckEmitter *, st_data_t );
 void syck_emit_scalar( SyckEmitter *, char *, enum scalar_style, int, int, char, char *, long );
 void syck_emit_1quoted( SyckEmitter *, int, char *, long );
 void syck_emit_2quoted( SyckEmitter *, int, char *, long );
+void syck_emit_2quoted_1( SyckEmitter *, int, char *, long );
 void syck_emit_folded( SyckEmitter *, int, char, char *, long );
 void syck_emit_literal( SyckEmitter *, char, char *, long );
 void syck_emit_seq( SyckEmitter *, char *, enum seq_style );

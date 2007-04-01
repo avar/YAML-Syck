@@ -49,6 +49,11 @@ leading C<---\n> marker.
 Defaults to false.  Setting this to a true value will make C<Dump> sort
 hash keys.
 
+=head2 $YAML::Syck::SingleQuote
+
+Defaults to false.  Setting this to a true value will make C<Dump> always emit
+quotes instead of bare strings.
+
 =head2 $YAML::Syck::ImplicitTyping
 
 Defaults to false.  Setting this to a true value will make C<Load> recognize
