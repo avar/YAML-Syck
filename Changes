@@ -1,3 +1,21 @@
+[Changes for 0.84 (JSON::Syck 0.23) - 2007-04-02]
+
+* New $YAML::Syck::SingleQuote flag: When it is set to true, Dump will
+  always emit quotes instead of bare strings.
+  Requested by: Ingo Bax
+
+* When $JSON::Syck::SingleQuote is set to true, special characters such as
+  \r\n are still escaped as usual, because JavaScript allows the same form
+  of escaping in strings with either quotes.
+  Reported by: Dobrica Pavlinusic
+
+[Changes for 0.83 (JSON::Syck 0.22) - 2007-02-05]
+
+* Under JSON::Syck, as well as YAML::Syck when $ImplicitTyping is set to
+  true, integer numbers larger than an unsigned integer (>=4294967296 on
+  32-bit platforms) was erroneously loaded as 0.
+  Reported by: Markus Wörle
+
 [Changes for 0.82 (JSON::Syck 0.21) - 2007-01-26]
 
 * Bytestrings containing no high bit bytes are no longer dumped as "!binary".

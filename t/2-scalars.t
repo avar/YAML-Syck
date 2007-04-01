@@ -1,4 +1,4 @@
-use t::TestYAML tests => 44; 
+use t::TestYAML tests => 52; 
 
 local $SIG{__WARN__} = sub { 1 } if $Test::VERSION < 1.20;
 
@@ -94,6 +94,14 @@ $YAML::Syck::ImplicitTyping = $YAML::Syck::ImplicitTyping = 1;
 is(Load("--- true\n"), 1);
 is(Load("--- false\n"), '');
 
+# Various edge cases at grok_number boundary
+is(Load("--- 42949672\n"), 42949672);
+is(Load("--- -42949672\n"), -42949672);
+is(Load("--- 429496729\n"), 429496729);
+is(Load("--- -429496729\n"), -429496729);
+is(Load("--- 4294967296\n"), 4294967296);
+is(Load("--- -4294967296\n"), -4294967296);
+
 # RT #18752
 my $recurse1 = << '.';
 --- &1 
@@ -131,4 +139,9 @@ $YAML::Syck::ImplicitBinary = $YAML::Syck::ImplicitBinary = 1;
 is(Dump("\xff\xff"), "--- !binary //8=\n");
 is(Load("--- !binary //8=\n"), "\xff\xff");
 is(Dump("ascii"), "--- ascii\n");
+
+$YAML::Syck::SingleQuote = $YAML::Syck::SingleQuote = 1;
+
+is(Dump('042'),    "--- '042'\n");
+is(Load("--- '042'\n"), '042');
 

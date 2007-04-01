@@ -136,6 +136,8 @@ sub write {
                 . "but we need version >= $perl_version";
     }
 
+    $args->{INSTALLDIRS} = $self->installdirs;
+
     my %args = map { ( $_ => $args->{$_} ) } grep {defined($args->{$_})} keys %$args;
 
     my $user_preop = delete $args{dist}->{PREOP};
@@ -207,4 +209,4 @@ sub postamble {
 
 __END__
 
-#line 336
+#line 338
