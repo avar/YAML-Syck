@@ -131,7 +131,8 @@ enum scalar_style {
     scalar_2quote,
     scalar_fold,
     scalar_literal,
-    scalar_plain
+    scalar_plain,
+    scalar_2quote_1 /* Added by Audrey Tang to support JSON's single quoting */
 };
 
 /*

@@ -707,7 +707,7 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
     /* Determine block style */
     if ( (scan & SCAN_NONPRINT) && (e->style != scalar_fold) ) {
         force_style = scalar_2quote;
-    } else if ( force_style != scalar_1quote && force_style != scalar_literal && ( scan & SCAN_WHITEEDGE ) ) {
+    } else if ( force_style != scalar_1quote && force_style != scalar_2quote_1 && ( scan & SCAN_WHITEEDGE ) ) {
         force_style = scalar_2quote;
     } else if ( force_style != scalar_fold && ( scan & SCAN_INDENTED ) ) {
         force_style = scalar_literal;
@@ -742,7 +742,7 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
 
     /* If the parent is an inline, double quote anything complex */
     if ( parent->status == syck_lvl_imap || parent->status == syck_lvl_iseq ) {
-        if ( force_style != scalar_plain && force_style != scalar_1quote && force_style != scalar_literal) {
+        if ( force_style != scalar_plain && force_style != scalar_1quote && force_style != scalar_2quote_1) {
             force_style = scalar_2quote;
         }
     }
@@ -770,9 +770,13 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
             syck_emit_folded( e, force_width, keep_nl, str, len );
         break;
 
+        case scalar_2quote_1:
+            syck_emit_2quoted_1( e, force_width, str, len );
+        break;
+
         case scalar_literal:
             /* syck_emit_literal( e, keep_nl, str, len ); */
-            syck_emit_2quoted_1( e, force_width, str, len );
+            syck_emit_2quoted( e, force_width, str, len );
         break;
 
         case scalar_plain:
