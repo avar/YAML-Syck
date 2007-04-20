@@ -1,3 +1,10 @@
+[Changes for 0.85 (JSON::Syck 0.24) - 2007-04-20]
+
+* Strings containing both single quotes and newlines were incorrectly 
+  quoted with backslash-escaped single quotes.  This is a regression
+  introduced in YAML::Syck 0.84.
+  Reported by: Agent Zhang
+
 [Changes for 0.84 (JSON::Syck 0.23) - 2007-04-02]
 
 * New $YAML::Syck::SingleQuote flag: When it is set to true, Dump will

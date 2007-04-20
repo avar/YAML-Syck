@@ -1,4 +1,4 @@
-use t::TestYAML tests => 52; 
+use t::TestYAML tests => 54; 
 
 local $SIG{__WARN__} = sub { 1 } if $Test::VERSION < 1.20;
 
@@ -140,7 +140,12 @@ is(Dump("\xff\xff"), "--- !binary //8=\n");
 is(Load("--- !binary //8=\n"), "\xff\xff");
 is(Dump("ascii"), "--- ascii\n");
 
+is(Dump("This is Perl 6 User's Golfing System\n", q[--- "This is Perl6 User's Golfing System\n"]));
+
 $YAML::Syck::SingleQuote = $YAML::Syck::SingleQuote = 1;
+
+# If single quote is impossible, fall back to double quote.
+is(Dump("This is Perl 6 User's Golfing System\n", q[--- "This is Perl6 User's Golfing System\n"]));
 
 is(Dump('042'),    "--- '042'\n");
 is(Load("--- '042'\n"), '042');

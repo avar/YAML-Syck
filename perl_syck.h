@@ -949,7 +949,7 @@ DumpYAML
 #ifdef YAML_IS_JSON
     SV *singlequote = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
     json_quote_char = (SvTRUE(singlequote) ? '\'' : '"' );
-    json_quote_style = (SvTRUE(singlequote) ? scalar_literal : scalar_2quote );
+    json_quote_style = (SvTRUE(singlequote) ? scalar_2quote_1 : scalar_2quote );
     emitter->indent = PERL_SYCK_INDENT_LEVEL;
 #else
     SV *singlequote = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
