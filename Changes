@@ -1,3 +1,9 @@
+[Changes for 0.86 (JSON::Syck 0.24) - 2007-06-16]
+
+* Support for dumping and loading regexps created by qr//, including
+  blessed once.  Note that loading Regexp values dumped by YAML.pm
+  currently discards modifiers.
+
 [Changes for 0.85 (JSON::Syck 0.24) - 2007-04-20]
 
 * Strings containing both single quotes and newlines were incorrectly 
