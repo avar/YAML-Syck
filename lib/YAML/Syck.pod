@@ -6,7 +6,7 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.86 of YAML::Syck, released April 20, 2007.
+This document describes version 0.87 of YAML::Syck, released June 17, 2007.
 
 =head1 SYNOPSIS
 
@@ -17,8 +17,10 @@ This document describes version 0.86 of YAML::Syck, released April 20, 2007.
     $YAML::Syck::ImplicitTyping = 1;
 
     $data = Load($yaml);
-    $data = LoadFile($file);
     $yaml = Dump($data);
+
+    # $file can be an IO object, or a filename
+    $data = LoadFile($file);
     DumpFile($file, $data);
 
     # A string with multiple YAML streams in it

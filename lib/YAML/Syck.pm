@@ -11,7 +11,7 @@ use 5.00307;
 use Exporter;
 
 BEGIN {
-    $VERSION = '0.86';
+    $VERSION = '0.87';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 
@@ -56,16 +56,39 @@ sub Load {
 
 sub DumpFile {
     my $file = shift;
-    local *FH;
-    open FH, "> $file" or die "Cannot write to $file: $!";
-    print FH Dump($_[0]);
+    if (ref($file) eq 'GLOB') {
+        require IO::Handle;
+        if ($#_) {
+            $file->print( YAML::Syck::DumpYAML($_) ) for @_;
+        }
+        else {
+            $file->print( YAML::Syck::DumpYAML($_[0]) );
+        }
+    }
+    else {
+        local *FH;
+        open FH, "> $file" or die "Cannot write to $file: $!";
+        if ($#_) {
+            print FH YAML::Syck::DumpYAML($_) for @_;
+        }
+        else {
+            print FH YAML::Syck::DumpYAML($_[0]);
+        }
+        close FH;
+    }
 }
 
 sub LoadFile {
     my $file = shift;
-    local *FH;
-    open FH, "< $file" or die "Cannot read from $file: $!";
-    Load(do { local $/; <FH> })
+    if (ref($file) eq 'GLOB') {
+        require IO::Handle;
+        Load(do { local $/; $file->getline });
+    }
+    else {
+        local *FH;
+        open FH, "< $file" or die "Cannot read from $file: $!";
+        Load(do { local $/; <FH> });
+    }
 }
 
 1;

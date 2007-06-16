@@ -1,12 +1,30 @@
 package JSON::Syck;
 use strict;
+use vars qw( $VERSION @EXPORT_OK @ISA );
 use Exporter;
 use YAML::Syck ();
 
-$JSON::Syck::VERSION = '0.24';
+BEGIN {
+    $VERSION    = '0.25';
+    @EXPORT_OK  = qw( Load Dump LoadFile DumpFile );
+    @ISA        = 'Exporter';
+    *Load       = \&YAML::Syck::LoadJSON;
+    *Dump       = \&YAML::Syck::DumpJSON;
+}
 
-*Load = \&YAML::Syck::LoadJSON;
-*Dump = \&YAML::Syck::DumpJSON;
+sub DumpFile {
+    my $file = shift;
+    if (ref($file) eq 'GLOB') {
+        require IO::Handle;
+        $file->print( YAML::Syck::DumpJSON($_[0]) );
+    }
+    else {
+        local *FH;
+        open FH, "> $file" or die "Cannot write to $file: $!";
+        print FH YAML::Syck::DumpJSON($_[0]);
+        close FH;
+    }
+}
 
 $JSON::Syck::ImplicitTyping  = 1;
 $JSON::Syck::Headless        = 1;
@@ -23,10 +41,14 @@ JSON::Syck - JSON is YAML
 
 =head1 SYNOPSIS
 
-  use JSON::Syck;
+    use JSON::Syck; # no exports by default 
 
-  my $data = JSON::Syck::Load($json);
-  my $json = JSON::Syck::Dump($data);
+    my $data = JSON::Syck::Load($json);
+    my $json = JSON::Syck::Dump($data);
+
+    # $file can be an IO object, or a filename
+    my $data = JSON::Syck::LoadFile($file);
+    JSON::Syck::DumpFile($file, $data);
 
 =head1 DESCRIPTION
 
