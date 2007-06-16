@@ -1,3 +1,13 @@
+[Changes for 0.88 (JSON::Syck 0.26) - 2007-06-17]
+
+* New dependency: Scalar::Util, for LoadFile and DumpFile functions.
+  You can safely do without that module if you do not make use of the
+  two functions.
+
+* LoadFile and DumpFile now accept glob values, and reject unopened
+  handles properly instead of silently ignores it.
+  Contributed by: Adriano Ferreira
+
 [Changes for 0.87 (JSON::Syck 0.25) - 2007-06-17]
 
 * New LoadFile and DumpFile functions for JSON::Syck.

@@ -5,7 +5,7 @@ use Exporter;
 use YAML::Syck ();
 
 BEGIN {
-    $VERSION    = '0.25';
+    $VERSION    = '0.26';
     @EXPORT_OK  = qw( Load Dump LoadFile DumpFile );
     @ISA        = 'Exporter';
     *Load       = \&YAML::Syck::LoadJSON;
@@ -14,9 +14,8 @@ BEGIN {
 
 sub DumpFile {
     my $file = shift;
-    if (ref($file) eq 'GLOB') {
-        require IO::Handle;
-        $file->print( YAML::Syck::DumpJSON($_[0]) );
+    if ( ref($file) and require Scalar::Util and Scalar::Util::openhandle($file) ) {
+        print {$file} YAML::Syck::DumpJSON($_[0]);
     }
     else {
         local *FH;
