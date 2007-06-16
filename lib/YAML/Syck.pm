@@ -11,7 +11,7 @@ use 5.00307;
 use Exporter;
 
 BEGIN {
-    $VERSION = '0.85';
+    $VERSION = '0.86';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 
@@ -27,6 +27,16 @@ BEGIN {
         push @ISA, 'DynaLoader';
         __PACKAGE__->bootstrap($VERSION);
     };
+}
+
+sub __qr_helper {
+    # XXX - Really bad idea - should split to MODIFIERS and REGEXP keys as per YAML.pm.
+    if (index($_[0], '(?-xism:') == 0) {
+        qr/${\substr($_[0], 8, -1)}/;
+    }
+    else {
+        qr/$_[0]/;
+    }
 }
 
 sub Dump {

@@ -6,7 +6,7 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.85 of YAML::Syck, released April 20, 2007.
+This document describes version 0.86 of YAML::Syck, released April 20, 2007.
 
 =head1 SYNOPSIS
 
@@ -84,12 +84,22 @@ scalars containing high-bit bytes.
 
 =head2 $YAML::Syck::DumpCode
 
-These control whether or not to try and eval/deparse perl source code.
+These flags control whether or not to try and eval/deparse perl source code;
+each of them defaults to false.
+
+Setting C<$YAML::Syck::UseCode> to a true value is equivalent to setting
+both C<$YAML::Syck::LoadCode> and C<$YAML::Syck::DumpCode> to true.
+
+=head1 BUGS
+
+Loading Regexp values dumped by YAML.pm currently discards modifiers.
+
+Dumping Glob/IO values does not work yet.
 
 =head1 CAVEATS
 
 The current implementation bundles libsyck source code; if your system has a
-side-wide shared libsyck, it will I<not> be used.
+site-wide shared libsyck, it will I<not> be used.
 
 Tag names such as C<!!perl/hash:Foo> is blessed into the package C<Foo>, but
 the C<!hs/foo> and C<!!hs/Foo> tags are blessed into C<hs::Foo>.  Note that
