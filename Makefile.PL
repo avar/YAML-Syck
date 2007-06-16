@@ -37,6 +37,7 @@ cc_files        (glob("*.c"), (-e 'Syck.c' ? () : 'Syck.c'));
 
 can_cc or die "This module requires a C compiler";
 
-include_deps 'Test::More';
-build_requires 'Devel::Leak' if defined $ENV{'AUTOMATED_TESTING'};
+include_deps    'Test::More';
+requires        'Scalar::Util';
+build_requires  'Devel::Leak' if defined $ENV{'AUTOMATED_TESTING'};
 sign; WriteAll;

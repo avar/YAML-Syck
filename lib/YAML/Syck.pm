@@ -11,7 +11,7 @@ use 5.00307;
 use Exporter;
 
 BEGIN {
-    $VERSION = '0.87';
+    $VERSION = '0.88';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 
@@ -56,13 +56,12 @@ sub Load {
 
 sub DumpFile {
     my $file = shift;
-    if (ref($file) eq 'GLOB') {
-        require IO::Handle;
+    if ( ref($file) and require Scalar::Util and Scalar::Util::openhandle($file) ) {
         if ($#_) {
-            $file->print( YAML::Syck::DumpYAML($_) ) for @_;
+            print {$file} YAML::Syck::DumpYAML($_) for @_;
         }
         else {
-            $file->print( YAML::Syck::DumpYAML($_[0]) );
+            print {$file} YAML::Syck::DumpYAML($_[0]);
         }
     }
     else {
@@ -80,9 +79,8 @@ sub DumpFile {
 
 sub LoadFile {
     my $file = shift;
-    if (ref($file) eq 'GLOB') {
-        require IO::Handle;
-        Load(do { local $/; $file->getline });
+    if ( ref($file) and require Scalar::Util and Scalar::Util::openhandle($file) ) {
+        Load(do { local $/; <$file> });
     }
     else {
         local *FH;
