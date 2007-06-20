@@ -201,8 +201,8 @@ yaml_syck_parser_handler
                 long len = 0;
                 char *blob = syck_base64dec(n->data.str->ptr, n->data.str->len, &len);
                 sv = newSVpv(blob, len);
-#ifdef PERL_LOADMOD_NOIMPORT
 #ifndef YAML_IS_JSON
+#ifdef PERL_LOADMOD_NOIMPORT
             } else if (load_code && (strEQ(id, "perl/code") || strnEQ(id, "perl/code:", 10))) {
                 SV *cv;
                 SV *text, *sub;
@@ -271,8 +271,39 @@ yaml_syck_parser_handler
                 if ( (*(pkg - 1) != '\0') && (*pkg != '\0') ) {
                     sv_bless(sv, gv_stashpv(id + 12, TRUE));
                 }
-#endif
-#endif
+            } else if ( (strEQ(id, "perl/regexp") || strnEQ( id, "perl/regexp:", 12 ) ) ) {
+                dSP;
+                SV *val = newSVpvn(n->data.str->ptr, n->data.str->len);
+                char *lang = strtok(id, "/:");
+                char *type = strtok(NULL, "");
+
+                ENTER;
+                SAVETMPS;
+                PUSHMARK(sp);
+                XPUSHs(val);
+                PUTBACK;
+                call_pv("YAML::Syck::__qr_helper", G_SCALAR);
+                SPAGAIN;
+
+                sv = newSVsv(POPs);
+
+                /* bless it if necessary */
+                if ( type != NULL && strnEQ(type, "regexp:", 7)) {
+                    /* !perl/regexp:Foo::Bar blesses into Foo::Bar */
+                    type += 7;
+                }
+
+                if (lang == NULL || (strEQ(lang, "perl"))) {
+                    /* !perl/regexp on it's own causes no blessing */
+                    if ( (type != NULL) && strNE(type, "regexp") && (*type != '\0')) {
+                        sv_bless(sv, gv_stashpv(type, TRUE));
+                    }
+                }
+                else {
+                    sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
+                }
+#endif /* PERL_LOADMOD_NOIMPORT */
+#endif /* !YAML_IS_JSON */
             } else {
                 /* croak("unknown node type: %s", id); */
                 sv = newSVpvn(n->data.str->ptr, n->data.str->len);
@@ -358,8 +389,6 @@ yaml_syck_parser_handler
             }
             else if ( (id != NULL) && (strEQ(id, "perl/regexp") || strnEQ( id, "perl/regexp:", 12 ) ) ) {
                 /* handle regexp references, that are a weird type of mappings */
-                /* XXX - MODIFIERS support */
-
                 dSP;
                 SV* key = perl_syck_lookup_sym(p, syck_map_read(n, map_key, 0));
                 SV* val = perl_syck_lookup_sym(p, syck_map_read(n, map_value, 0));
@@ -728,17 +757,15 @@ yaml_syck_emitter_handler
                 else {
                     MAGIC *mg;
                     if (mg = mg_find(SvRV(sv), PERL_MAGIC_qr)) {
-                        strcat(tag, "regexp:");
-                        if (strNE(ref, "Regexp")) {
-                            strcat(tag, ref);
+                        if (strEQ(ref, "Regexp")) {
+                            strcat(tag, "regexp");
+                            ref += 6; /* empty string */
                         }
-                        /* XXX - Emit "MODIFIERS" key as well */
-                        syck_emit_map( e, tag, MAP_NONE);
-                        *tag = '\0';
-                        syck_emit_item( e, (st_data_t)newSVpvn_share(REGEXP_LITERAL, REGEXP_LITERAL_LENGTH, 0) );
-                        syck_emit_item( e, (st_data_t)newSVpvn(SvPV_nolen(sv), sv_len(sv)));
-                        syck_emit_end(e);
-                        return;
+                        else {
+                            strcat(tag, "regexp:");
+                        }
+                        sv = newSVpvn(SvPV_nolen(sv), sv_len(sv));
+                        ty = SvTYPE(sv);
                     }
                     else {
                         strcat(tag, "scalar:");

@@ -25,12 +25,12 @@ run_ref_ok(qw(
 ));
 
 my $rx = qr/123/;
-is(Dump($rx), "--- !!perl/regexp: \nREGEXP: (?-xism:123)\n");
-is(Dump(Load(Dump($rx))), "--- !!perl/regexp: \nREGEXP: (?-xism:123)\n");
+is(Dump($rx), "--- !!perl/regexp (?-xism:123)\n");
+is(Dump(Load(Dump($rx))), "--- !!perl/regexp (?-xism:123)\n");
 
-my $rx_obj = bless qr/123/ => 'Foo';
-is(Dump($rx_obj), "--- !!perl/regexp:Foo \nREGEXP: (?-xism:123)\n");
-is(Dump(Load(Dump($rx_obj))), "--- !!perl/regexp:Foo \nREGEXP: (?-xism:123)\n");
+my $rx_obj = bless qr/123/i => 'Foo';
+is(Dump($rx_obj), "--- !!perl/regexp:Foo (?i-xsm:123)\n");
+is(Dump(Load(Dump($rx_obj))), "--- !!perl/regexp:Foo (?i-xsm:123)\n");
 
 my $obj = bless(\(my $undef) => 'Foo');
 is(Dump($obj), "--- !!perl/scalar:Foo ~\n");

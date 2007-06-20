@@ -1,3 +1,10 @@
+[Changes for 0.90 (JSON::Syck 0.26) - 2007-06-17]
+
+* Regexes are now dump/loaded correctly with modifiers, with a new
+  representation: "--- !!perl/regexp:main (?i-xsm:1)", instead of the
+  old mapping with a REGEXP key. (The old form still loads correctly).
+  Requested by: Ingy döt Net
+
 [Changes for 0.88 (JSON::Syck 0.26) - 2007-06-17]
 
 * New dependency: Scalar::Util, for LoadFile and DumpFile functions.
@@ -289,7 +296,7 @@
 * Documentation change: in the POD text, stress the importance of setting
   $YAML::Syck::ImplicitTyping to true, for interoperability with other
   language's YAML/Syck bindings is desired.
-  Suggested by: "dgaramond2" on Perlmonks.
+  Requested by: "dgaramond2" on Perlmonks.
 
 [Changes for 0.37 - 2006-03-14]
 
