@@ -11,7 +11,7 @@ use 5.00307;
 use Exporter;
 
 BEGIN {
-    $VERSION = '0.90';
+    $VERSION = '0.91';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 
@@ -27,15 +27,32 @@ BEGIN {
         push @ISA, 'DynaLoader';
         __PACKAGE__->bootstrap($VERSION);
     };
+
 }
 
+use constant _QR_MAP => {
+    ''   => sub { qr{$_[0]}     }, 
+    x    => sub { qr{$_[0]}x    }, 
+    i    => sub { qr{$_[0]}i    }, 
+    s    => sub { qr{$_[0]}s    }, 
+    m    => sub { qr{$_[0]}m    }, 
+    ix   => sub { qr{$_[0]}ix   }, 
+    sx   => sub { qr{$_[0]}sx   }, 
+    mx   => sub { qr{$_[0]}mx   }, 
+    si   => sub { qr{$_[0]}si   }, 
+    mi   => sub { qr{$_[0]}mi   }, 
+    ms   => sub { qr{$_[0]}sm   }, 
+    six  => sub { qr{$_[0]}six  }, 
+    mix  => sub { qr{$_[0]}mix  }, 
+    msx  => sub { qr{$_[0]}msx  }, 
+    msi  => sub { qr{$_[0]}msi  }, 
+    msix => sub { qr{$_[0]}msix }, 
+};
+
 sub __qr_helper {
-    if (index($_[0], '(?-xism:') == 0) {
-        qr/${\substr($_[0], 8, -1)}/;
-    }
-    elsif ($_[0] =~ /\A  \(\?  ([xism]+)  -  (?:[xism]*)  : (.*) \)  \z/x) {
-        local $@;
-        eval "qr/\$2/$1";
+    if ($_[0] =~ /\A  \(\?  ([ixsm]*)  (?:-  (?:[ixsm]*))?  : (.*) \)  \z/x) {
+        my $sub = _QR_MAP->{$1} || _QR_MAP->{''};
+        &$sub($2);
     }
     else {
         qr/$_[0]/;

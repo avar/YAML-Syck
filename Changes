@@ -1,9 +1,17 @@
-[Changes for 0.90 (JSON::Syck 0.26) - 2007-06-17]
+[Changes for 0.91 (JSON::Syck 0.26) - 2007-06-23]
+
+* Corrected loading Regexps with all combinations of quantifiers.
+  Contributed by: Ingy döt Net
+
+[Changes for 0.90 (JSON::Syck 0.26) - 2007-06-22]
 
 * Regexes are now dump/loaded correctly with modifiers, with a new
   representation: "--- !!perl/regexp:main (?i-xsm:1)", instead of the
-  old mapping with a REGEXP key. (The old form still loads correctly).
+  old mapping with a REGEXP key.  The old form still loads correctly;
+  the new form corresponds to YAML.pm 0.63 and later.
   Requested by: Ingy döt Net
+
+* Loading regexes with modifiers no longer involves an eval"" call.
 
 [Changes for 0.88 (JSON::Syck 0.26) - 2007-06-17]
 
