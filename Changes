@@ -1,3 +1,8 @@
+[Changes for 0.91 (JSON::Syck 0.26) - 2007-06-23]
+
+* Corrected loading Regexps with all combinations of quantifiers.
+  Contributed by: Ingy döt Net
+
 [Changes for 0.90 (JSON::Syck 0.26) - 2007-06-22]
 
 * Regexes are now dump/loaded correctly with modifiers, with a new

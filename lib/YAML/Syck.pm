@@ -11,7 +11,7 @@ use 5.00307;
 use Exporter;
 
 BEGIN {
-    $VERSION = '0.90';
+    $VERSION = '0.91';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 
@@ -31,27 +31,28 @@ BEGIN {
 }
 
 use constant _QR_MAP => {
-    ''   => sub { qr/$_[0]/     },
-    i    => sub { qr/$_[0]/i    },
-    x    => sub { qr/$_[0]/x    },
-    ix   => sub { qr/$_[0]/ix   },
-    s    => sub { qr/$_[0]/s    },
-    is   => sub { qr/$_[0]/is   },
-    xs   => sub { qr/$_[0]/xs   },
-    ixs  => sub { qr/$_[0]/ixs  },
-    m    => sub { qr/$_[0]/m    },
-    im   => sub { qr/$_[0]/im   },
-    xm   => sub { qr/$_[0]/xm   },
-    ixm  => sub { qr/$_[0]/ixm  },
-    sm   => sub { qr/$_[0]/sm   },
-    ism  => sub { qr/$_[0]/ism  },
-    xsm  => sub { qr/$_[0]/xsm  },
-    ixsm => sub { qr/$_[0]/ixsm },
+    ''   => sub { qr{$_[0]}     }, 
+    x    => sub { qr{$_[0]}x    }, 
+    i    => sub { qr{$_[0]}i    }, 
+    s    => sub { qr{$_[0]}s    }, 
+    m    => sub { qr{$_[0]}m    }, 
+    ix   => sub { qr{$_[0]}ix   }, 
+    sx   => sub { qr{$_[0]}sx   }, 
+    mx   => sub { qr{$_[0]}mx   }, 
+    si   => sub { qr{$_[0]}si   }, 
+    mi   => sub { qr{$_[0]}mi   }, 
+    ms   => sub { qr{$_[0]}sm   }, 
+    six  => sub { qr{$_[0]}six  }, 
+    mix  => sub { qr{$_[0]}mix  }, 
+    msx  => sub { qr{$_[0]}msx  }, 
+    msi  => sub { qr{$_[0]}msi  }, 
+    msix => sub { qr{$_[0]}msix }, 
 };
 
 sub __qr_helper {
-    if ($_[0] =~ /\A  \(\?  ([ixsm]*)  -  (?:[ixsm]*)  : (.*) \)  \z/x) {
-        _QR_MAP->{$1}->($2);
+    if ($_[0] =~ /\A  \(\?  ([ixsm]*)  (?:-  (?:[ixsm]*))?  : (.*) \)  \z/x) {
+        my $sub = _QR_MAP->{$1} || _QR_MAP->{''};
+        &$sub($2);
     }
     else {
         qr/$_[0]/;
