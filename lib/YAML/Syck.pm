@@ -11,7 +11,7 @@ use 5.00307;
 use Exporter;
 
 BEGIN {
-    $VERSION = '0.91';
+    $VERSION = '0.94';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 
@@ -74,9 +74,26 @@ sub Load {
     }
 }
 
+# NOTE. The code below (_is_openhandle) avoids to require/load
+# Scalar::Util unless it is given a ref or glob
+# as an argument. That is purposeful, so to avoid
+# the need for this dependency unless strictly necessary.
+# If that was not the case, Scalar::Util::openhandle could
+# be used directly.
+
+sub _is_openhandle {
+    my $h = shift;
+    if ( ref($h) || ref(\$h) eq 'GLOB' ) {
+        require Scalar::Util;
+        return Scalar::Util::openhandle($h);
+    } else {
+        return undef;
+    }
+}
+
 sub DumpFile {
     my $file = shift;
-    if ( ref($file) and require Scalar::Util and Scalar::Util::openhandle($file) ) {
+    if ( _is_openhandle($file) ) {
         if ($#_) {
             print {$file} YAML::Syck::DumpYAML($_) for @_;
         }
@@ -99,7 +116,7 @@ sub DumpFile {
 
 sub LoadFile {
     my $file = shift;
-    if ( ref($file) and require Scalar::Util and Scalar::Util::openhandle($file) ) {
+    if ( _is_openhandle($file) ) {
         Load(do { local $/; <$file> });
     }
     else {

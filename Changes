@@ -1,3 +1,17 @@
+[Changes for 0.93 (JSON::Syck 0.26) - 2007-07-10]
+
+* Repair broken PAUSE upload, again. (Sigh.)
+
+[Changes for 0.93 (JSON::Syck 0.26) - 2007-07-10]
+
+* Repair broken PAUSE upload.
+
+[Changes for 0.92 (JSON::Syck 0.26) - 2007-07-10]
+
+* Allow for LoadFile(*FH) and DumpFile(*FH), in addition to
+  ($fh) and (\*FH).  Also, new tests for LoadFile and DumpFile.
+  Contributed by: Adriano Ferreira
+
 [Changes for 0.91 (JSON::Syck 0.26) - 2007-06-23]
 
 * Corrected loading Regexps with all combinations of quantifiers.

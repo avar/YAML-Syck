@@ -14,7 +14,7 @@ BEGIN {
 
 sub DumpFile {
     my $file = shift;
-    if ( ref($file) and require Scalar::Util and Scalar::Util::openhandle($file) ) {
+    if ( YAML::Syck::_is_openhandle($file) ) {
         print {$file} YAML::Syck::DumpJSON($_[0]);
     }
     else {
@@ -74,7 +74,7 @@ Oh, and JSON::Syck doesn't use camelCase method names :-)
 
 =head1 REFERENCES
 
-=head2 SCALAR REFERNECE
+=head2 SCALAR REFERENCE
 
 For now, when you pass a scalar reference to JSON::Syck, it
 dereferences to get the actual scalar value.

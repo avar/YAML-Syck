@@ -41,12 +41,15 @@ syck_.c
 syck_st.c
 syck_st.h
 t/1-basic.t
+t/11-loadfile.t
+t/12-dumpfile.t
 t/2-scalars.t
 t/3-objects.t
 t/4-perl_tag_scheme.t
 t/leak.t
 t/json-basic.t
 t/json-circular-ref.t
+t/json-crlf.t
 t/json-empty.t
 t/json-indent.t
 t/json-minus.t
@@ -56,6 +59,7 @@ t/json-refs.t
 t/json-singlequote.t
 t/TestYAML.pm
 t/yaml-blessed-ref.t
+t/yaml-implicit-warnings.t
 t/yaml-tie.t
 token.c
 yaml2byte.c
