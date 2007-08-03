@@ -16,36 +16,35 @@ Hash: SHA1
 
 SHA1 266b208fdc19cae4b9355a2cabd18c336d6e1997 COMPATIBILITY
 SHA1 3710975c0e6727079e17c6d1f27948c40729d710 COPYING
-SHA1 23c76f4200cfa82dcbaf0d8a77f06660567daf6d Changes
-SHA1 6d75597a7ca029e922d0dd6ad44e62eb4cdafba3 MANIFEST
+SHA1 225347df9f7b635b8fceb5ed0a50f78728ae1643 Changes
+SHA1 a833b5249f3889840d73c38bb1436bf0e151d5bf MANIFEST
 SHA1 a37e5e92a896d112eb4f26f90d57cf60a4858548 META.yml
 SHA1 daaefadfd003a303e85e31d8888c4b3951ec852b Makefile.PL
 SHA1 4ff9b64038872c3d255b9c000a1f9fb2d000ea29 README
 SHA1 33c36d61607a784b206df02e9508c31649106d77 Syck.xs
 SHA1 e8f69df417217515647747d232d15520ac59f6cc bytecode.c
-SHA1 90e3b0ce7b716d63b637e498d65a6c25c5b0c327 emitter.c
+SHA1 14329e8ff857bb6dedb7f48c95d9e04a186c3fd1 emitter.c
 SHA1 e6426f94d8acb9d9e3159d8906e570b1e70d6eea gram.c
 SHA1 f4f2cc6ce84bd40f33a80d33d8881402f03ce75d gram.h
 SHA1 0ef2ba57dea44e80cd0ce522eb1317048beb0299 handler.c
 SHA1 ff243e33b7ae5e48f28e3216f0a47e72e1158195 implicit.c
-SHA1 9b2f9d83bcf77860f53a0c07c90a4a59ad9f5df1 inc/Module/Install.pm
-SHA1 abe32855d75ab13747cf65765af9947b7a8c3057 inc/Module/Install/Base.pm
-SHA1 95b81d1e91bd634467bf633571eff4420e9c04eb inc/Module/Install/Can.pm
-SHA1 0214f854ee023ae58871a9330d8fea2176652b99 inc/Module/Install/Compiler.pm
-SHA1 1fe98c63cf9d7271c8cb4183ba230f152df69e26 inc/Module/Install/Fetch.pm
-SHA1 0606a8b02a420600bc3e2b65ab82f70266784926 inc/Module/Install/Include.pm
-SHA1 93377fa09ca119814598134291e2d1f6640168c3 inc/Module/Install/Makefile.pm
-SHA1 42aaa6f422c82f72e140041727235f0fac8debf8 inc/Module/Install/Metadata.pm
-SHA1 0c2118868ef82ac517eb6d9c3bd93e6eb9bbf83e inc/Module/Install/Win32.pm
-SHA1 e827d6d43771032fa3df35c0ad5e5698d0e54cda inc/Module/Install/WriteAll.pm
-SHA1 ae96dc4c051a202e5db3fa73133e6183ee4910b2 inc/Test/Builder.pm
-SHA1 a9037004a2c3096d77169a16da95743eeb813539 inc/Test/Builder/Module.pm
-SHA1 45d0149fee8d12082d0aa00fd9202f4b29126824 inc/Test/More.pm
+SHA1 78edb89a439463e44c33a72bbee84c54d0dc8aaf inc/Module/Install.pm
+SHA1 8ea4e37df83fd0c1c050be5c8da75545c3828d9b inc/Module/Install/Base.pm
+SHA1 1da6031583c32f0d1ec073b8376102fc51427dcc inc/Module/Install/Can.pm
+SHA1 92dc6dfacb812af4d4820bbb4158c1e00d4405c7 inc/Module/Install/Compiler.pm
+SHA1 b779375b90c16af2f31f38a1dd2b5df223c7f2fb inc/Module/Install/Fetch.pm
+SHA1 6bf0d0d100b94d1a2ce64d010c8813dec26ac480 inc/Module/Install/Include.pm
+SHA1 2054450e1e9c1dd8056362bf4a64ae70d5d71476 inc/Module/Install/Makefile.pm
+SHA1 5d6189b2cad15cf9932a28faafd55130c8247e83 inc/Module/Install/Metadata.pm
+SHA1 02af973fae2ac3531fa6b704574b2b8cb2a08148 inc/Module/Install/Win32.pm
+SHA1 3a2eab96e91cca8d99938cda7791759ae9d97b3a inc/Module/Install/WriteAll.pm
+SHA1 6ee3ac34f31857536dd77852e4dd4e21e5743607 inc/Test/Builder.pm
+SHA1 9ceb21c6c29c6857f63ddfa580cedb776e7d403d inc/Test/Builder/Module.pm
+SHA1 0fc9342c11d50218dfa2a71aee7443af26c99177 inc/Test/More.pm
 SHA1 faa3c3e57c88dc1bbb1c8ff9a8a36d761278db45 lib/JSON/Syck.pm
 SHA1 2c2459b2b5cf94a7f9cd1905a242d7d01616ee0b lib/YAML/Dumper/Syck.pm
 SHA1 534000ebfb91c993f5344ae4e34185d853954e6f lib/YAML/Loader/Syck.pm
-SHA1 6305cdb7e9cf1412c681793cf6363b29423f3326 lib/YAML/Syck.pm
-SHA1 9590ea0d2cfd9b69f70c238d9acdbc4102d5fdb0 lib/YAML/Syck.pod
+SHA1 ff0ddee21aa6bb0060f26e5cd775e385ba65fdfc lib/YAML/Syck.pm
 SHA1 118fa2ebec0e4625ec143d9264b2784dc6cfac21 node.c
 SHA1 7108100e0fec832b239e4242baa1b589fc7fe1b5 perl_common.h
 SHA1 43bf46a44363d347865d2ece6350ed28b94049fa perl_syck.h
@@ -83,7 +82,7 @@ SHA1 b0528d36416a3650b8514d8f65093fe894adc3a5 yamlbyte.h
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.3 (Darwin)
 
-iD8DBQFGktx5tLPdNzw1AaARAsvdAJ0f95UDTeYCuiBVb9ZBTcgIZy6b6ACgiSQZ
-O6gGLvgPdsIkBWaSBijpsmk=
-=cPD/
+iD8DBQFGs2cqtLPdNzw1AaARAmQZAJ9oYZKsQMYbc7WRHcVOGbrMHxixCwCgualg
+slo2cRYYjCpW8bJOY4OjxKI=
+=2d22
 -----END PGP SIGNATURE-----
