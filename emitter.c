@@ -658,7 +658,6 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
     SyckLevel *parent = syck_emitter_parent_level( e );
     SyckLevel *lvl = syck_emitter_current_level( e );
     int scan = 0;
-    char *implicit;
     
     if ( str == NULL ) str = "";
 
@@ -671,11 +670,11 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
     }
 
     scan = syck_scan_scalar( force_width, str, len );
-    implicit = syck_match_implicit( str, len );
 
     /* quote strings which default to implicits */
-    implicit = syck_taguri( YAML_DOMAIN, implicit, strlen( implicit ) );
-    if ( syck_tagcmp( tag, implicit ) != 0 && syck_tagcmp( tag, "tag:yaml.org,2002:str" ) == 0 ) {
+    if ( (len == 2) && (str[0] == 'n' || str[0] == 'N') && (str[1] == 'o' || str[1] == 'O') ) {
+        force_style = scalar_2quote;
+    } else if ( (len == 3) && (str[0] == 'y' || str[0] == 'Y') && (str[1] == 'e' || str[1] == 'E') && (str[2] == 's' || str[2] == 'S') ) {
         force_style = scalar_2quote;
     } else {
         /* complex key -- disabled by Audrey Tang -/
@@ -687,9 +686,9 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
             parent->status = syck_lvl_mapx;
         }
         */
-        syck_emit_tag( e, tag, implicit );
+        char* implicit = syck_match_implicit( str, len );
+        syck_emit_tag( e, tag, syck_taguri( YAML_DOMAIN, implicit, strlen( implicit ) ) );
     }
-    S_FREE( implicit );
 
     /* if still arbitrary, sniff a good block style. */
     if ( force_style == scalar_none ) {
