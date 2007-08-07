@@ -285,7 +285,7 @@ syck_emitter_clear( SyckEmitter *e )
  * Raw write to the emitter buffer.
  */
 void
-syck_emitter_write( SyckEmitter *e, char *str, long len )
+syck_emitter_write( SyckEmitter *e, const char *str, long len )
 {
     long at;
     ASSERT( str != NULL )
@@ -450,7 +450,7 @@ end_emit:
  * and the implicit tag which would be assigned to this node.  If a tag is
  * required, write the tag.
  */
-void syck_emit_tag( SyckEmitter *e, char *tag, char *ignore )
+void syck_emit_tag( SyckEmitter *e, const char *tag, const char *ignore )
 {
     SyckLevel *lvl;
     if ( tag == NULL ) return;
@@ -469,7 +469,7 @@ void syck_emit_tag( SyckEmitter *e, char *tag, char *ignore )
             int skip = 4 + strlen( YAML_DOMAIN ) + 1;
             syck_emitter_write( e, tag + skip, taglen - skip );
         } else {
-            char *subd = tag + 4;
+            const char *subd = tag + 4;
             while ( *subd != ':' && *subd != '\0' ) subd++;
             if ( *subd == ':' ) {
                 if ( subd - tag > ( strlen( YAML_DOMAIN ) + 5 ) &&
@@ -658,6 +658,7 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
     SyckLevel *parent = syck_emitter_parent_level( e );
     SyckLevel *lvl = syck_emitter_current_level( e );
     int scan = 0;
+    char *implicit;
     
     if ( str == NULL ) str = "";
 
@@ -670,12 +671,20 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
     }
 
     scan = syck_scan_scalar( force_width, str, len );
+    implicit = syck_match_implicit( str, len );
 
     /* quote strings which default to implicits */
-    if ( (len == 2) && (str[0] == 'n' || str[0] == 'N') && (str[1] == 'o' || str[1] == 'O') ) {
-        force_style = scalar_2quote;
-    } else if ( (len == 3) && (str[0] == 'y' || str[0] == 'Y') && (str[1] == 'e' || str[1] == 'E') && (str[2] == 's' || str[2] == 'S') ) {
-        force_style = scalar_2quote;
+    if (
+            (
+                (strncmp( implicit, "bool", 4 ) == 0) || 
+                (strncmp( implicit, "null", 4 ) == 0)
+            )
+            &&
+            (force_style != scalar_plain)
+            &&
+            (len > 0)
+            ) {
+        force_style = scalar_1quote;
     } else {
         /* complex key -- disabled by Audrey Tang -/
         if ( parent->status == syck_lvl_map && parent->ncount % 2 == 1 &&
@@ -686,8 +695,7 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
             parent->status = syck_lvl_mapx;
         }
         */
-        char* implicit = syck_match_implicit( str, len );
-        syck_emit_tag( e, tag, syck_taguri( YAML_DOMAIN, implicit, strlen( implicit ) ) );
+        syck_emit_tag( e, tag, implicit );
     }
 
     /* if still arbitrary, sniff a good block style. */

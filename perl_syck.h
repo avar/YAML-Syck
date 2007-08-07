@@ -807,11 +807,11 @@ yaml_syck_emitter_handler
     }
     else if (ty == SVt_NULL) {
         /* emit an undef */
-        syck_emit_scalar(e, "str", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
+        syck_emit_scalar(e, "str", scalar_plain, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
     }
     else if ((ty == SVt_PVMG) && !SvOK(sv)) {
         /* emit an undef (typically pointed from a blesed SvRV) */
-        syck_emit_scalar(e, OBJOF("str"), scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
+        syck_emit_scalar(e, OBJOF("str"), scalar_plain, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
     }
     else if (SvNIOKp(sv) && (sv_len(sv) != 0)) {
         /* emit a number with a stringified version */
@@ -823,12 +823,6 @@ yaml_syck_emitter_handler
         if (len == 0) {
             syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, "", 0);
         }
-#ifndef YAML_IS_JSON
-        else if (strEQ(SvPV_nolen(sv), NULL_LITERAL)) {
-            /* escape ~ as a quoted string */
-            syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, NULL_LITERAL, 1);
-        }
-#endif
         else if (IS_UTF8(sv)) {
             /* if we support UTF8 and the string contains UTF8 */
             enum scalar_style old_s = e->style;
@@ -937,7 +931,7 @@ yaml_syck_emitter_handler
             }
             case SVt_PVCV: { /* code */
 #ifdef YAML_IS_JSON
-                syck_emit_scalar(e, "str", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
+                syck_emit_scalar(e, "str", scalar_plain, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
 #else
 
                 /* This following code is mostly copypasted from Storable */
@@ -1012,7 +1006,7 @@ yaml_syck_emitter_handler
                 break;
             }
             default: {
-                syck_emit_scalar(e, "str", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
+                syck_emit_scalar(e, "str", scalar_plain, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
             }
         }
     }

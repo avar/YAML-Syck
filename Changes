@@ -1,3 +1,27 @@
+[Changes for 0.96 (JSON::Syck 0.26) - 2007-08-08]
+
+* The always-quote rule now applies to all implicit booleans
+  and null values, i.e. strings that match the following regex:
+
+    /y|Y
+    |n|N
+    |yes|Yes|YES
+    |no|No|NO
+    |true|True|TRUE
+    |false|False|FALSE
+    |on|On|ON
+    |off|Off|OFF
+    |null|Null|NULL
+    |~
+    /x
+
+* Bare literals "Y", "N", "y" and "n" are now recognized as
+  booleans when loading with implicit typing turned on.
+
+* Mixed case strings that does not represent implicit boolean
+  values, such as "yES" and "nO", are no longer always-quoted.
+  Contributed by: Malcolm Studd
+
 [Changes for 0.95 (JSON::Syck 0.26) - 2007-08-04]
 
 * "Yes" and "no" (including all upper/lower case forms) are now

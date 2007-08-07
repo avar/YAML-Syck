@@ -1,4 +1,4 @@
-use t::TestYAML tests => 54; 
+use t::TestYAML tests => 71; 
 
 local $SIG{__WARN__} = sub { 1 } if $Test::VERSION < 1.20;
 
@@ -150,3 +150,25 @@ is(Dump("This is Perl 6 User's Golfing System\n", q[--- "This is Perl6 User's Go
 is(Dump('042'),    "--- '042'\n");
 is(Load("--- '042'\n"), '042');
 
+# If implicit typing is on, quote strings corresponding to implicit boolean and null values
+$YAML::Syck::SingleQuote = 0;
+
+is(Dump('N'), "--- 'N'\n");
+is(Dump('NO'), "--- 'NO'\n");
+is(Dump('No'), "--- 'No'\n");
+is(Dump('no'), "--- 'no'\n");
+is(Dump('y'), "--- 'y'\n");
+is(Dump('YES'), "--- 'YES'\n");
+is(Dump('Yes'), "--- 'Yes'\n");
+is(Dump('yes'), "--- 'yes'\n");
+is(Dump('TRUE'), "--- 'TRUE'\n");
+is(Dump('false'), "--- 'false'\n");
+is(Dump('off'), "--- 'off'\n");
+
+is(Dump('null'), "--- 'null'\n");
+is(Dump('Null'), "--- 'Null'\n");
+is(Dump('NULL'), "--- 'NULL'\n");
+
+is(Dump('oN'), "--- oN\n"); # invalid case
+is(Dump('oFF'), "--- oFF\n"); # invalid case
+is(Dump('nULL'), "--- nULL\n"); # invalid case
