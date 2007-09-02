@@ -73,7 +73,7 @@ json_syck_parser_handler
 yaml_syck_parser_handler
 #endif
 (SyckParser *p, SyckNode *n) {
-    SV *sv;
+    SV *sv = NULL;
     AV *seq;
     HV *map;
     long i;
@@ -578,7 +578,6 @@ static SV * LoadYAML (char *s) {
     SV *obj              = &PL_sv_undef;
     SV *use_code         = GvSV(gv_fetchpv(form("%s::UseCode", PACKAGE_NAME), TRUE, SVt_PV));
     SV *load_code        = GvSV(gv_fetchpv(form("%s::LoadCode", PACKAGE_NAME), TRUE, SVt_PV));
-    SV *implicit_binary  = GvSV(gv_fetchpv(form("%s::ImplicitBinary", PACKAGE_NAME), TRUE, SVt_PV));
     SV *implicit_typing  = GvSV(gv_fetchpv(form("%s::ImplicitTyping", PACKAGE_NAME), TRUE, SVt_PV));
     SV *implicit_unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
     SV *singlequote      = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
@@ -756,7 +755,7 @@ yaml_syck_emitter_handler
                 }
                 else {
                     MAGIC *mg;
-                    if (mg = mg_find(SvRV(sv), PERL_MAGIC_qr)) {
+                    if ( (mg = mg_find(SvRV(sv), PERL_MAGIC_qr) ) ) {
                         if (strEQ(ref, "Regexp")) {
                             strcat(tag, "regexp");
                             ref += 6; /* empty string */
@@ -807,11 +806,11 @@ yaml_syck_emitter_handler
     }
     else if (ty == SVt_NULL) {
         /* emit an undef */
-        syck_emit_scalar(e, "str", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
+        syck_emit_scalar(e, "str", scalar_plain, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
     }
     else if ((ty == SVt_PVMG) && !SvOK(sv)) {
         /* emit an undef (typically pointed from a blesed SvRV) */
-        syck_emit_scalar(e, OBJOF("str"), scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
+        syck_emit_scalar(e, OBJOF("str"), scalar_plain, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
     }
     else if (SvNIOKp(sv) && (sv_len(sv) != 0)) {
         /* emit a number with a stringified version */
@@ -823,12 +822,6 @@ yaml_syck_emitter_handler
         if (len == 0) {
             syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, "", 0);
         }
-#ifndef YAML_IS_JSON
-        else if (strEQ(SvPV_nolen(sv), NULL_LITERAL)) {
-            /* escape ~ as a quoted string */
-            syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, NULL_LITERAL, 1);
-        }
-#endif
         else if (IS_UTF8(sv)) {
             /* if we support UTF8 and the string contains UTF8 */
             enum scalar_style old_s = e->style;
@@ -937,7 +930,7 @@ yaml_syck_emitter_handler
             }
             case SVt_PVCV: { /* code */
 #ifdef YAML_IS_JSON
-                syck_emit_scalar(e, "str", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
+                syck_emit_scalar(e, "str", scalar_plain, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
 #else
 
                 /* This following code is mostly copypasted from Storable */
@@ -1012,7 +1005,7 @@ yaml_syck_emitter_handler
                 break;
             }
             default: {
-                syck_emit_scalar(e, "str", scalar_none, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
+                syck_emit_scalar(e, "str", scalar_plain, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
             }
         }
     }
