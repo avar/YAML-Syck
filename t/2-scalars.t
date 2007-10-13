@@ -1,4 +1,4 @@
-use t::TestYAML tests => 71; 
+use t::TestYAML tests => 75;
 
 local $SIG{__WARN__} = sub { 1 } if $Test::VERSION < 1.20;
 
@@ -19,6 +19,19 @@ $YAML::Syck::DumpCode = 0;
 is(Dump(sub{ 42 }),  "--- !!perl/code: '{ \"DUMMY\" }'\n");
 $YAML::Syck::DumpCode = 1;
 ok(Dump(sub{ 42 }) =~ m#--- !!perl/code.*?{.*?42.*?}$#s);
+
+$YAML::Syck::LoadCode = 0;
+{
+    my $not_sub = Load("--- !!perl/code:Some::Class '{ \"foo\" . shift }'\n");
+    is( ref $not_sub, "Some::Class" );
+    is( $not_sub->("bar"), undef );
+}
+
+{
+    my $sub = Load("--- !!perl/code '{ \"foo\" . shift }'\n");
+    is( ref $sub, "CODE" );
+    is( $sub->("bar"), undef );
+}
 
 my $like_yaml_pm = 0;
 $YAML::Syck::LoadCode = 0;

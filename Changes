@@ -1,3 +1,15 @@
+[Changes for 0.98 (JSON::Syck 0.26) - 2007-10-13]
+
+* Restore support for Perl 5.005 and earlier.
+
+[Changes for 0.97 (JSON::Syck 0.26) - 2007-09-03]
+
+* When loading !!perl/code with $YAML::Syck::LoadCode set to false,
+  YAML::Syck now returns a coderef that does nothing (i.e. sub {}),
+  in accordance with YAML.pm's treatment, instead of returning the
+  actual code of the sub as a string.
+  Contributed by: Florian Ragwitz
+
 [Changes for 0.96 (JSON::Syck 0.26) - 2007-08-08]
 
 * The always-quote rule now applies to all implicit booleans

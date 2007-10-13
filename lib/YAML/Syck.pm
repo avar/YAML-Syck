@@ -13,7 +13,7 @@ use 5.00307;
 use Exporter;
 
 BEGIN {
-    $VERSION = '0.96';
+    $VERSION = '0.98';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 
@@ -32,7 +32,7 @@ BEGIN {
 
 }
 
-use constant _QR_MAP => {
+use constant QR_MAP => {
     ''   => sub { qr{$_[0]}     }, 
     x    => sub { qr{$_[0]}x    }, 
     i    => sub { qr{$_[0]}i    }, 
@@ -53,7 +53,7 @@ use constant _QR_MAP => {
 
 sub __qr_helper {
     if ($_[0] =~ /\A  \(\?  ([ixsm]*)  (?:-  (?:[ixsm]*))?  : (.*) \)  \z/x) {
-        my $sub = _QR_MAP->{$1} || _QR_MAP->{''};
+        my $sub = QR_MAP()->{$1} || QR_MAP()->{''};
         &$sub($2);
     }
     else {
@@ -139,7 +139,7 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.96 of YAML::Syck, released August 8, 2007.
+This document describes version 0.98 of YAML::Syck, released October 13, 2007.
 
 =head1 SYNOPSIS
 
