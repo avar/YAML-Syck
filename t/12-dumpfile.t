@@ -46,14 +46,15 @@ YAML
 
 # dump to indirect file handles
 SKIP: {
-    skip "indirect file handles require 5.6 or later", 1 unless $] >= 5.006000;
+    skip "indirect file handles require 5.6 or later", 1 unless $] >= 5.006000; eval q[
 
     open(my $h, '>', 'dumpfile.yml');
     DumpFile($h, $scalar);
     close $h;
     file_contents_is('dumpfile.yml', $expected_yaml, 'DumpFile works with indirect file handles');
     unlink 'dumpfile.yml' or die $!;
-}
+
+] }
 
 # dump to ordinary filehandles
 {
