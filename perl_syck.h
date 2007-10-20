@@ -203,22 +203,28 @@ yaml_syck_parser_handler
                 sv = newSVpv(blob, len);
 #ifndef YAML_IS_JSON
 #ifdef PERL_LOADMOD_NOIMPORT
-            } else if (load_code && (strEQ(id, "perl/code") || strnEQ(id, "perl/code:", 10))) {
+            } else if (strEQ(id, "perl/code") || strnEQ(id, "perl/code:", 10)) {
                 SV *cv;
-                SV *text, *sub;
+                SV *sub;
                 char *pkg = id + 10;
 
-                /* This code is copypasted from Storable.xs */
+                if (load_code) {
+                    SV *text;
 
-                /*
-                 * prepend "sub " to the source
-                 */
+                    /* This code is copypasted from Storable.xs */
 
-                text = newSVpvn(n->data.str->ptr, n->data.str->len);
+                    /*
+                     * prepend "sub " to the source
+                     */
 
-                sub = newSVpvn("sub ", 4);
-                sv_catpv(sub, SvPV_nolen(text)); /* XXX no sv_catsv! */
-                SvREFCNT_dec(text);
+                    text = newSVpvn(n->data.str->ptr, n->data.str->len);
+
+                    sub = newSVpvn("sub ", 4);
+                    sv_catpv(sub, SvPV_nolen(text)); /* XXX no sv_catsv! */
+                    SvREFCNT_dec(text);
+                } else {
+                    sub = newSVpvn("sub {}", 6);
+                }
 
                 ENTER;
                 SAVETMPS;
@@ -229,18 +235,19 @@ yaml_syck_parser_handler
 
                 if (cv && SvROK(cv) && SvTYPE(SvRV(cv)) == SVt_PVCV) {
                     sv = cv;
-                } else {
-                    croak("code %s did not evaluate to a subroutine reference\n", SvPV_nolen(sub));
                 }
-
-                if ( (*(pkg - 1) != '\0') && (*pkg != '\0') ) {
-                    sv_bless(sv, gv_stashpv(pkg, TRUE));
+                else {
+                    croak("code %s did not evaluate to a subroutine reference\n", SvPV_nolen(sub));
                 }
 
                 SvREFCNT_inc(sv); /* XXX seems to be necessary */
 
                 FREETMPS;
                 LEAVE;
+
+                if ( (*(pkg - 1) != '\0') && (*pkg != '\0') ) {
+                    sv_bless(sv, gv_stashpv(pkg, TRUE));
+                }
 
                 /* END Storable */
 
