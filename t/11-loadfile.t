@@ -76,12 +76,13 @@ SKIP: {
 
 # load from "in memory" file
 SKIP : {
-    skip "in-memory files require 5.8 or later", 1 unless $] >= 5.00800;
+    skip "in-memory files require 5.8 or later", 1 unless $] >= 5.00800; eval q[
 
     open(my $h, '<', \'a simple scalar');
     is(LoadFile($h), "a simple scalar", 'LoadFile works with in-memory files');
     close($h);
-}
+
+] }
 
 __DATA__
 ---
