@@ -1,4 +1,9 @@
-use t::TestYAML tests => 29;
+use t::TestYAML tests => 29, (
+    ($] < 5.006) ? (todo => [18..20, 26..29])
+                 :
+    ($] < 5.008) ? (todo => [19..20, 26..29])
+                 : ()
+);
 
 ok(YAML::Syck->VERSION);
 
@@ -47,14 +52,15 @@ $YAML::Syck::UseCode = 1;
 }
 
 {
-	my $sub = Load(Dump(bless(sub { 42 }, "foobar")));
+	my $sub = eval { Load(Dump(bless(sub { 42 }, "foobar"))) };
 	is(ref($sub), "foobar", "blessed to foobar");
 	is(eval { $sub->() }, 42, "it's a CODE");
 }
 
 {
-	my $sub = Load(Dump(bless(sub { 42 }, "code")));
+	my $sub = eval { Load(Dump(bless(sub { 42 }, "code"))) };
 	is(ref($sub), "code", "blessed to code");
 	is(eval { $sub->() }, 42, "it's a CODE");
 }
 
+exit;
