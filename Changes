@@ -1,3 +1,8 @@
+[Changes for 1.00 (JSON::Syck 0.26) - 2007-12-10]
+
+* When $YAML::Syck::SingleQuote is set to true, Dump() now emits newlines
+  in strings correctly.  (Previously it would emit extra newlines.)
+
 [Changes for 0.99 (JSON::Syck 0.26) - 2007-10-23]
 
 * TODOify tests as appropriate for Perl 5.005 and Perl 5.6.x.

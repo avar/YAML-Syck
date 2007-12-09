@@ -13,7 +13,7 @@ use 5.00307;
 use Exporter;
 
 BEGIN {
-    $VERSION = '0.99';
+    $VERSION = '1.00';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 
@@ -139,7 +139,7 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
 
 =head1 VERSION
 
-This document describes version 0.99 of YAML::Syck, released October 23, 2007.
+This document describes version 1.00 of YAML::Syck, released December 10, 2007.
 
 =head1 SYNOPSIS
 
@@ -186,7 +186,7 @@ hash keys.
 =head2 $YAML::Syck::SingleQuote
 
 Defaults to false.  Setting this to a true value will make C<Dump> always emit
-quotes instead of bare strings.
+single quotes instead of bare strings.
 
 =head2 $YAML::Syck::ImplicitTyping
 
