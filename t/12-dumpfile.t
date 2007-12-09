@@ -78,11 +78,11 @@ SKIP: {
 
 # dump to "in memory" file
 SKIP : {
-    skip "in-memory files require 5.8 or later", 1 unless $] >= 5.00800;
+    skip "in-memory files require 5.8 or later", 1 unless $] >= 5.00800; eval q[
 
     open(my $h, '>', \my $s);
     DumpFile($h, $scalar);
     close($h);
     is($s, $expected_yaml, 'DumpFile works with in-memory files');
 
-}
+] }

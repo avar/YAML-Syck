@@ -1,4 +1,4 @@
-use t::TestYAML tests => 75;
+use t::TestYAML tests => 81;
 
 local $SIG{__WARN__} = sub { 1 } if $Test::VERSION < 1.20;
 
@@ -157,11 +157,16 @@ is(Dump("This is Perl 6 User's Golfing System\n", q[--- "This is Perl6 User's Go
 
 $YAML::Syck::SingleQuote = $YAML::Syck::SingleQuote = 1;
 
-# If single quote is impossible, fall back to double quote.
-is(Dump("This is Perl 6 User's Golfing System\n", q[--- "This is Perl6 User's Golfing System\n"]));
-
+is(Dump("This is Perl 6 User's Golfing System\n"), qq[--- 'This is Perl 6 User''s Golfing System\n\n'\n]);
 is(Dump('042'),    "--- '042'\n");
-is(Load("--- '042'\n"), '042');
+
+roundtrip('042');
+roundtrip("This\nis\na\ntest");
+roundtrip("Newline\n");
+roundtrip(" ");
+roundtrip("\n");
+roundtrip("S p a c e");
+roundtrip("Space \n Around");
 
 # If implicit typing is on, quote strings corresponding to implicit boolean and null values
 $YAML::Syck::SingleQuote = 0;
@@ -185,3 +190,4 @@ is(Dump('NULL'), "--- 'NULL'\n");
 is(Dump('oN'), "--- oN\n"); # invalid case
 is(Dump('oFF'), "--- oFF\n"); # invalid case
 is(Dump('nULL'), "--- nULL\n"); # invalid case
+

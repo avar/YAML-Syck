@@ -835,34 +835,18 @@ void syck_emit_1quoted( SyckEmitter *e, int width, char *str, long len )
     char do_indent = 0;
     char *mark = str;
     char *start = str;
-    char *end = str;
     syck_emitter_write( e, "'", 1 );
     while ( mark < str + len ) {
-        if ( do_indent ) {
-            syck_emit_indent( e );
-            do_indent = 0;
-        }
         switch ( *mark ) {
-            case '\'':  syck_emitter_write( e, "\\'", 2 ); break;
+            case '\'':  syck_emitter_write( e, "''", 2 ); break;
 
             case '\n':
-                end = mark + 1;
-                if ( *start != ' ' && *start != '\n' && *end != '\n' && *end != ' ' ) {
+                if ( *start != '\n' || start == str ) {
                     syck_emitter_write( e, "\n\n", 2 );
                 } else {
                     syck_emitter_write( e, "\n", 1 );
                 }
-                do_indent = 1;
                 start = mark + 1;
-            break;
-
-            case ' ':
-                if ( width > 0 && *start != ' ' && mark - end > width ) {
-                    do_indent = 1;
-                    end = mark + 1;
-                } else {
-                    syck_emitter_write( e, " ", 1 );
-                }
             break;
 
             default:
