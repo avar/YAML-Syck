@@ -5,7 +5,7 @@ use Exporter;
 use YAML::Syck ();
 
 BEGIN {
-    $VERSION    = '0.26';
+    $VERSION    = '0.27';
     @EXPORT_OK  = qw( Load Dump LoadFile DumpFile );
     @ISA        = 'Exporter';
     *Load       = \&YAML::Syck::LoadJSON;
@@ -36,7 +36,7 @@ __END__
 
 =head1 NAME
 
-JSON::Syck - JSON is YAML
+JSON::Syck - JSON is YAML (but consider using JSON::XS instead!)
 
 =head1 SYNOPSIS
 
@@ -51,16 +51,18 @@ JSON::Syck - JSON is YAML
 
 =head1 DESCRIPTION
 
-JSON::Syck is a syck implementatoin of JSON parsing and
-generation. Because JSON is YAML
-(L<http://redhanded.hobix.com/inspect/yamlIsJson.html>), using syck
-gives you the fastest and most memory efficient parser and dumper for
-JSON data representation.
+JSON::Syck is a syck implementation of JSON parsing and generation. Because
+JSON is YAML (L<http://redhanded.hobix.com/inspect/yamlIsJson.html>), using
+syck gives you a fast and memory-efficient parser and dumper for JSON data
+representation.
+
+However, a newer module L<JSON::XS>, has since emerged.  It is more flexible,
+efficient and robust, so please consider using it instead of this module.
 
 =head1 DIFFERENCE WITH JSON
 
-You might want to know the difference between I<JSON> and
-I<JSON::Syck>.
+You might want to know the difference between the I<JSON> module and
+this one.
 
 Since JSON is a pure-perl module and JSON::Syck is based on libsyck,
 JSON::Syck is supposed to be very fast and memory efficient. See
@@ -128,6 +130,10 @@ convenient to use single quotes.
 Set C<$JSON::Syck::SingleQuote> to 1 will make both C<Dump> and C<Load> expect
 single-quoted string literals.
 
+=head1 SEE ALSO
+
+L<JSON::XS>,
+
 =head1 AUTHORS
 
 Audrey Tang E<lt>cpan@audreyt.orgE<gt>
@@ -136,7 +142,7 @@ Tatsuhiko Miyagawa E<lt>miyagawa@gmail.comE<gt>
 
 =head1 COPYRIGHT
 
-Copyright 2005, 2006, 2007 by Audrey Tang E<lt>cpan@audreyt.orgE<gt>.
+Copyright 2005, 2006, 2007, 2008 by Audrey Tang E<lt>cpan@audreyt.orgE<gt>.
 
 This software is released under the MIT license cited below.
 

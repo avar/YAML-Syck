@@ -1,3 +1,16 @@
+[Changes for 1.01 (JSON::Syck 0.27) - 2008-01-19]
+
+* JSON::XS is now promoted prominiently in JSON::Syck's documentation.
+
+* Added support for Perl 5.11 and its first-class Regexp objects.
+  Contributed by: Andreas Koenig
+
+* Tests no longer fail incorrectly when JSON.pm 2.00+ is installed.
+  Contributed by: Andreas Koenig
+
+* Removed the unused Syck bytecode modules (yamlbyte.h and yaml2byte.c)
+  to further reduce our memory footprint.
+
 [Changes for 1.00 (JSON::Syck 0.26) - 2007-12-10]
 
 * When $YAML::Syck::SingleQuote is set to true, Dump() now emits newlines

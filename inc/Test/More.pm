@@ -17,7 +17,7 @@ sub _carp {
 
 
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.70';
+$VERSION = '0.74';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 use Test::Builder::Module;
@@ -233,32 +233,37 @@ sub use_ok ($;@) {
 
     my($pack,$filename,$line) = caller;
 
-    local($@,$!,$SIG{__DIE__});   # isolate eval
+    # Work around a glitch in $@ and eval
+    my $eval_error;
+    {
+        local($@,$!,$SIG{__DIE__});   # isolate eval
 
-    if( @imports == 1 and $imports[0] =~ /^\d+(?:\.\d+)?$/ ) {
-        # probably a version check.  Perl needs to see the bare number
-        # for it to work with non-Exporter based modules.
-        eval <<USE;
+        if( @imports == 1 and $imports[0] =~ /^\d+(?:\.\d+)?$/ ) {
+            # probably a version check.  Perl needs to see the bare number
+            # for it to work with non-Exporter based modules.
+            eval <<USE;
 package $pack;
 use $module $imports[0];
 USE
-    }
-    else {
-        eval <<USE;
+        }
+        else {
+            eval <<USE;
 package $pack;
 use $module \@imports;
 USE
+        }
+        $eval_error = $@;
     }
 
-    my $ok = $tb->ok( !$@, "use $module;" );
+    my $ok = $tb->ok( !$eval_error, "use $module;" );
 
     unless( $ok ) {
-        chomp $@;
+        chomp $eval_error;
         $@ =~ s{^BEGIN failed--compilation aborted at .*$}
                 {BEGIN failed--compilation aborted at $filename line $line.}m;
         $tb->diag(<<DIAGNOSTIC);
     Tried to use '$module'.
-    Error:  $@
+    Error:  $eval_error
 DIAGNOSTIC
 
     }
@@ -266,7 +271,7 @@ DIAGNOSTIC
     return $ok;
 }
 
-#line 702
+#line 707
 
 sub require_ok ($) {
     my($module) = shift;
@@ -310,10 +315,16 @@ sub _is_module_name {
     $module =~ /^[a-zA-Z]\w*$/;
 }
 
-#line 779
+#line 784
 
 use vars qw(@Data_Stack %Refs_Seen);
 my $DNE = bless [], 'Does::Not::Exist';
+
+sub _dne {
+    ref $_[0] eq ref $DNE;
+}
+
+
 sub is_deeply {
     my $tb = Test::More->builder;
 
@@ -386,8 +397,8 @@ sub _format_stack {
     foreach my $idx (0..$#vals) {
         my $val = $vals[$idx];
         $vals[$idx] = !defined $val ? 'undef'          :
-                      $val eq $DNE  ? "Does not exist" :
-	              ref $val      ? "$val"           :
+                      _dne($val)    ? "Does not exist" :
+                      ref $val      ? "$val"           :
                                       "'$val'";
     }
 
@@ -411,7 +422,7 @@ sub _type {
     return '';
 }
 
-#line 919
+#line 930
 
 sub diag {
     my $tb = Test::More->builder;
@@ -420,7 +431,7 @@ sub diag {
 }
 
 
-#line 988
+#line 999
 
 #'#
 sub skip {
@@ -448,7 +459,7 @@ sub skip {
 }
 
 
-#line 1075
+#line 1086
 
 sub todo_skip {
     my($why, $how_many) = @_;
@@ -469,7 +480,7 @@ sub todo_skip {
     last TODO;
 }
 
-#line 1128
+#line 1139
 
 sub BAIL_OUT {
     my $reason = shift;
@@ -478,7 +489,7 @@ sub BAIL_OUT {
     $tb->BAIL_OUT($reason);
 }
 
-#line 1167
+#line 1178
 
 #'#
 sub eq_array {
@@ -536,7 +547,7 @@ sub _deep_check {
         if( defined $e1 xor defined $e2 ) {
             $ok = 0;
         }
-        elsif ( $e1 == $DNE xor $e2 == $DNE ) {
+        elsif ( _dne($e1) xor _dne($e2) ) {
             $ok = 0;
         }
         elsif ( $same_ref and ($e1 eq $e2) ) {
@@ -602,7 +613,7 @@ WHOA
 }
 
 
-#line 1298
+#line 1309
 
 sub eq_hash {
     local @Data_Stack;
@@ -635,7 +646,7 @@ sub _eq_hash {
     return $ok;
 }
 
-#line 1355
+#line 1366
 
 sub eq_set  {
     my($a1, $a2) = @_;
@@ -661,6 +672,6 @@ sub eq_set  {
     );
 }
 
-#line 1545
+#line 1556
 
 1;

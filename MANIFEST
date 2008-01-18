@@ -7,6 +7,7 @@ gram.c
 gram.h
 handler.c
 implicit.c
+inc/attributes.pm
 inc/Module/Install.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
@@ -34,6 +35,7 @@ ppport.h
 ppport_math.h
 ppport_sort.h
 README
+SIGNATURE			Public-key signature (added by MakeMaker)
 syck.h
 Syck.xs
 syck_.c
@@ -45,7 +47,6 @@ t/12-dumpfile.t
 t/2-scalars.t
 t/3-objects.t
 t/4-perl_tag_scheme.t
-t/leak.t
 t/json-basic.t
 t/json-circular-ref.t
 t/json-crlf.t
@@ -56,11 +57,9 @@ t/json-newline.t
 t/json-null.t
 t/json-refs.t
 t/json-singlequote.t
+t/leak.t
 t/TestYAML.pm
 t/yaml-blessed-ref.t
 t/yaml-implicit-warnings.t
 t/yaml-tie.t
 token.c
-yaml2byte.c
-yamlbyte.h
-SIGNATURE                                Public-key signature (added by MakeMaker)
