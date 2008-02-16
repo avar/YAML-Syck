@@ -1,3 +1,10 @@
+[Changes for 1.03 (JSON::Syck 0.29) - 2008-02-16]
+
+* JSON::Syck: When $JSON::Syck::SingleQuote is false, implicit booleans
+  such as "yes" and "no" should be dumped with double quotes, instead of
+  single quotes (which breaks RFC 4627).
+  Reported by: cho45
+
 [Changes for 1.02 (JSON::Syck 0.28) - 2008-02-16]
 
 * JSON::Syck: Colons in single-quoted strings are no longer loaded
