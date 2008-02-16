@@ -1,3 +1,16 @@
+[Changes for 1.04 (JSON::Syck 0.29) - 2008-02-17]
+
+* The 'Name "YAML::Syck::ImplicitBinary" used only once: possible typo'
+  warnings no longer triggers in Perl 5.10 when running with perl -w.
+  Reported by: Jesse Vincent
+
+[Changes for 1.03 (JSON::Syck 0.29) - 2008-02-16]
+
+* JSON::Syck: When $JSON::Syck::SingleQuote is false, implicit booleans
+  such as "yes" and "no" should be dumped with double quotes, instead of
+  single quotes (which breaks RFC 4627).
+  Reported by: cho45
+
 [Changes for 1.02 (JSON::Syck 0.28) - 2008-02-16]
 
 * JSON::Syck: Colons in single-quoted strings are no longer loaded
