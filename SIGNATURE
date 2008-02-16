@@ -16,7 +16,7 @@ Hash: SHA1
 
 SHA1 266b208fdc19cae4b9355a2cabd18c336d6e1997 COMPATIBILITY
 SHA1 3710975c0e6727079e17c6d1f27948c40729d710 COPYING
-SHA1 005117bd0038b74db9ae70749370fe5e97389c40 Changes
+SHA1 f9532d9a6cff3d03ffb17ed79e983ec755e29946 Changes
 SHA1 419410fc0a8856d06927b23e9306c086391b48a6 MANIFEST
 SHA1 a37e5e92a896d112eb4f26f90d57cf60a4858548 META.yml
 SHA1 daaefadfd003a303e85e31d8888c4b3951ec852b Makefile.PL
@@ -42,13 +42,13 @@ SHA1 98cd56704e09b57d9ba121b45d976c3d09a9f19c inc/Test/Builder.pm
 SHA1 6e95f0ebeb31abc5608a987e88edf2e2427912c4 inc/Test/Builder/Module.pm
 SHA1 1296aa4ac787d6df9f9679d2bae4851ffef63e5a inc/Test/More.pm
 SHA1 f8e70396a1f3e0b34668d08871d7519321995283 inc/attributes.pm
-SHA1 7bdca379342200beb6f6bed12d9ea659a41ad92a lib/JSON/Syck.pm
+SHA1 f5a9fdceb11cf813260ebe928a8480c129374861 lib/JSON/Syck.pm
 SHA1 2c2459b2b5cf94a7f9cd1905a242d7d01616ee0b lib/YAML/Dumper/Syck.pm
 SHA1 534000ebfb91c993f5344ae4e34185d853954e6f lib/YAML/Loader/Syck.pm
-SHA1 6296a35a32a1674940c241df44a9fa9e748119a7 lib/YAML/Syck.pm
+SHA1 d2bec9db886914b59d07109bdb011daba31a3000 lib/YAML/Syck.pm
 SHA1 6cbfdd21b89093ca277b790660a92ba964519a7d node.c
 SHA1 af82db418593d376e80f7eb85f7eedb91bc5dd8e perl_common.h
-SHA1 a26c26336a23398dfcf85391aebcf5c5dc04e351 perl_syck.h
+SHA1 4f4852e5e976cc2b34a9474fba9120f8507e1326 perl_syck.h
 SHA1 489b224360d0c3f2428bed3d23798e56041257a4 ppport.h
 SHA1 9c9255d4d1a4b4ce5aa75ae4220df496cf8e4a44 ppport_math.h
 SHA1 604dd165210e0209bc5464e9793cdd22d9c6e3fd ppport_sort.h
@@ -60,10 +60,10 @@ SHA1 fb1887fc7f53fdc1aefcecf565e659fca05fbba1 t/1-basic.t
 SHA1 cb6584c4bacab73b216754ffa52b13e67ad92a4d t/11-loadfile.t
 SHA1 1c1eac01406dc4dae5251c3a361f10d8f1c17787 t/12-dumpfile.t
 SHA1 21cfa8fd24bd77b290e94dbe62e25e26ad8beb9b t/2-scalars.t
-SHA1 577344db96b21dca5ff5a5fbf7e6b24537927f00 t/3-objects.t
+SHA1 9f3eba9efd8f85ff7396e9cf46a187dd654587c9 t/3-objects.t
 SHA1 3d204931ed3bec06971a56a07fd3952c19330ccb t/4-perl_tag_scheme.t
 SHA1 ca5354e0a76bd6ec804184c0a5ceec35b0ae782a t/TestYAML.pm
-SHA1 a477aea3af5e7c76c29f2b9f33996ec393cf021e t/json-basic.t
+SHA1 9725a5c5d62cc6b730a514bb2fe7fa46fe808db9 t/json-basic.t
 SHA1 02cbee738704ef9a8577be36d8c88efae849f92f t/json-circular-ref.t
 SHA1 b91ff631ee1812c31028abbf1dbbbf2d4a2ac41e t/json-crlf.t
 SHA1 f4aa3d499da1908b785ce8cf7312ba7c3982c122 t/json-empty.t
@@ -72,7 +72,7 @@ SHA1 39e7e4e786d053124e02949e73ec476c9e4d72f7 t/json-minus.t
 SHA1 3dc96f9d89222f01a6138717698ca0b6214e4347 t/json-newline.t
 SHA1 23a780343e0a3ee7db38788639a19c69e5476bf2 t/json-null.t
 SHA1 70a819945e04b4b57aa7fd7bec54c909202b6618 t/json-refs.t
-SHA1 a2d8988827a06cc1b031f3682a44a0503a14e852 t/json-singlequote.t
+SHA1 3c729d8597211afbe7f36e960767a5e1d573a6d1 t/json-singlequote.t
 SHA1 d989749380ac7246395b89f55de17718ed14b82f t/leak.t
 SHA1 31df717d2ffca807f649634311fcbfe8846d9dd6 t/yaml-blessed-ref.t
 SHA1 128dee2bb3952494ed9322c185e8cdf35de1f8d4 t/yaml-implicit-warnings.t
@@ -81,7 +81,7 @@ SHA1 c711f56e4fc10a9969a8aef182a95a8ce5458c8f token.c
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.3 (Darwin)
 
-iD8DBQFHkOZ8tLPdNzw1AaARAoJCAJ9uGx/iKVbQBOXzzKLLeYf943GxYwCfZpzd
-0kasUknqfimHCqD/TE8hpOw=
-=M2CF
+iD8DBQFHttTUtLPdNzw1AaARAvntAJ9vCGzZWC3d0/bqufkMUDz9Wbb9QACeLLX+
+HYHevDx3c0hnPskQOxYzSiY=
+=DvyI
 -----END PGP SIGNATURE-----

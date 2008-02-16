@@ -4,7 +4,7 @@ use Data::Dumper;
 use Test::More;
 use JSON::Syck;
 
-our $HAS_JSON = 0;
+my $HAS_JSON = 0;
 BEGIN {
 unless (defined &utf8::encode) {
     plan skip_all => 'No Unicode support';

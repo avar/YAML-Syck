@@ -496,7 +496,7 @@ static char* perl_json_preprocess(char *s) {
     int i;
     char *out;
     char ch;
-    bool in_string = 0;
+    char in_string = '\0';
     bool in_quote  = 0;
     char *pos;
     STRLEN len = strlen(s);
@@ -516,11 +516,16 @@ static char* perl_json_preprocess(char *s) {
         else if (ch == '\\') {
             in_quote = 1;
         }
-        else if (ch == json_quote_char) {
-            in_string = !in_string;
+        else if (in_string == '\0') {
+            switch (ch) {
+                case ':':  { *pos++ = ' '; break; }
+                case ',':  { *pos++ = ' '; break; }
+                case '"':  { in_string = '"'; break; }
+                case '\'': { in_string = '\''; break; }
+            }
         }
-        else if ((ch == ':' || ch == ',') && !in_string) {
-            *pos++ = ' ';
+        else if (ch == in_string) {
+            in_string = '\0';
         }
     }
 
