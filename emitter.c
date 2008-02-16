@@ -684,7 +684,7 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
             &&
             (len > 0)
             ) {
-        force_style = scalar_1quote;
+        force_style = (force_style == scalar_2quote) ? scalar_2quote : scalar_1quote;
     } else {
         /* complex key -- disabled by Audrey Tang -/
         if ( parent->status == syck_lvl_map && parent->ncount % 2 == 1 &&
