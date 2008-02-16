@@ -496,7 +496,7 @@ static char* perl_json_preprocess(char *s) {
     int i;
     char *out;
     char ch;
-    bool in_string = 0;
+    char in_string = '\0';
     bool in_quote  = 0;
     char *pos;
     STRLEN len = strlen(s);
@@ -516,11 +516,16 @@ static char* perl_json_preprocess(char *s) {
         else if (ch == '\\') {
             in_quote = 1;
         }
-        else if (ch == json_quote_char) {
-            in_string = !in_string;
+        else if (in_string == '\0') {
+            switch (ch) {
+                case ':':  { *pos++ = ' '; break; }
+                case ',':  { *pos++ = ' '; break; }
+                case '"':  { in_string = '"'; break; }
+                case '\'': { in_string = '\''; break; }
+            }
         }
-        else if ((ch == ':' || ch == ',') && !in_string) {
-            *pos++ = ' ';
+        else if (ch == in_string) {
+            in_string = '\0';
         }
     }
 
@@ -753,6 +758,17 @@ yaml_syck_emitter_handler
             case SVt_PVHV: { strcat(tag, "hash:");   break; }
             case SVt_PVCV: { strcat(tag, "code:");   break; }
             case SVt_PVGV: { strcat(tag, "glob:");   break; }
+#if PERL_VERSION > 10
+            case SVt_REGEXP: {
+                if (strEQ(ref, "Regexp")) {
+                    strcat(tag, "regexp");
+                    ref += 6; /* empty string */
+                } else {
+                    strcat(tag, "regexp:");
+                }
+                break;
+            }
+#endif
 
             /* flatten scalar ref objects so that they dump as !perl/scalar:Foo::Bar foo */
             case SVt_PVMG: {
@@ -760,6 +776,14 @@ yaml_syck_emitter_handler
                     strcat(tag, "ref:");
                     break;
                 }
+#if PERL_VERSION > 10
+                else {
+                    strcat(tag, "scalar:");
+                    sv = SvRV(sv);
+                    ty = SvTYPE(sv);
+                    break;
+                }
+#else
                 else {
                     MAGIC *mg;
                     if ( (mg = mg_find(SvRV(sv), PERL_MAGIC_qr) ) ) {
@@ -780,6 +804,7 @@ yaml_syck_emitter_handler
                     }
                     break;
                 }
+#endif
             }
         }
         strcat(tag, ref);
@@ -801,6 +826,14 @@ yaml_syck_emitter_handler
                 e->indent = PERL_SYCK_INDENT_LEVEL;
                 break;
             }
+#if PERL_VERSION > 10
+            case SVt_REGEXP: {
+                STRLEN len = sv_len(sv);
+                syck_emit_scalar( e, OBJOF("tag:!perl:regexp"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), len );
+                syck_emit_end(e);
+                break;
+            }
+#endif
             default: {
                 syck_emit_map(e, OBJOF("tag:!perl:ref"), MAP_NONE);
                 *tag = '\0';
