@@ -1,3 +1,9 @@
+[Changes for 1.05 (JSON::Syck 0.29) - 2008-06-09]
+
+* Loading a YAML stream containing Regexp nodes under -d:DProf should
+  not fail with "panic: Devel::DProf inconsistent subroutine return".
+  Reported by: Richard Jelinek
+
 [Changes for 1.04 (JSON::Syck 0.29) - 2008-02-17]
 
 * The 'Name "YAML::Syck::ImplicitBinary" used only once: possible typo'

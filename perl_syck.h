@@ -294,6 +294,10 @@ yaml_syck_parser_handler
 
                 sv = newSVsv(POPs);
 
+                PUTBACK;
+                FREETMPS;
+                LEAVE;
+
                 /* bless it if necessary */
                 if ( type != NULL && strnEQ(type, "regexp:", 7)) {
                     /* !perl/regexp:Foo::Bar blesses into Foo::Bar */
@@ -410,6 +414,10 @@ yaml_syck_parser_handler
                 SPAGAIN;
 
                 sv = newSVsv(POPs);
+
+                PUTBACK;
+                FREETMPS;
+                LEAVE;
 
                 if (strnNE(ref_type, REGEXP_LITERAL, REGEXP_LITERAL_LENGTH+1)) {
                     /* handle the weird audrey scalar ref stuff */
