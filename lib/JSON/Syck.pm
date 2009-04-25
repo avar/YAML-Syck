@@ -5,7 +5,7 @@ use Exporter;
 use YAML::Syck ();
 
 BEGIN {
-    $VERSION    = '0.29';
+    $VERSION    = '0.30';
     @EXPORT_OK  = qw( Load Dump LoadFile DumpFile );
     @ISA        = 'Exporter';
     *Load       = \&YAML::Syck::LoadJSON;
@@ -22,6 +22,19 @@ sub DumpFile {
         open FH, "> $file" or die "Cannot write to $file: $!";
         print FH YAML::Syck::DumpJSON($_[0]);
         close FH;
+    }
+}
+
+
+sub LoadFile {
+    my $file = shift;
+    if ( YAML::Syck::_is_openhandle($file) ) {
+        YAML::Syck::LoadJSON(do { local $/; <$file> });
+    }
+    else {
+        local *FH;
+        open FH, "< $file" or die "Cannot read from $file: $!";
+        YAML::Syck::LoadJSON(do { local $/; <FH> });
     }
 }
 
@@ -142,7 +155,7 @@ Tatsuhiko Miyagawa E<lt>miyagawa@gmail.comE<gt>
 
 =head1 COPYRIGHT
 
-Copyright 2005, 2006, 2007, 2008 by Audrey Tang E<lt>cpan@audreyt.orgE<gt>.
+Copyright 2005-2009 by Audrey Tang E<lt>cpan@audreyt.orgE<gt>.
 
 This software is released under the MIT license cited below.
 

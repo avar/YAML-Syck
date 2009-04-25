@@ -2,8 +2,8 @@ NAME
     YAML::Syck - Fast, lightweight YAML loader and dumper
 
 VERSION
-    This document describes version 1.01 of YAML::Syck, released January 18,
-    2008.
+    This document describes version 1.07 of YAML::Syck, released April 25,
+    2009.
 
 SYNOPSIS
         use YAML::Syck;
@@ -101,7 +101,7 @@ AUTHORS
     Audrey Tang <cpan@audreyt.org>
 
 COPYRIGHT
-    Copyright 2005, 2006, 2007, 2008 by Audrey Tang <cpan@audreyt.org>.
+    Copyright 2005-2009 by Audrey Tang <cpan@audreyt.org>.
 
     This software is released under the MIT license cited below.
 
