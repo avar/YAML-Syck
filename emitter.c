@@ -761,6 +761,16 @@ void syck_emit_scalar( SyckEmitter *e, char *tag, enum scalar_style force_style,
         keep_nl = NL_KEEP;
     }
 
+    /* A key/value like C<foo: :bar> will be interpreted as ":bar" by Perl, but
+     * Ruby will treat it as the symbol :bar. For compatability with Ruby emit
+     * these with quotes.
+     */
+    if ( force_style == scalar_plain &&
+         strncmp( implicit, "str", 4 ) == 0 &&
+         str[0] == ':' ) {
+        force_style = scalar_literal;
+    }
+
     /* Write the text node */
     switch ( force_style )
     {
