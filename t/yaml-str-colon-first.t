@@ -1,10 +1,10 @@
 use strict;
-use Test::More tests => 2049;
+use Test::More tests => 129;
 use YAML::Syck;
 
 $YAML::Syck::ImplicitUnicode = 1;
 
-for (my $i = 0; $i <= 2**12; $i += 2) {
+for (my $i = 0; $i <= 2**12; $i += 32) {
     my $str = ":" . chr($i);
     my $dump = Dump( { foo => $str } );
     my $load = Load $dump;
