@@ -1,3 +1,9 @@
+[Changes for 1.07_01 (JSON::Syck 0.30) - 2010-05-20]
+
+* Upgrade from Module::Install 0.68 to 0.97
+
+* Bump included Test::More dependency
+
 [Changes for 1.07 (JSON::Syck 0.30) - 2009-04-25]
 
 * Added the missing Loadfile function to JSON::Syck.
