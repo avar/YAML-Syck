@@ -1,5 +1,22 @@
 [Changes for 1.07_01 (JSON::Syck 0.30) - 2010-05-20]
 
+About:
+
+First release by new maintainer (AVAR). The source repository is now
+hosted in Git at http://github.com/avar/YAML-Syck
+
+YAML::Syck is still pretty much abandonware, all its bugs likely to
+get fixed any time soon.
+
+Code fixes:
+
+* Strings starting with : are now always quoted. Ruby will interpret
+  anything starting with a colon as a symbol. Before this fix strings
+  exported from YAML::Syck would be interpreted as Ruby symbols when
+  read by Ruby's syck.
+
+Release engineering fixes:
+
 * Upgrade from Module::Install 0.68 to 0.97
 
 * Bump included Test::More dependency
