@@ -4,6 +4,9 @@
 
 * Bump included Test::More dependency
 
+* Remove included inc/attributes.pm dependency. Nothing in our
+  dependencies used this anymore.
+
 [Changes for 1.07 (JSON::Syck 0.30) - 2009-04-25]
 
 * Added the missing Loadfile function to JSON::Syck.
