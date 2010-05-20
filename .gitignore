@@ -10,3 +10,6 @@ META.yml
 *.gz
 *.bz2
 *.bak
+*.o
+*.bs
+/Syck.c
