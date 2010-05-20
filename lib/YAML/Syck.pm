@@ -9,7 +9,7 @@ use vars qw(
     $UseCode $LoadCode $DumpCode
     $DeparseObject
 );
-use 5.00307;
+use 5.005;
 use Exporter;
 
 BEGIN {

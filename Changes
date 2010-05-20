@@ -9,6 +9,9 @@
 
 * Add homepage, bugtracker, and repository metadata to META.yml
 
+* Bump perl dependency from 5.00307 to 5.005. This is all
+  Module::Install supported anyway.
+
 [Changes for 1.07 (JSON::Syck 0.30) - 2009-04-25]
 
 * Added the missing Loadfile function to JSON::Syck.
