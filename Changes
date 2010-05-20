@@ -26,8 +26,9 @@ Release engineering fixes:
 
 * Add homepage, bugtracker, and repository metadata to META.yml
 
-* Bump perl dependency from 5.00307 to 5.005. This is all
-  Module::Install supported anyway.
+* Bump perl dependency from 5.00307 to 5.006. 5.005 is all
+  Module::Install supported, and YAML::Syck depends on Scalar::Util
+  which only goes as low as 5.006.
 
 [Changes for 1.07 (JSON::Syck 0.30) - 2009-04-25]
 

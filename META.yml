@@ -19,7 +19,7 @@ no_index:
     - t
 requires:
   Scalar::Util: 0
-  perl: 5.005
+  perl: 5.6.0
 resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=YAML-Syck
   homepage: http://search.cpan.org/dist/YAML-Syck
