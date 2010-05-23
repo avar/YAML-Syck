@@ -2,17 +2,6 @@ use strict;
 use lib '.';
 use inc::Module::Install;
 
-print << '_';
-
-*** WARNING ***
-
-YAML::Syck version >=0.60 breaks compatibility with earlier versions of
-YAML::Syck and YAML.pm (<0.60) when serializing blessed references.
-
-See the COMPATIBILITY file for more information.
-
-_
-
 my $bad;
 if (eval { require YAML; $YAML::VERSION < 0.60 }) {
     print "*** Pre-0.60 version of YAML.pm ($YAML::VERSION) detected.\n";
@@ -24,6 +13,17 @@ if (eval { require YAML::Syck; $YAML::Syck::VERSION < 0.60 }) {
 }
 
 if ($bad and !is_admin()) {
+    print << '_';
+
+*** WARNING ***
+
+YAML::Syck version >=0.60 breaks compatibility with earlier versions of
+YAML::Syck and YAML.pm (<0.60) when serializing blessed references.
+
+See the COMPATIBILITY file for more information.
+
+_
+
     exit() unless prompt("Continue installing YAML::Syck?", 'y') =~ /^y/i;
 }
 

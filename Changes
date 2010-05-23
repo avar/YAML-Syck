@@ -2,6 +2,9 @@
 * Reset the hash iterator after dumping hashes. Solves RT #54167 and
   the duplicate RT #34166.
 
+* RT #39572: Only print 0.60 compatibility warning if 0.60 or earlier
+  is installed.
+
 [Changes for 1.08 (JSON::Syck 0.31) - 2010-05-23]
 
 Like the 1.07_01 test release aside from small documentation
