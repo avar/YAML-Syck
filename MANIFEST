@@ -47,6 +47,7 @@ t/12-dumpfile.t
 t/2-scalars.t
 t/3-objects.t
 t/4-perl_tag_scheme.t
+t/bug/rt-54167.t
 t/json-basic.t
 t/json-circular-ref.t
 t/json-crlf.t
