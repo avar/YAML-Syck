@@ -156,6 +156,25 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
     $yaml = Dump(@data);
     @data = Load($yaml);
 
+=head1 WARNING
+
+This module has L<a lot of known
+issues|https://rt.cpan.org/Public/Dist/Display.html?Name=YAML-Syck>
+and hasn't been actively maintained since 2007. If you encounter an
+issue with it probably won't be fixed unless you L<offer up a
+patch|http://github.com/avar/YAML-Syck> in Git that's ready for
+release.
+
+Consider using L<YAML::XS> instead, or not using YAML at all. YAML is
+falling out of style in the Perl community in favor of simpler formats
+like JSON, which don't suffer from the bugs and annoying
+incompatibilities that plague the ambitious YAML format.
+
+There are still some good reasons to use this module, such as better
+interoperability with other syck wrappers (like Ruby's), or some edge
+case of YAML's syntax that it handles better. Maybe it'll work
+perfectly for you, but if it doesn't you may be in for some pain.
+
 =head1 DESCRIPTION
 
 This module provides a Perl interface to the B<libsyck> data serialization

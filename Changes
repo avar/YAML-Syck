@@ -5,6 +5,10 @@ improvements.
 
 * POD link to JSON::XS from JSON::Syck
 
+* Include a WARNING section in the YAML::Syck pod that mentions that
+  the module hasn't been actively maintained since 2007, and that
+  perhaps prospective users might want to turn elsewhere.
+
 [Changes for 1.07_01 (JSON::Syck 0.30) - 2010-05-20]
 
 About:
