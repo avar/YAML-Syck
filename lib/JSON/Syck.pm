@@ -49,7 +49,7 @@ __END__
 
 =head1 NAME
 
-JSON::Syck - JSON is YAML (but consider using JSON::XS instead!)
+JSON::Syck - JSON is YAML (but consider using L<JSON::XS> instead!)
 
 =head1 SYNOPSIS
 

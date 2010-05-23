@@ -1,3 +1,10 @@
+[Changes for 1.08 (JSON::Syck 0.31) - 2010-05-23]
+
+Like the 1.07_01 test release aside from small documentation
+improvements.
+
+* POD link to JSON::XS from JSON::Syck
+
 [Changes for 1.07_01 (JSON::Syck 0.30) - 2010-05-20]
 
 About:
