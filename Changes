@@ -1,3 +1,8 @@
+[Changes for 1.09 (JSON::Syck 0.32) - 2010-05-29]
+
+* Exactly equivalent to 1.08_01, aside from bumping the version
+  numbers
+
 [Changes for 1.08_01 (JSON::Syck 0.31_01) - 2010-05-23]
 
 * Reset the hash iterator after dumping hashes. Solves RT #54167 and
