@@ -1,3 +1,12 @@
+[Changes for 1.10 (JSON::Syck 0.32) - 2010-06-06]
+
+1.09 was released with version 0.97 of Module::Install. It had a
+critical bug that I reported which broke installations on perl 5.8.3
+and older.
+
+This release is equivalent to 1.09 aside from bumping Module::Install
+to 0.99 which fixed the bug.
+
 [Changes for 1.09 (JSON::Syck 0.32) - 2010-05-29]
 
 * Exactly equivalent to 1.08_01, aside from bumping the version
