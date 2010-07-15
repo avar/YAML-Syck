@@ -496,9 +496,34 @@ syck_parse( SyckParser *p )
 void
 syck_default_error_handler( SyckParser *p, char *msg )
 {
-    printf( "Error at [Line %d, Col %d]: %s\n", 
+    printf( "Error at [Line %d, Col %d]: %s\n",
         p->linect,
         p->cursor - p->lineptr,
         msg );
 }
 
+int syck_is_a_number(char* str, long len) {
+	int idx;
+	char seen_decimal = 0;
+	char c;
+
+	if(!str) return 0; /* Don't parse null strings */
+	if(len < 1) return 0; /* empty strings can't be numbers */
+
+	/* Look for illegal characters */
+	for ( idx = 0; idx < len; idx++ ) {
+		c = str[idx];
+
+		if(c > '9' || c < '.' || c == '/' )
+			return 0; /* Number can only have 0..9 and . */
+		if(c == '.') {
+			if(seen_decimal) return 0; /* Numbers can't have 2 .'s in them */
+			if(idx == 0) return 0; /* has to have a leading 0 at least for floats */
+			seen_decimal = 1;
+		}
+	}
+
+	if(len > 1 && str[0] == '0' && str[1] != '.') return 0; /* Trap hex/octal */
+
+	return 1;
+}

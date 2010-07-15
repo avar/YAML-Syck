@@ -1,4 +1,4 @@
-use t::TestYAML tests => 81;
+use t::TestYAML tests => 88;
 
 local $SIG{__WARN__} = sub { 1 } if $Test::VERSION < 1.20;
 
@@ -167,6 +167,14 @@ roundtrip(" ");
 roundtrip("\n");
 roundtrip("S p a c e");
 roundtrip("Space \n Around");
+
+roundtrip("042");
+roundtrip("0x42");
+roundtrip("0.42");
+roundtrip(".42");
+roundtrip("1,000,000");
+roundtrip("1e+6");
+roundtrip("10e+6");
 
 # If implicit typing is on, quote strings corresponding to implicit boolean and null values
 $YAML::Syck::SingleQuote = 0;

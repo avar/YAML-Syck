@@ -860,8 +860,8 @@ yaml_syck_emitter_handler
         /* emit an undef (typically pointed from a blesed SvRV) */
         syck_emit_scalar(e, OBJOF("str"), scalar_plain, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
     }
-    else if (SvNIOKp(sv) && (sv_len(sv) != 0)) {
-        /* emit a number with a stringified version */
+    else if (looks_like_number(sv) && syck_is_a_number(SvPV_nolen(sv), sv_len(sv))) {
+        /* emit a number only if it's [.0-9]+ and isn't octal or hex. We're treating octal/hex as strings */
         syck_emit_scalar(e, OBJOF("str"), SCALAR_NUMBER, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
     }
     else if (SvPOKp(sv)) {
