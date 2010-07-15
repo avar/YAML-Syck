@@ -105,7 +105,7 @@ sub DumpFile {
     }
     else {
         local *FH;
-        open FH, "> $file" or die "Cannot write to $file: $!";
+        open(FH, '>', $file) or die "Cannot write to $file: $!";
         if ($#_) {
             print FH YAML::Syck::DumpYAML($_) for @_;
         }
@@ -126,7 +126,7 @@ sub LoadFile {
     }
     else {
         local *FH;
-        open FH, "< $file" or die "Cannot read from $file: $!";
+        open(FH, '<', $file) or die "Cannot read from $file: $!";
         Load(do { local $/; <FH> });
     }
 }
