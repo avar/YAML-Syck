@@ -10,7 +10,7 @@ unless (-w $RealBin) {
     exit;
 }
 
-plan tests => 8;
+plan tests => 11;
 
 *::LoadFile = *JSON::Syck::LoadFile;
 
@@ -37,7 +37,11 @@ sub write_file {
 
 # write YAML to a file
 write_file('loadfile.json', "---\na simple scalar");
-END { unlink 'loadfile.json' or die "can't delete 'loadfile.json': $!" if -e 'loadfile.json' }
+write_file('emptyfile.json', "");
+END {
+    unlink 'loadfile.json' or die "can't delete 'loadfile.json': $!" if -e 'loadfile.json';
+    unlink 'emptyfile.json' or die "can't delete 'emptyfile.json': $!" if -e 'emptyfile.json';
+}
 
 # using file names
 is(LoadFile('loadfile.json'), "a simple scalar", 'LoadFile works with file names');
@@ -84,6 +88,20 @@ SKIP : {
     close($h);
 
 ] }
+
+{ # Load empty file fails
+    my $json = eval {LoadFile('emptyfile.json')};
+    like($@, qr/^Cannot load empty file at/ms, "LoadFile dies loading an empty file");
+    is($json, undef, "LoadFile returns undef loading an empty file");
+}
+
+  { # Load empty file handle fails
+    open(my $fh, '<', 'emptyfile.json') or die;
+    my $json = eval {LoadFile($fh)};
+    like($@, qr/^Cannot load empty file at/ms, "LoadFile dies loading an empty file");
+    is($json, undef, "LoadFile returns undef loading an empty file");
+}
+
 
 __DATA__
 "a simple scalar"

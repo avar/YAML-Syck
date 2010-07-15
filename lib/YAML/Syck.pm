@@ -118,6 +118,9 @@ sub DumpFile {
 
 sub LoadFile {
     my $file = shift;
+    if(!-e $file || -z $file ) {
+        die("Cannot load empty file");
+    };
     if ( _is_openhandle($file) ) {
         Load(do { local $/; <$file> });
     }

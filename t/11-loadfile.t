@@ -9,7 +9,7 @@ unless (-w $RealBin) {
     exit;
 }
 
-plan tests => 8;
+plan tests => 11;
 
 *::LoadFile = *YAML::Syck::LoadFile;
 
@@ -36,7 +36,11 @@ sub write_file {
 
 # write YAML to a file
 write_file('loadfile.yml', "---\na simple scalar");
-END { unlink 'loadfile.yml' or die "can't delete 'loadfile.yml': $!" if -e 'loadfile.yml' }
+write_file('emptyfile.yml', "");
+END { 
+  unlink 'loadfile.yml' or die "can't delete 'loadfile.yml': $!" if -e 'loadfile.yml';
+  unlink 'emptyfile.yml' or die "can't delete 'emptyfile.yml': $!" if -e 'emptyfile.yml';
+}
 
 # using file names
 is(LoadFile('loadfile.yml'), "a simple scalar", 'LoadFile works with file names');
@@ -83,6 +87,20 @@ SKIP : {
     close($h);
 
 ] }
+
+
+{ # Load empty file fails
+    my $yml = eval {LoadFile('emptyfile.yml')};
+    like($@, qr/^Cannot load empty file at/ms, "LoadFile dies loading an empty file");
+    is($yml, undef, "LoadFile returns undef loading an empty file");
+}
+
+{ # Load empty file handle fails
+    open(my $fh, '<', 'emptyfile.yml') or die;
+    my $yml = eval {LoadFile($fh)};
+    like($@, qr/^Cannot load empty file at/ms, "LoadFile dies loading an empty file");
+    is($yml, undef, "LoadFile returns undef loading an empty file");
+}
 
 __DATA__
 ---

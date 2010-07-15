@@ -28,6 +28,9 @@ sub DumpFile {
 
 sub LoadFile {
     my $file = shift;
+    if(!-e $file || -z $file) {
+        die("Cannot load empty file");
+    }
     if ( YAML::Syck::_is_openhandle($file) ) {
         YAML::Syck::LoadJSON(do { local $/; <$file> });
     }
