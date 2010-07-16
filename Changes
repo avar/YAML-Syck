@@ -11,7 +11,7 @@
 * Tone down the WARNING section in YAML::Syck's documentation that was
   added in 1.08
 
-[Changes for 1.10 (JSON::Syck 0.32) - 2010-06-06]
+[Changes for 1.10 (JSON::Syck 0.33) - 2010-06-06]
 
 1.09 was released with version 0.97 of Module::Install. It had a
 critical bug that I reported which broke installations on perl 5.8.3
