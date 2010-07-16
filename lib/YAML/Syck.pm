@@ -104,15 +104,14 @@ sub DumpFile {
         }
     }
     else {
-        local *FH;
-        open(FH, '>', $file) or die "Cannot write to $file: $!";
+        open(my $fh, '>', $file) or die "Cannot write to $file: $!";
         if ($#_) {
-            print FH YAML::Syck::DumpYAML($_) for @_;
+            print $fh YAML::Syck::DumpYAML($_) for @_;
         }
         else {
-            print FH YAML::Syck::DumpYAML($_[0]);
+            print $fh YAML::Syck::DumpYAML($_[0]);
         }
-        close FH;
+        close $fh;
     }
 }
 
@@ -125,9 +124,8 @@ sub LoadFile {
         Load(do { local $/; <$file> });
     }
     else {
-        local *FH;
-        open(FH, '<', $file) or die "Cannot read from $file: $!";
-        Load(do { local $/; <FH> });
+        open(my $fh, '<', $file) or die "Cannot read from $file: $!";
+        Load(do { local $/; <$fh> });
     }
 }
 

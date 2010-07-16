@@ -18,10 +18,9 @@ sub DumpFile {
         print {$file} YAML::Syck::DumpJSON($_[0]);
     }
     else {
-        local *FH;
-        open(FH, '>',  $file) or die "Cannot write to $file: $!";
-        print FH YAML::Syck::DumpJSON($_[0]);
-        close FH;
+        open(my $fh, '>',  $file) or die "Cannot write to $file: $!";
+        print $fh YAML::Syck::DumpJSON($_[0]);
+        close $fh;
     }
 }
 
@@ -35,9 +34,8 @@ sub LoadFile {
         YAML::Syck::LoadJSON(do { local $/; <$file> });
     }
     else {
-        local *FH;
-        open(FH, '<', $file) or die "Cannot read from $file: $!";
-        YAML::Syck::LoadJSON(do { local $/; <FH> });
+        open(my $fh, '<', $file) or die "Cannot read from $file: $!";
+        YAML::Syck::LoadJSON(do { local $/; <$fh> });
     }
 }
 
