@@ -1,6 +1,4 @@
-use t::TestYAML tests => 88;
-
-local $SIG{__WARN__} = sub { 1 } if $Test::VERSION < 1.20;
+use t::TestYAML tests => 89;
 
 ok(YAML::Syck->VERSION);
 
@@ -153,7 +151,7 @@ is(Dump("\xff\xff"), "--- !binary //8=\n");
 is(Load("--- !binary //8=\n"), "\xff\xff");
 is(Dump("ascii"), "--- ascii\n");
 
-is(Dump("This is Perl 6 User's Golfing System\n", q[--- "This is Perl6 User's Golfing System\n"]));
+is(Dump("This is Perl 6 User's Golfing System\n"), q[--- "This is Perl 6 User's Golfing System\n"] . "\n" );
 
 $YAML::Syck::SingleQuote = $YAML::Syck::SingleQuote = 1;
 
@@ -199,3 +197,11 @@ is(Dump('oN'), "--- oN\n"); # invalid case
 is(Dump('oFF'), "--- oFF\n"); # invalid case
 is(Dump('nULL'), "--- nULL\n"); # invalid case
 
+# RT 52432 - '... X'
+my $bad_hash = {'... X' => ''};
+my $bad_hash_should = "--- \n... X: ''\n";
+TODO: {
+    local $TODO;
+    $TODO = "roundtrip is breaking for this right now: '$bad_hash_should'";
+    roundtrip($bad_hash);
+}

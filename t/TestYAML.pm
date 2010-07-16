@@ -3,7 +3,7 @@ package t::TestYAML;
 BEGIN { $ENV{PERL_DL_NONLAZY} = 0 }
 
 use strict;
-use Test;
+use Test::More;
 use YAML::Syck;
 
 sub import {
@@ -12,7 +12,7 @@ sub import {
     plan @_;
 
     *::ok = *ok;
-    *::is = *ok;
+    *::is = *is;
     *::roundtrip = *roundtrip;
     *::Dump = *YAML::Syck::Dump;
     *::Load = *YAML::Syck::Load;
