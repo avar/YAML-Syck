@@ -1,4 +1,4 @@
-[Changes for 1.10_01 (YAML::Syck 0.32) - 2010-07-15]
+[Changes for 1.10_01 (JSON::Syck 0.34) - 2010-07-15]
 * LoadFile aborts loading an empty file
 * RT 50227 - Not quoting strings when data has been sorted numerically
   before being passed to JSON::Syck::Dump
