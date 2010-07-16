@@ -7,7 +7,7 @@ build_requires:
 configure_requires:
   ExtUtils::MakeMaker: 6.42
 distribution_type: module
-generated_by: 'Module::Install version 0.99'
+generated_by: 'Module::Install version 1.00'
 license: mit
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -25,4 +25,4 @@ resources:
   homepage: http://search.cpan.org/dist/YAML-Syck
   license: http://opensource.org/licenses/mit-license.php
   repository: http://github.com/avar/YAML-Syck
-version: 1.10
+version: 1.10_01
