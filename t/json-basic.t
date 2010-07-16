@@ -6,15 +6,15 @@ use JSON::Syck;
 
 my $HAS_JSON = 0;
 BEGIN {
-unless (defined &utf8::encode) {
+  unless (defined &utf8::encode) {
     plan skip_all => 'No Unicode support';
     exit;
-}
-eval { require JSON; $HAS_JSON = 1 };
-if ($HAS_JSON && $JSON::VERSION >= 2){
+  }
+  eval { require JSON; $HAS_JSON = 1 };
+  if ($HAS_JSON && $JSON::VERSION >= 2 && $JSON::VERSION < 2.11) {
     plan skip_all => 'JSON compatibility broken since JSON 2.0';
     exit;
-}
+  }
 }
 
 use Storable;
