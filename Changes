@@ -8,6 +8,8 @@
 * RT 37236 - Re-enable JSON-basic tests for JSON >= 2.11
 * RT 47944 - back quote is a reserved character
 * RT 36288 - ability to disable blessing datastructures on load
+* Tone down the WARNING section in YAML::Syck's documentation that was
+  added in 1.08
 
 [Changes for 1.10 (JSON::Syck 0.32) - 2010-06-06]
 
