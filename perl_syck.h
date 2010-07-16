@@ -81,6 +81,7 @@ yaml_syck_parser_handler
 #ifndef YAML_IS_JSON
     struct parser_xtra *bonus = (struct parser_xtra *)p->bonus;
     bool load_code = bonus->load_code;
+    bool load_blessed = bonus->load_blessed;
 #endif
 
     while (id && (*id == '!')) { id++; }
@@ -355,7 +356,7 @@ yaml_syck_parser_handler
                         sv_bless(sv, gv_stashpv(type, TRUE));
                     }
                 }
-                else {
+                else if (load_blessed) {
                     sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
                 }
             }
@@ -478,7 +479,7 @@ yaml_syck_parser_handler
                         if ( (type != NULL) && strNE(type, "hash") && *type != '\0' ) {
                             sv_bless(sv, gv_stashpv(type, TRUE));
                         }
-                    } else {
+                    } else if (load_blessed) {
                         sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
                     }
                 }
@@ -601,6 +602,7 @@ static SV * LoadYAML (char *s) {
     SV *implicit_typing  = GvSV(gv_fetchpv(form("%s::ImplicitTyping", PACKAGE_NAME), TRUE, SVt_PV));
     SV *implicit_unicode = GvSV(gv_fetchpv(form("%s::ImplicitUnicode", PACKAGE_NAME), TRUE, SVt_PV));
     SV *singlequote      = GvSV(gv_fetchpv(form("%s::SingleQuote", PACKAGE_NAME), TRUE, SVt_PV));
+    SV *load_blessed     = GvSV(gv_fetchpv(form("%s::LoadBlessed", PACKAGE_NAME), TRUE, SVt_PV));
     json_quote_char      = (SvTRUE(singlequote) ? '\'' : '"' );
 
     ENTER; SAVETMPS;
@@ -628,6 +630,7 @@ static SV * LoadYAML (char *s) {
     bonus.objects          = (AV*)sv_2mortal((SV*)newAV());
     bonus.implicit_unicode = SvTRUE(implicit_unicode);
     bonus.load_code        = SvTRUE(use_code) || SvTRUE(load_code);
+    bonus.load_blessed     = SvTRUE(load_blessed);
     parser->bonus          = &bonus;
 
 #ifndef YAML_IS_JSON

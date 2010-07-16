@@ -7,7 +7,7 @@ use vars qw(
     $Headless $SortKeys $SingleQuote
     $ImplicitBinary $ImplicitTyping $ImplicitUnicode 
     $UseCode $LoadCode $DumpCode
-    $DeparseObject
+    $DeparseObject $LoadBlessed
 );
 use 5.006;
 use Exporter;
@@ -18,6 +18,7 @@ BEGIN {
     @ISA     = qw( Exporter );
 
     $SortKeys = 1;
+    $LoadBlessed = 1;
 
     local $@;
     eval {
@@ -237,6 +238,11 @@ each of them defaults to false.
 Setting C<$YAML::Syck::UseCode> to a true value is equivalent to setting
 both C<$YAML::Syck::LoadCode> and C<$YAML::Syck::DumpCode> to true.
 
+=head2 $YAML::Syck::LoadBlessed
+
+Defaults to true. Setting this to a false value will prevent C<Load> from
+blessing tag names that do not begin with C<!!perl> or C<!perl>; see below.
+
 =head1 BUGS
 
 Dumping Glob/IO values does not work yet.
@@ -253,7 +259,9 @@ Tag names such as C<!!perl/hash:Foo> is blessed into the package C<Foo>, but
 the C<!hs/foo> and C<!!hs/Foo> tags are blessed into C<hs::Foo>.  Note that
 this holds true even if the tag contains non-word characters; for example,
 C<!haskell.org/Foo> is blessed into C<haskell.org::Foo>.  Please use
-L<Class::Rebless> to cast it into other user-defined packages.
+L<Class::Rebless> to cast it into other user-defined packages. You can also
+set the LoadBlessed flag false to disable blessing tag names that do not begin
+with C<!!perl> or C<!perl>.
 
 =head1 SEE ALSO
 

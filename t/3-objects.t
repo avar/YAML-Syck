@@ -1,4 +1,4 @@
-use t::TestYAML tests => 29, (
+use t::TestYAML tests => 47, (
     ($] < 5.008) ? (todo => [19..20, 26..29])
                  : ()
 );
@@ -25,6 +25,7 @@ run_ref_ok(qw(
     !haskell.org/^Foo   haskell.org::Foo
     !!perl              HASH
     !!moose             moose
+    !ruby/object:Test::Bear ruby::object:Test::Bear
 ));
 
 my $rx = qr/123/;
@@ -60,5 +61,18 @@ $YAML::Syck::UseCode = 1;
 	is(ref($sub), "code", "blessed to code");
 	is(eval { $sub->() }, 42, "it's a CODE");
 }
+
+$YAML::Syck::LoadBlessed = 0;
+
+run_ref_ok(qw(
+    !!perl/hash:foo     foo
+    !perl/foo           foo
+    !hs/Foo             HASH
+    !haskell.org/Foo    HASH
+    !haskell.org/^Foo   HASH
+    !!perl              HASH
+    !!moose             HASH
+    !ruby/object:Test::Bear HASH
+));
 
 exit;
