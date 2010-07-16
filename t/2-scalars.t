@@ -1,4 +1,4 @@
-use t::TestYAML tests => 89;
+use t::TestYAML tests => 90;
 
 ok(YAML::Syck->VERSION);
 
@@ -205,3 +205,5 @@ TODO: {
     $TODO = "roundtrip is breaking for this right now: '$bad_hash_should'";
     roundtrip($bad_hash);
 }
+
+is(Dump({ foo => "`bar" }), qq{--- \nfoo: "`bar"\n}, 'RT 47944 - back quote is a reserved character')
