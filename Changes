@@ -1,3 +1,14 @@
+[Changes for 1.10_01 (YAML::Syck 0.32) - 2010-07-15]
+* LoadFile aborts loading an empty file
+* RT 50227 - Not quoting strings when data has been sorted numerically
+  before being passed to JSON::Syck::Dump
+* RT 48327 - use 3 arg form of open() instead of the 2 argument form
+* Add TODO tests for RT 52432 - '... X' breaks round trip
+* RT 59432 - use lexical file handles for read/write to files
+* RT 37236 - Re-enable JSON-basic tests for JSON >= 2.11
+* RT 47944 - back quote is a reserved character
+* RT 36288 - ability to disable blessing datastructures on load
+
 [Changes for 1.10 (JSON::Syck 0.32) - 2010-06-06]
 
 1.09 was released with version 0.97 of Module::Install. It had a
