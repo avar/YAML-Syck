@@ -66,6 +66,80 @@ static enum scalar_style yaml_quote_style = scalar_none;
 #define TRACK_OBJECT(sv) (av_push(((struct parser_xtra *)p->bonus)->objects, sv))
 #define USE_OBJECT(sv) (SvREFCNT_inc(sv))
 
+#ifndef YAML_IS_JSON
+
+#ifndef SvRV_set        /* prior to 5.8.7; thx charsbar! */
+#define SvRV_set(sv, val) \
+    STMT_START { \
+        (SvRV(sv) = (val)); } STMT_END
+#endif
+
+static const char *
+is_bad_alias_object( SV *sv ) {
+    SV *hv, **psv;
+
+    if (! sv_isobject(sv))
+        return NULL;
+
+    hv = SvRV(sv);
+    if (! strnEQ(sv_reftype(hv, 1), "YAML::Syck::BadAlias", 20-1))
+        return NULL;
+
+    psv = hv_fetch((HV *) hv, "name", 4, 0);
+    if (! psv)
+        return NULL;
+
+    return SvPVX(*psv);
+}
+
+static void
+register_bad_alias( SyckParser *p, const char *anchor, SV *sv ) {
+    HV *map;
+    SV **pref_av, *new_rvav;
+    AV *rvs;
+
+    map = ((struct parser_xtra *)p->bonus)->bad_anchors;
+    pref_av = hv_fetch(map, anchor, strlen(anchor), 0);
+    if (! pref_av) {
+        new_rvav = newRV_noinc((SV *) newAV());
+        hv_store(map, anchor, strlen(anchor), new_rvav, 0);
+        pref_av = &new_rvav;
+    }
+    rvs = (AV *) SvRV(*pref_av);
+
+    SvREFCNT_inc(sv);
+    av_push(rvs, sv);
+}
+
+static void
+resolve_bad_alias( SyckParser *p, const char *anchor, SV *sv ) {
+    HV *map;
+    SV **pref_av, *entity;
+    AV *rvs;
+    I32 len, i;
+
+    entity = SvRV(sv);
+
+    map = ((struct parser_xtra *)p->bonus)->bad_anchors;
+    pref_av = hv_fetch(map, anchor, strlen(anchor), 0);
+    if (! pref_av)
+        return;
+
+    rvs = (AV *) SvRV(*pref_av);
+    len = av_len(rvs)+1;
+    for (i = 0; i < len; i ++) {
+        SV **prv = av_fetch(rvs, i, 0);
+        if (prv) {
+            SvREFCNT_dec(SvRV(*prv));
+            SvRV_set(*prv, entity);
+            SvREFCNT_inc(entity);
+        }
+    }
+    av_clear(rvs);
+}
+
+#endif
+
 SYMID
 #ifdef YAML_IS_JSON
 json_syck_parser_handler
@@ -328,6 +402,14 @@ yaml_syck_parser_handler
             seq = newAV();
             for (i = 0; i < n->data.list->idx; i++) {
                 SV *a = perl_syck_lookup_sym(p, syck_seq_read(n, i));
+#ifndef YAML_IS_JSON
+                const char *forward_anchor;
+
+                a = sv_2mortal(newSVsv(a));
+                forward_anchor = is_bad_alias_object(a);
+                if (forward_anchor)
+                    register_bad_alias(p, forward_anchor, a);
+#endif
                 av_push(seq, a);
                 USE_OBJECT(a);
             }
@@ -370,7 +452,14 @@ yaml_syck_parser_handler
                 SV* key = perl_syck_lookup_sym(p, syck_map_read(n, map_key, 0));
                 SV* val = perl_syck_lookup_sym(p, syck_map_read(n, map_value, 0));
                 char *ref_type = SvPVX(key);
+#if 0 /* need not to duplicate scalar reference */
+                const char *forward_anchor;
 
+                val = sv_2mortal(newSVsv(val));
+                forward_anchor = is_bad_alias_object(val);
+                if (forward_anchor)
+                    register_bad_alias(p, forward_anchor, val);
+#endif
                 sv = newRV_noinc(val);
                 USE_OBJECT(val);
 
@@ -445,6 +534,15 @@ yaml_syck_parser_handler
                     }
                 }
             }
+            else if (id && strnEQ(id, "perl:YAML::Syck::BadAlias", 25-1)) {
+                SV* key = (SV *) syck_map_read(n, map_key, 0);
+                SV* val = (SV *) syck_map_read(n, map_value, 0);
+                map = newHV();
+                if (hv_store_ent(map, key, val, 0) != NULL)
+                    USE_OBJECT(val);
+                sv = newRV_noinc((SV*)map);
+                sv_bless(sv, gv_stashpv("YAML::Syck::BadAlias", TRUE));
+            }
             else
 #endif
             {
@@ -453,7 +551,14 @@ yaml_syck_parser_handler
                 for (i = 0; i < n->data.pairs->idx; i++) {
                     SV* key = perl_syck_lookup_sym(p, syck_map_read(n, map_key, i));
                     SV* val = perl_syck_lookup_sym(p, syck_map_read(n, map_value, i));
+#ifndef YAML_IS_JSON
+                    const char *forward_anchor;
 
+                    val = sv_2mortal(newSVsv(val));
+                    forward_anchor = is_bad_alias_object(val);
+                    if (forward_anchor)
+                        register_bad_alias(p, forward_anchor, val);
+#endif
                     if (hv_store_ent(map, key, val, 0) != NULL)
                        USE_OBJECT(val);
                 }
@@ -491,6 +596,9 @@ yaml_syck_parser_handler
 #ifndef YAML_IS_JSON
     /* Fix bad anchors using sv_setsv */
     if (n->id) {
+        if (n->anchor)
+            resolve_bad_alias(p, n->anchor, sv);
+
         sv_setsv( perl_syck_lookup_sym(p, n->id), sv );
     }
 #endif
@@ -634,6 +742,8 @@ static SV * LoadYAML (char *s) {
     parser->bonus          = &bonus;
 
 #ifndef YAML_IS_JSON
+    bonus.bad_anchors = (HV*)sv_2mortal((SV*)newHV());
+
     if (GIMME_V == G_ARRAY) {
         SYMID prev_v = 0;
 
