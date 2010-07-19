@@ -47,6 +47,7 @@ t/12-dumpfile.t
 t/2-scalars.t
 t/3-objects.t
 t/4-perl_tag_scheme.t
+t/bug/rt-49404-double_free.t
 t/bug/rt-54167.t
 t/json-basic.t
 t/json-circular-ref.t
@@ -62,6 +63,7 @@ t/json-refs.t
 t/json-singlequote.t
 t/leak.t
 t/TestYAML.pm
+t/yaml-alias.t
 t/yaml-blessed-ref.t
 t/yaml-implicit-warnings.t
 t/yaml-str-colon-first.t

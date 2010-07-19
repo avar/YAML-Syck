@@ -1,3 +1,8 @@
+[Changes for 1.10_03 (YAML::Syck 0.34 ) - 2010-07-19]
+* TODO tests to cover noted deficiencies in RT #'s
+  26182, 54780, 49404, 42390
+* RT 23909 - Loaded self-refererring document is corrupted
+
 [Changes for 1.10_02 (YAML::Syck 0.34 ) - 2010-07-19]
 * RT 50227 - Logic bug in deciding what numbers to quote led to some
   interesting corner cases. Now only 9digit integers are supported
