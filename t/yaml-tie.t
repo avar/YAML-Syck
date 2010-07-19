@@ -1,22 +1,40 @@
 use strict;
-use t::TestYAML tests => 1;
+use Test::More tests => 6;
 use YAML::Syck;
 use Tie::Hash;
 
-my($foo, $bar);
 {
     my %h;
     my $rh = \%h;
     %h = (a=>1, b=>'2', c=>3.1415, d=>4);
     bless $rh => 'Tie::StdHash';
-    $foo = Dump($rh);
+
+    is(Dump($rh), "--- !!perl/hash:Tie::StdHash \na: 1\nb: 2\nc: '3.1415'\nd: 4\n");
+    is(Dump(\%h), "--- !!perl/hash:Tie::StdHash \na: 1\nb: 2\nc: '3.1415'\nd: 4\n");
 }
 {
     my %h;
     my $th = tie %h, 'Tie::StdHash';
     %h = (a=>1, b=>'2', c=>3.1415, d=>4);
-    $bar = Dump($th);
+
+    is(Dump($th), "--- !!perl/hash:Tie::StdHash \na: 1\nb: 2\nc: '3.1415'\nd: 4\n");
+    TODO: {
+        local $TODO = "Tied hashes don't dump"; 
+        is(Dump(\%h), "--- !!perl/hash:Tie::StdHash \na: 1\nb: 2\nc: '3.1415'\nd: 4\n");
+    }
 }
 
-is $foo, $bar;
+{
+    my %h;
+    my $th = tie %h, 'Tie::StdHash';
+    $h{a} = 1;
+    $h{b} = '2';
+    $h{c} = 3.1415;
+    $h{d} = 4;
 
+    is(Dump($th), "--- !!perl/hash:Tie::StdHash \na: 1\nb: 2\nc: '3.1415'\nd: 4\n");
+    TODO: {
+        local $TODO = "Tied hashes don't dump"; 
+        is(Dump(\%h), "--- !!perl/hash:Tie::StdHash \na: 1\nb: 2\nc: '3.1415'\nd: 4\n");
+    }
+}
