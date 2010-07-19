@@ -1,3 +1,9 @@
+[Changes for 1.10_04 (YAML::Syck 0.34 ) - 2010-07-19]
+* RT 23850 - META.yml of DMAKI/DateTime-Format-Japanese-0.01.tar.gz
+  cannot be parsed
+* RT 34073 - TODO Tests - Parsing YAML without separator
+* RT 20969 - Document die behavior differences with YAML
+
 [Changes for 1.10_03 (YAML::Syck 0.34 ) - 2010-07-19]
 * TODO tests to cover noted deficiencies in RT #'s
   26182, 54780, 49404, 42390
