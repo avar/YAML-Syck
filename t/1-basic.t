@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 9;
+use Test::More tests => 11;
 
 use YAML::Syck;
 
@@ -31,4 +31,12 @@ TODO: {
     local $TODO = 'Load fails on empty string';
     isnt($@, '', "Bad data dies on Load");
     is($out, undef, "Bad data fails load");
+}
+
+TODO: {
+    my $out = eval {Load("---\n- ! >-\n")};
+
+    local $TODO = 'RT 23850 - META.yml of DMAKI/DateTime-Format-Japanese-0.01.tar.gz cannot be parsed';
+    is($@, '', "Bad data dies on Load");
+    is_deeply($out, [''], "Bad data fails load");
 }
