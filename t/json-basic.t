@@ -42,44 +42,60 @@ my @tests = (
     '{"foo":""}',
     '["\"://\""]',
     '"~foo"',
+    {TEST => '"\/"', TODO => "backslashed char not working yet"},  # escaped solidus
+    {TEST => '"\""', TODO => "backslashed char not working yet"},    
+    {TEST => '"\b"', TODO => "backslashed char not working yet"},
+    {TEST => '"\f"', TODO => "backslashed char not working yet"},
+    {TEST => '"\n"', TODO => "backslashed char not working yet"},
+    {TEST => '"\r"', TODO => "backslashed char not working yet"},
+    {TEST => '"\t"', TODO => "backslashed char not working yet"},
+    {TEST => '"\u0001"', TODO => "backslashed char not working yet"},
 );
 
 plan tests => scalar @tests * (2 + $HAS_JSON) * 2;
 
-for my $single_quote (0, 1) {
-for my $unicode (0, 1) {
-    local $JSON::Syck::SingleQuote = $single_quote;
-    local $JSON::Syck::ImplicitUnicode = $unicode;
-
-    for my $test_orig (@tests) {
-        my $test = $test_orig;
-        if ($single_quote) {
-            $test =~ s/'/\\'/g;
-            $test =~ s/"/'/g;
-        }
-
-        my $data = eval { JSON::Syck::Load($test) };
-        my $json = JSON::Syck::Dump($data);
-        utf8::encode($json) if !ref($json) && $unicode;
-
-        # don't bother white spaces
-        for ($test, $json) {
-            s/([,:]) /$1/eg;
-        }
-
-        my $desc = "roundtrip $test -> " . Dumper($data) . " -> $json";
-        utf8::encode($desc);
-        is $json, $test, $desc;
-
-        # try parsing the data with JSON.pm
-        if ($HAS_JSON and !$single_quote) {
-            $SIG{__WARN__} = sub { 1 };
-            utf8::encode($data) if defined($data) && !ref($data) && $unicode;
-            my $data_pp = eval { JSON::jsonToObj($json) };
-            is_deeply $data_pp, $data, "compatibility with JSON.pm $test";
+TODO: {
+    for my $single_quote (0, 1) {
+        for my $unicode (0, 1) {
+            local $JSON::Syck::SingleQuote = $single_quote;
+            local $JSON::Syck::ImplicitUnicode = $unicode;
+        
+            for my $test_orig (@tests) {
+                my $test = $test_orig;
+                
+                local $TODO;
+                if(ref $test eq 'HASH') {
+                    $TODO = $test->{TODO};
+                    $test = $test->{TEST};
+                }
+                
+                if ($single_quote) {
+                    $test =~ s/'/\\'/g;
+                    $test =~ s/"/'/g;
+                }
+        
+                my $data = eval { JSON::Syck::Load($test) };
+                my $json = JSON::Syck::Dump($data);
+                utf8::encode($json) if !ref($json) && $unicode;
+        
+                # don't bother white spaces
+                for ($test, $json) {
+                    s/([,:]) /$1/eg;
+                }
+        
+                my $desc = "roundtrip $test -> " . Dumper($data) . " -> $json";
+                utf8::encode($desc);
+                is $json, $test, $desc;
+        
+                # try parsing the data with JSON.pm
+                if ($HAS_JSON and !$single_quote) {
+                    $SIG{__WARN__} = sub { 1 };
+                    utf8::encode($data) if defined($data) && !ref($data) && $unicode;
+                    my $data_pp = eval { JSON::jsonToObj($json) };
+                    is_deeply $data_pp, $data, "compatibility with JSON.pm $test";
+                }
+            }
         }
     }
 }
-}
-
 
