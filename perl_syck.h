@@ -863,14 +863,21 @@ yaml_syck_emitter_handler
         /* emit an undef (typically pointed from a blesed SvRV) */
         syck_emit_scalar(e, OBJOF("str"), scalar_plain, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
     }
-    else if (looks_like_number(sv) && syck_is_a_number(SvPV_nolen(sv), sv_len(sv))) {
-        /* emit a number only if it's [.0-9]+ and isn't octal or hex. We're treating octal/hex as strings */
-        syck_emit_scalar(e, OBJOF("str"), SCALAR_NUMBER, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
-    }
     else if (SvPOKp(sv)) {
         /* emit a string */
         STRLEN len = sv_len(sv);
-        if (len == 0) {
+
+        if (looks_like_number(sv)) {
+        	if(syck_str_is_unquotable_integer(SvPV_nolen(sv), sv_len(sv))) {
+        		/* emit an unquoted number only if it's a very basic integer. /^-?[1-9][0-9]*$/ */
+        		syck_emit_scalar(e, OBJOF("str"), SCALAR_NUMBER, 0, 0, 0, SvPV_nolen(sv), len);
+        	}
+        	else {
+        		/* Even though it looks like a number, quote it or it won't round trip correctly. */
+        		syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, SvPV_nolen(sv), len);
+        	}
+        }
+        else if (len == 0) {
             syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, "", 0);
         }
         else if (IS_UTF8(sv)) {
@@ -904,6 +911,13 @@ yaml_syck_emitter_handler
 #endif
         else {
             syck_emit_scalar(e, OBJOF("str"), SCALAR_STRING, 0, 0, 0, SvPV_nolen(sv), len);
+        }
+    }
+    else if (looks_like_number(sv)) {
+    	if(SvIOK(sv) && syck_str_is_unquotable_integer(SvPV_nolen(sv), sv_len(sv)) ) { /* int detection. */
+    		syck_emit_scalar(e, OBJOF("str"), SCALAR_NUMBER, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+        } else { /* We need to quote this thing even though it appears a number. Only small integers round trip correctly & portably. */
+    		syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
         }
     }
     else {

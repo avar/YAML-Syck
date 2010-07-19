@@ -1,4 +1,4 @@
-use t::TestYAML tests => 90;
+use t::TestYAML tests => 120;
 
 ok(YAML::Syck->VERSION);
 
@@ -206,4 +206,14 @@ TODO: {
     roundtrip($bad_hash);
 }
 
-is(Dump({ foo => "`bar" }), qq{--- \nfoo: "`bar"\n}, 'RT 47944 - back quote is a reserved character')
+is(Dump({ foo => "`bar" }), qq{--- \nfoo: "`bar"\n}, 'RT 47944 - back quote is a reserved character');
+
+# quoted number corner cases:
+foreach (qw/1 2 3 1.0 1.0000 1.00004 2.2 3.7 42.0 0.123 0.0042 0...02 98765432109123 987654321091234 -98765432109123/) {
+    roundtrip($_);
+}
+
+# Un-quoted number corner cases:
+foreach (1, 2, 3, 1.0, 1.0000, 1.00004, 2.2, 3.7, 42.0, 0.123, 0.0042, 0, 1, 98765432109123, 987654321091234 -98765432109123) {
+    roundtrip($_);
+}
