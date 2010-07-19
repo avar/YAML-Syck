@@ -1,4 +1,4 @@
-use t::TestYAML tests => 120;
+use t::TestYAML tests => 121;
 
 ok(YAML::Syck->VERSION);
 
@@ -216,4 +216,22 @@ foreach (qw/1 2 3 1.0 1.0000 1.00004 2.2 3.7 42.0 0.123 0.0042 0...02 9876543210
 # Un-quoted number corner cases:
 foreach (1, 2, 3, 1.0, 1.0000, 1.00004, 2.2, 3.7, 42.0, 0.123, 0.0042, 0, 1, 98765432109123, 987654321091234 -98765432109123) {
     roundtrip($_);
+}
+
+
+# RT 54780 - double quoted loading style
+
+TODO: {
+    my $input = q{--- "<tag>content\
+  \ string</tag>\n\
+  <anothertag>other\
+  \ content</anothertag>\n\
+  \  \n<i>new</i>\n"};
+    my $expected = q{<tag>content string</tag>
+<anothertag>other content</anothertag>
+  
+<i>new</i>
+};
+    local $TODO = "not handling double quoted style right";
+    is(Load($input), $expected, "RT 54780 - Wrong loading of YAML with double quoted style");
 }
