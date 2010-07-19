@@ -1,3 +1,9 @@
+[Changes for 1.10_02 (YAML::Syck 0.34 ) - 2010-07-19]
+* RT 50227 - Logic bug in deciding what numbers to quote led to some
+  interesting corner cases. Now only 9digit integers are supported
+  as unquoted. Everything else will be forced to quote
+* RT 59458 - convert \%d to \%ld in code to prevent compiler warnings
+
 [Changes for 1.10_01 (JSON::Syck 0.34) - 2010-07-15]
 * LoadFile aborts loading an empty file
 * RT 50227 - Not quoting strings when data has been sorted numerically
