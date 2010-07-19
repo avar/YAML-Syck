@@ -43,7 +43,7 @@ my @tests = (
     '["\"://\""]',
     '"~foo"',
     {TEST => '"\/"', TODO => "backslashed char not working yet"},  # escaped solidus
-    {TEST => '"\""', TODO => "backslashed char not working yet"},    
+    '"\""',    
     {TEST => '"\b"', TODO => "backslashed char not working yet"},
     {TEST => '"\f"', TODO => "backslashed char not working yet"},
     {TEST => '"\n"', TODO => "backslashed char not working yet"},
@@ -55,12 +55,11 @@ my @tests = (
 plan tests => scalar @tests * (2 + $HAS_JSON) * 2;
 
 TODO: {
-    for my $single_quote (0, 1) {
-        for my $unicode (0, 1) {
-            local $JSON::Syck::SingleQuote = $single_quote;
-            local $JSON::Syck::ImplicitUnicode = $unicode;
-        
-            for my $test_orig (@tests) {
+    for my $test_orig (@tests) {
+        for my $single_quote (0, 1) {
+            for my $unicode (0, 1) {
+                local $JSON::Syck::SingleQuote = $single_quote;
+                local $JSON::Syck::ImplicitUnicode = $unicode;
                 my $test = $test_orig;
                 
                 local $TODO;
