@@ -212,6 +212,12 @@ byte strings with high-bit set will be dumped with backslash escaping.
 However, because YAML does not distinguish between these two kinds of strings,
 so this flag will affect loading of both variants of strings.
 
+If you want to use LoadFile or DumpFile with unicode, you are required to open
+your own file in order to assure it's UTF8 encoded:
+
+  open(my $fh, ">:encoding(UTF-8)", "out.yml");
+  DumpFile($fh, $hashref);
+
 =head2 $YAML::Syck::ImplicitBinary
 
 Defaults to false.  For Perl 5.8.0 or later, setting this to a true value will
