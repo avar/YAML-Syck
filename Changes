@@ -1,3 +1,6 @@
+[Changes for 1.10_05 (YAML::Syck 0.34 ) - 2010-07-28]
+* Skip failing tie test on perl < 5.8.8 && perl >= 5.7.0x
+
 [Changes for 1.10_04 (YAML::Syck 0.34 ) - 2010-07-19]
 * RT 23850 - META.yml of DMAKI/DateTime-Format-Japanese-0.01.tar.gz
   cannot be parsed
