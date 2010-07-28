@@ -75,6 +75,7 @@ TODO: {
         
                 my $data = eval { JSON::Syck::Load($test) };
                 my $json = JSON::Syck::Dump($data);
+                #diag("json: $json");
                 utf8::encode($json) if !ref($json) && $unicode;
         
                 # don't bother white spaces
@@ -82,7 +83,7 @@ TODO: {
                     s/([,:]) /$1/eg;
                 }
         
-                my $desc = "roundtrip $test -> " . Dumper($data) . " -> $json";
+                my $desc = "roundtrip $test -> " . Dumper($data) . " -> $json -> sq:$single_quote utf8:$unicode ";
                 utf8::encode($desc);
                 is $json, $test, $desc;
         
