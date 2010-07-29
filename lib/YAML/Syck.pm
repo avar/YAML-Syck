@@ -118,13 +118,16 @@ sub DumpFile {
 
 sub LoadFile {
     my $file = shift;
-    if(!-e $file || -z $file ) {
-        die("Cannot load empty file");
-    };
     if ( _is_openhandle($file) ) {
-        Load(do { local $/; <$file> });
+      if( -z $file ) {
+          die("Cannot load an empty file");
+      };
+      Load(do { local $/; <$file> });
     }
     else {
+      if(!-e $file || -z $file) {
+	die("'$file' is empty or non-existant");
+      }
         open(my $fh, '<', $file) or die "Cannot read from $file: $!";
         Load(do { local $/; <$fh> });
     }

@@ -9,7 +9,7 @@ unless (-w $RealBin) {
     exit;
 }
 
-plan tests => 11;
+plan tests => 12;
 
 *::LoadFile = *YAML::Syck::LoadFile;
 
@@ -80,25 +80,25 @@ SKIP: {
 
 # load from "in memory" file
 SKIP : {
-    skip "in-memory files require 5.8 or later", 1 unless $] >= 5.00800; eval q[
+    skip "in-memory files require 5.8 or later", 1 unless $] >= 5.00800;
 
-    open(my $h, '<', \'a simple scalar');
+    my $string = 'a simple scalar';
+    open(my $h, '<', \$string);
     is(LoadFile($h), "a simple scalar", 'LoadFile works with in-memory files');
     close($h);
-
-] }
+}
 
 
 { # Load empty file fails
     my $yml = eval {LoadFile('emptyfile.yml')};
-    like($@, qr/^Cannot load empty file at/ms, "LoadFile dies loading an empty file");
+    like($@, qr/^\'emptyfile.yml' is empty or non-existant at/ms, "LoadFile dies loading an empty file");
     is($yml, undef, "LoadFile returns undef loading an empty file");
 }
 
 { # Load empty file handle fails
     open(my $fh, '<', 'emptyfile.yml') or die;
     my $yml = eval {LoadFile($fh)};
-    like($@, qr/^Cannot load empty file at/ms, "LoadFile dies loading an empty file");
+    like($@, qr/^Cannot load an empty file at/ms, "LoadFile dies loading an empty file");
     is($yml, undef, "LoadFile returns undef loading an empty file");
 }
 

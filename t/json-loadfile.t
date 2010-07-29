@@ -10,7 +10,7 @@ unless (-w $RealBin) {
     exit;
 }
 
-plan tests => 11;
+plan tests => 12;
 
 *::LoadFile = *JSON::Syck::LoadFile;
 
@@ -81,24 +81,23 @@ SKIP: {
 
 # load from "in memory" file
 SKIP : {
-    skip "in-memory files require 5.8 or later", 1 unless $] >= 5.00800; eval q[
+    skip "in-memory files require 5.8 or later", 1 unless $] >= 5.00800;
 
     open(my $h, '<', \'a simple scalar');
     is(LoadFile($h), "a simple scalar", 'LoadFile works with in-memory files');
     close($h);
-
-] }
+}
 
 { # Load empty file fails
     my $json = eval {LoadFile('emptyfile.json')};
-    like($@, qr/^Cannot load empty file at/ms, "LoadFile dies loading an empty file");
+    like($@, qr/^'emptyfile.json' is non-existant or empty at/ms, "LoadFile dies loading an empty file");
     is($json, undef, "LoadFile returns undef loading an empty file");
 }
 
   { # Load empty file handle fails
     open(my $fh, '<', 'emptyfile.json') or die;
     my $json = eval {LoadFile($fh)};
-    like($@, qr/^Cannot load empty file at/ms, "LoadFile dies loading an empty file");
+    like($@, qr/^Cannot load an empty file at/ms, "LoadFile dies loading an empty file");
     is($json, undef, "LoadFile returns undef loading an empty file");
 }
 

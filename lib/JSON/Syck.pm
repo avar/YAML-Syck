@@ -27,13 +27,16 @@ sub DumpFile {
 
 sub LoadFile {
     my $file = shift;
-    if(!-e $file || -z $file) {
-        die("Cannot load empty file");
-    }
     if ( YAML::Syck::_is_openhandle($file) ) {
+        if(-z $file) {
+	    die("Cannot load an empty file");
+        }
         YAML::Syck::LoadJSON(do { local $/; <$file> });
     }
     else {
+        if(!-e $file || -z $file) {
+	    die("'$file' is non-existant or empty");
+	}
         open(my $fh, '<', $file) or die "Cannot read from $file: $!";
         YAML::Syck::LoadJSON(do { local $/; <$fh> });
     }
