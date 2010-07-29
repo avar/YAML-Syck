@@ -107,10 +107,10 @@ sub DumpFile {
     else {
         open(my $fh, '>', $file) or die "Cannot write to $file: $!";
         if ($#_) {
-            print $fh YAML::Syck::DumpYAML($_) for @_;
+            print {$fh} YAML::Syck::DumpYAML($_) for @_;
         }
         else {
-            print $fh YAML::Syck::DumpYAML($_[0]);
+            print {$fh} YAML::Syck::DumpYAML($_[0]);
         }
         close $fh;
     }

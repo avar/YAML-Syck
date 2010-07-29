@@ -19,7 +19,7 @@ sub DumpFile {
     }
     else {
         open(my $fh, '>',  $file) or die "Cannot write to $file: $!";
-        print $fh YAML::Syck::DumpJSON($_[0]);
+        print {$fh} YAML::Syck::DumpJSON($_[0]);
         close $fh;
     }
 }
