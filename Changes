@@ -1,4 +1,12 @@
 [Changes for 1.10_05 (YAML::Syck 0.34 ) - 2010-07-28]
+* Load of in-memory file handles not previously tested (was eval'd 
+  out of existance) Corrected code and test to behave correctly.
+* Perl 5.8 required to YAML-ify code refs
+* Perl 5.6 requires {} to print to a scalar GLOB
+* use SvNIOK to test for int or float if we know it's not a string
+* Attempt again to get 5.8.7 skipped for tie test
+
+[Changes for 1.10_05 (YAML::Syck 0.34 ) - 2010-07-28]
 * Skip failing tie test on perl < 5.8.8 && perl >= 5.7.0x
 
 [Changes for 1.10_04 (YAML::Syck 0.34 ) - 2010-07-19]
