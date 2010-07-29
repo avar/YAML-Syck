@@ -32,9 +32,12 @@ my $rx = qr/123/;
 is(Dump($rx), "--- !!perl/regexp (?-xism:123)\n");
 is(Dump(Load(Dump($rx))), "--- !!perl/regexp (?-xism:123)\n");
 
-my $rx_obj = bless qr/123/i => 'Foo';
-is(Dump($rx_obj), "--- !!perl/regexp:Foo (?i-xsm:123)\n");
-is(Dump(Load(Dump($rx_obj))), "--- !!perl/regexp:Foo (?i-xsm:123)\n");
+SKIP: {
+    Test::More::skip "5.6 doesn't support printing regexes", 2 if($] < 5.007);
+    my $rx_obj = bless qr/123/i => 'Foo';
+    is(Dump($rx_obj), "--- !!perl/regexp:Foo (?i-xsm:123)\n");
+    is(Dump(Load(Dump($rx_obj))), "--- !!perl/regexp:Foo (?i-xsm:123)\n");
+}
 
 my $obj = bless(\(my $undef) => 'Foo');
 is(Dump($obj), "--- !!perl/scalar:Foo ~\n");
@@ -50,15 +53,17 @@ $YAML::Syck::UseCode = 1;
 	is(eval { $hash->{1} }, 2, "it's a hash");
 }
 
-{
+TODO: {
 	my $sub = eval { Load(Dump(bless(sub { 42 }, "foobar"))) };
 	is(ref($sub), "foobar", "blessed to foobar");
+	local $TODO = "5.6 can't do code references in Syck right now" if($] < 5.007);
 	is(eval { $sub->() }, 42, "it's a CODE");
 }
 
-{
+TODO: {
 	my $sub = eval { Load(Dump(bless(sub { 42 }, "code"))) };
 	is(ref($sub), "code", "blessed to code");
+	local $TODO = "5.6 can't do code references in Syck right now" if($] < 5.007);
 	is(eval { $sub->() }, 42, "it's a CODE");
 }
 

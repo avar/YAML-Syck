@@ -1116,6 +1116,10 @@ yaml_syck_emitter_handler
 #else
 
                 /* This following code is mostly copypasted from Storable */
+
+#if PERL_VERSION < 8
+		syck_emit_scalar(e, OBJOF("tag:!perl:code:"), SCALAR_QUOTED, 0, 0, 0, "{ \"DUMMY\" }", 11);
+#else
                 if ( !dump_code ) {
                     syck_emit_scalar(e, OBJOF("tag:!perl:code:"), SCALAR_QUOTED, 0, 0, 0, "{ \"DUMMY\" }", 11);
                 }
@@ -1172,6 +1176,7 @@ yaml_syck_emitter_handler
 
                     /* END Storable */
                 }
+#endif
 #endif
                 *tag = '\0';
                 break;
