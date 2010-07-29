@@ -18,7 +18,7 @@ use Tie::Hash;
     %h = (a=>1, b=>'2', c=>3.1415, d=>4);
 
     SKIP: {
-	skip "Perl 5.8.[67] seem to have issues with large ints as ints", 1 unless($] > '5.008007' || $] < '5.007');
+	skip "Perl 5.8.[67] seem to have issues with large ints as ints", 1 unless($] >= '5.008008' || $] < '5.007');
 	is(Dump($th), "--- !!perl/hash:Tie::StdHash \na: 1\nb: 2\nc: '3.1415'\nd: 4\n");
     }
 
