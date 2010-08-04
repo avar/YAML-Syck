@@ -17,8 +17,8 @@ use Tie::Hash;
     my $th = tie %h, 'Tie::StdHash';
     %h = (a=>1, b=>'2', c=>3.1415, d=>4);
 
-    SKIP: {
-	skip "Perl 5.8.[67] seem to have issues with large ints as ints", 1 unless($] >= '5.008008' || $] < '5.007');
+    TODO: {
+	local $TODO = "Perl 5.8 seems to sometimes coerce ints into strings." unless($] > '5.009888' || $] < '5.007');
 	is(Dump($th), "--- !!perl/hash:Tie::StdHash \na: 1\nb: 2\nc: '3.1415'\nd: 4\n");
     }
 

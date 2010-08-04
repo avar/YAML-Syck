@@ -1,4 +1,8 @@
-[Changes for 1.11 (YAML::Syck 0.34 ) - 2010-08-03]
+[Changes for 1.12 (YAML::Syck 0.35 ) - 2010-08-03]
+* The tie test proved to be very unstable for 5.8 and it's not
+  relevant for tie actually. I'm converting it to a TODO for now.
+
+[Changes for 1.11 (YAML::Syck 0.35 ) - 2010-08-03]
 * Tests are now stable. releasing 1.11
 
 [Changes for 1.10_07 (YAML::Syck 0.34 ) - 2010-07-29]
