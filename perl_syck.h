@@ -982,6 +982,8 @@ yaml_syck_emitter_handler
         /* emit a string */
         STRLEN len = sv_len(sv);
 
+/* JSON should preserve quotes even on simple integers ("0" is true in javascript) */
+#ifndef YAML_IS_JSON
         if (looks_like_number(sv)) {
         	if(syck_str_is_unquotable_integer(SvPV_nolen(sv), sv_len(sv))) {
         		/* emit an unquoted number only if it's a very basic integer. /^-?[1-9][0-9]*$/ */
@@ -992,7 +994,9 @@ yaml_syck_emitter_handler
         		syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, SvPV_nolen(sv), len);
         	}
         }
-        else if (len == 0) {
+        else
+#endif
+        	if (len == 0) {
             syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, "", 0);
         }
         else if (IS_UTF8(sv)) {
