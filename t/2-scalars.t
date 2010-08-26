@@ -1,4 +1,4 @@
-use t::TestYAML tests => 128;
+use t::TestYAML tests => 134;
 
 ok(YAML::Syck->VERSION);
 
@@ -231,7 +231,16 @@ foreach (1, 2, 3, 1.0, 1.0000, 1.00004, 2.2, 3.7, 42.0, 0.123, 0.0042, 0, 1, 987
 # Simple integers dump without quotes
 foreach (1, 2, 3, 0, -1, -2, -3) {
     is(Dump($_), "--- $_\n", "Dumped version of file is unquoted");
-  }
+}
+
+is(Dump('0x10'), "--- 0x10\n",   "hex Dump preserves as string");
+is(Load("--- '0x10'\n"), "0x10", "hex Load preserves as string");
+
+is(Dump('080'), "--- '080'\n",   "oct Dump preserves by quoting");
+is(Load("--- '080'\n"), "080", "oct Load preserves by quoting");
+
+is(Dump('00'), "--- '00'\n",   "00 Dump preserves by quoting");
+is(Load("--- '00'\n"), "00", "00 Load preserves by quoting");
 
 # RT 54780 - double quoted loading style
 

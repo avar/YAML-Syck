@@ -1,3 +1,8 @@
+[Changes for 1.14 (YAML::Syck 0.37 ) - 2010-08-03]
+* RT RT60771 - Further refactor for JSON. if a number is a valid
+  perl string, quote it. "1" + "1" = "11" in javascript.
+* add YAML tests to make sure HEX and octal preserve their information
+
 [Changes for 1.13 (YAML::Syck 0.36 ) - 2010-08-03]
 * RT RT60771 - quoted negative integer and quoted zeroes.
   This was breaking JSON since "0" is true in javascript.
