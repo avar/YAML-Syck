@@ -1,4 +1,4 @@
-use t::TestYAML tests => 121;
+use t::TestYAML tests => 128;
 
 ok(YAML::Syck->VERSION);
 
@@ -228,6 +228,10 @@ foreach (1, 2, 3, 1.0, 1.0000, 1.00004, 2.2, 3.7, 42.0, 0.123, 0.0042, 0, 1, 987
     roundtrip($_);
 }
 
+# Simple integers dump without quotes
+foreach (1, 2, 3, 0, -1, -2, -3) {
+    is(Dump($_), "--- $_\n", "Dumped version of file is unquoted");
+  }
 
 # RT 54780 - double quoted loading style
 
