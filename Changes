@@ -1,6 +1,10 @@
+[Changes for 1.13 (YAML::Syck 0.36 ) - 2010-08-03]
+* RT RT60771 - quoted negative integer and quoted zeroes.
+  This was breaking JSON since "0" is true in javascript.
+
 [Changes for 1.12 (YAML::Syck 0.35 ) - 2010-08-03]
 * The tie test proved to be very unstable for 5.8 and it's not
-  relevant for tie actually. I'm converting it to a TODO for now.
+  relevant for tie actually. I'm converting it to a TODO for 
 
 [Changes for 1.11 (YAML::Syck 0.35 ) - 2010-08-03]
 * Tests are now stable. releasing 1.11
