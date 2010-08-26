@@ -1,4 +1,4 @@
-use Test::More tests => 10;
+use Test::More tests => 11;
 
 use JSON::Syck qw(Dump);
 
@@ -14,6 +14,7 @@ is(Dump(\@arr1), '[1,2,54,"howdy"]', "cmp sort doesn't coerce numbers into strin
 my @arr54 = ("howdy",1,2,54);
 is(Dump(\@arr54), '["howdy",1,2,54]', "Strings are quoted. Numbers are not");
 
+is(Dump(0),    '0', '"0" != 0 in JSON. 0 is false "0" is true.');
 is(Dump('042'),    '"042"', "Ocatls don't get treated as numbers");
 is(Dump('0x42'),    '"0x42"', "Hex doesn't get treated as a number");
 is(Dump('0.42'),    '"0.42"', "Floats with leading 0 don't get excluded by octal check");
