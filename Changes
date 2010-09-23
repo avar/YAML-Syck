@@ -1,3 +1,12 @@
+[Changes for 1.15 (YAML::Syck 0.38 ) - 2010-09-23]
+
+* perl RT #78008 - The 5.13.5 development release of perl changed how
+  regexes are stringified, breaking our tests. Update the tests to
+  deal with the new syntax.
+
+  See fb85c04 (http://perl5.git.perl.org/perl.git/commit/fb85c04) in
+  perl.git for context.
+
 [Changes for 1.14 (YAML::Syck 0.37 ) - 2010-08-03]
 * RT RT60771 - Further refactor for JSON. if a number is a valid
   perl string, quote it. "1" + "1" = "11" in javascript.
