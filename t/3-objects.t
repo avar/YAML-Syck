@@ -1,4 +1,4 @@
-use t::TestYAML tests => 47, (
+use t::TestYAML tests => 48, (
     ($] < 5.008) ? (todo => [19..20, 26..29])
                  : ()
 );
@@ -28,15 +28,32 @@ run_ref_ok(qw(
     !ruby/object:Test::Bear ruby::object:Test::Bear
 ));
 
+
+# perl 5.13.5 and later has fb85c04, which changed the regex
+# stringification syntax. This is also valid.
+use constant REGEX_CARET => qr// =~ /\Q(?^\E/;
+
 my $rx = qr/123/;
-is(Dump($rx), "--- !!perl/regexp (?-xism:123)\n");
-is(Dump(Load(Dump($rx))), "--- !!perl/regexp (?-xism:123)\n");
+if (REGEX_CARET) {
+    ok(1, "Testing regexes with the >=5.13.5 caret syntax");
+    is(Dump($rx), "--- !!perl/regexp (?^:123)\n");
+    is(Dump(Load(Dump($rx))), "--- !!perl/regexp (?^:(?^:123))\n");
+} else {
+    ok(1, "Testing regexes with the old <5.13.5 syntax");
+    is(Dump($rx), "--- !!perl/regexp (?-xism:123)\n");
+    is(Dump(Load(Dump($rx))), "--- !!perl/regexp (?-xism:123)\n");
+}
 
 SKIP: {
     Test::More::skip "5.6 doesn't support printing regexes", 2 if($] < 5.007);
     my $rx_obj = bless qr/123/i => 'Foo';
-    is(Dump($rx_obj), "--- !!perl/regexp:Foo (?i-xsm:123)\n");
-    is(Dump(Load(Dump($rx_obj))), "--- !!perl/regexp:Foo (?i-xsm:123)\n");
+    if (REGEX_CARET) {
+        is(Dump($rx_obj), "--- !!perl/regexp:Foo (?^i:123)\n");
+        is(Dump(Load(Dump($rx_obj))), "--- !!perl/regexp:Foo (?^:(?^i:123))\n");
+    } else {
+        is(Dump($rx_obj), "--- !!perl/regexp:Foo (?i-xsm:123)\n");
+        is(Dump(Load(Dump($rx_obj))), "--- !!perl/regexp:Foo (?i-xsm:123)\n");
+    }
 }
 
 my $obj = bless(\(my $undef) => 'Foo');
