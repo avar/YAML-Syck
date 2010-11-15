@@ -172,7 +172,7 @@ B<NOTE>: If you are working with other language's YAML/Syck bindings
 calling the C<Load>/C<Dump> functions.  The default setting is for
 preserving backward-compatibility with C<YAML.pm>.
 
-=head1 Differences Between Yaml::Syck and YAML
+=head1 Differences Between YAML::Syck and YAML
 
 =head2 Error handling
 
