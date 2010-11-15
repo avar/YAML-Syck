@@ -174,7 +174,7 @@ preserving backward-compatibility with C<YAML.pm>.
 
 =head1 Differences Between Yaml::Syck and YAML
 
-head2 Error handling
+=head2 Error handling
 
 Some calls are designed to die rather than returning YAML. You should wrap
 your calls in eval to assure you do not get unexpected results.
