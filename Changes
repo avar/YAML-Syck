@@ -1,3 +1,7 @@
+[Changes for 1.16 (YAML::Syck 0.39 ) - 2010-11-21]
+
+* POD formatting fixes contributed by Justin Hunter
+
 [Changes for 1.15 (YAML::Syck 0.38 ) - 2010-09-23]
 
 * perl RT #78008 - The 5.13.5 development release of perl changed how
