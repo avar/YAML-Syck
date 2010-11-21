@@ -1,3 +1,11 @@
+[Changes for 1.17 (YAML::Syck 0.40 ) - 2010-11-21]
+
+* Change a C99 comment to a C89 comment
+
+* Upgrade ppport.h from 3.13 to 3.19
+
+* Remove inc/Test/Builder/IO/Scalar.pm from MANIFEST
+
 [Changes for 1.16 (YAML::Syck 0.39 ) - 2010-11-21]
 
 * POD formatting fixes contributed by Justin Hunter
