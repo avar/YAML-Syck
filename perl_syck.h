@@ -1109,7 +1109,7 @@ yaml_syck_emitter_handler
                         syck_emit_item( e, (st_data_t)val );
                     }
                 }
-                // reset hash each poiter
+                /* reset the hash pointer */
                 hv_iterinit(hv);
                 syck_emit_end(e);
                 return;
