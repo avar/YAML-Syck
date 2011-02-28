@@ -1,4 +1,8 @@
-[Changes for 1.17 (YAML::Syck 0.40 ) - 2010-11-21]
+[Changes for 1.17_01 (YAML::Syck 0.40 ) - 2011-02-28]
+
+* Break YAML::Syck dependency on Scalar::Util
+
+[Changes for 1.17 (JSON::Syck 0.40 ) - 2010-11-21]
 
 * Change a C99 comment to a C89 comment
 
@@ -6,11 +10,11 @@
 
 * Remove inc/Test/Builder/IO/Scalar.pm from MANIFEST
 
-[Changes for 1.16 (YAML::Syck 0.39 ) - 2010-11-21]
+[Changes for 1.16 (JSON::Syck 0.39 ) - 2010-11-21]
 
 * POD formatting fixes contributed by Justin Hunter
 
-[Changes for 1.15 (YAML::Syck 0.38 ) - 2010-09-23]
+[Changes for 1.15 (JSON::Syck 0.38 ) - 2010-09-23]
 
 * perl RT #78008 - The 5.13.5 development release of perl changed how
   regexes are stringified, breaking our tests. Update the tests to
@@ -19,26 +23,26 @@
   See fb85c04 (http://perl5.git.perl.org/perl.git/commit/fb85c04) in
   perl.git for context.
 
-[Changes for 1.14 (YAML::Syck 0.37 ) - 2010-08-03]
+[Changes for 1.14 (JSON::Syck 0.37 ) - 2010-08-03]
 * RT RT60771 - Further refactor for JSON. if a number is a valid
   perl string, quote it. "1" + "1" = "11" in javascript.
 * add YAML tests to make sure HEX and octal preserve their information
 
-[Changes for 1.13 (YAML::Syck 0.36 ) - 2010-08-03]
+[Changes for 1.13 (JSON::Syck 0.36 ) - 2010-08-03]
 * RT RT60771 - quoted negative integer and quoted zeroes.
   This was breaking JSON since "0" is true in javascript.
 
-[Changes for 1.12 (YAML::Syck 0.35 ) - 2010-08-03]
+[Changes for 1.12 (JSON::Syck 0.35 ) - 2010-08-03]
 * The tie test proved to be very unstable for 5.8 and it's not
   relevant for tie actually. I'm converting it to a TODO for 
 
-[Changes for 1.11 (YAML::Syck 0.35 ) - 2010-08-03]
+[Changes for 1.11 (JSON::Syck 0.35 ) - 2010-08-03]
 * Tests are now stable. releasing 1.11
 
-[Changes for 1.10_07 (YAML::Syck 0.34 ) - 2010-07-29]
+[Changes for 1.10_07 (JSON::Syck 0.34 ) - 2010-07-29]
 * META.yml missing
 
-[Changes for 1.10_06 (YAML::Syck 0.34 ) - 2010-07-29]
+[Changes for 1.10_06 (JSON::Syck 0.34 ) - 2010-07-29]
 * Load of in-memory file handles not previously tested (was eval'd 
   out of existance) Corrected code and test to behave correctly.
 * Perl 5.8 required to YAML-ify code refs
@@ -46,21 +50,21 @@
 * use SvNIOK to test for int or float if we know it's not a string
 * Attempt again to get 5.8.7 skipped for tie test
 
-[Changes for 1.10_05 (YAML::Syck 0.34 ) - 2010-07-28]
+[Changes for 1.10_05 (JSON::Syck 0.34 ) - 2010-07-28]
 * Skip failing tie test on perl < 5.8.8 && perl >= 5.7.0x
 
-[Changes for 1.10_04 (YAML::Syck 0.34 ) - 2010-07-19]
+[Changes for 1.10_04 (JSON::Syck 0.34 ) - 2010-07-19]
 * RT 23850 - META.yml of DMAKI/DateTime-Format-Japanese-0.01.tar.gz
   cannot be parsed
 * RT 34073 - TODO Tests - Parsing YAML without separator
 * RT 20969 - Document die behavior differences with YAML
 
-[Changes for 1.10_03 (YAML::Syck 0.34 ) - 2010-07-19]
+[Changes for 1.10_03 (JSON::Syck 0.34 ) - 2010-07-19]
 * TODO tests to cover noted deficiencies in RT #'s
   26182, 54780, 49404, 42390
 * RT 23909 - Loaded self-refererring document is corrupted
 
-[Changes for 1.10_02 (YAML::Syck 0.34 ) - 2010-07-19]
+[Changes for 1.10_02 (JSON::Syck 0.34 ) - 2010-07-19]
 * RT 50227 - Logic bug in deciding what numbers to quote led to some
   interesting corner cases. Now only 9digit integers are supported
   as unquoted. Everything else will be forced to quote
