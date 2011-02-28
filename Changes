@@ -1,3 +1,6 @@
+[Changes for 1.17_01 (YAML::Syck 0.40_01 ) - 2011-02-28]
+
+* Break YAML::Syck dependency on Scalar::Util
 
 [Changes for 1.17 (JSON::Syck 0.40 ) - 2010-11-21]
 
