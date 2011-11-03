@@ -14,3 +14,7 @@ MYMETA.yml
 *.o
 *.bs
 /Syck.c
+.*.swp
+.*.swo
+MYMETA.json
+META.json
