@@ -13,7 +13,7 @@ use 5.006;
 use Exporter;
 
 BEGIN {
-    $VERSION = '1.17_01';
+    $VERSION = '1.17_02';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 
@@ -73,7 +73,8 @@ sub Load {
         @{$rv};
     }
     else {
-        YAML::Syck::LoadYAML($_[0]);
+        @_ = $_[0];
+        goto &YAML::Syck::LoadYAML;
     }
 }
 

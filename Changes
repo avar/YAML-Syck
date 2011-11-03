@@ -1,4 +1,10 @@
-[Changes for 1.17_01 (YAML::Syck 0.40_01 ) - 2011-02-28]
+[Changes for 1.17_02 (JSON::Syck 0.40_02 ) - 2011-11-03]
+
+* perl RT #102606 - Only lvalue subroutines are supposed to return
+  the argument to "return" without copying it. Stop relying on a
+  pre-5.15 bug. [Father Chrysostomos]
+
+[Changes for 1.17_01 (JSON::Syck 0.40_01 ) - 2011-02-28]
 
 * Break YAML::Syck dependency on Scalar::Util
 
