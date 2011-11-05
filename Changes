@@ -1,3 +1,7 @@
+[Changes for 1.18 (JSON::Syck 0.41 ) - 2011-11-05]
+
+* Promote to stable release.
+
 [Changes for 1.17_02 (JSON::Syck 0.40_02 ) - 2011-11-03]
 
 * perl RT #102606 - Only lvalue subroutines are supposed to return
