@@ -5,8 +5,8 @@ use YAML::Syck;
 use Test::More tests => 11;
 
 SKIP: {
-    eval { require Devel::Leak }
-      or skip( "Devel::Leak not installed", 11 );
+    eval { require Devel::Leak; require 5.8.9; 1; }
+      or skip( "Devel::Leak not installed or perl too old", 11 );
 
     # check if arrays leak
 
