@@ -14,7 +14,7 @@ BEGIN {
 
 sub DumpFile {
     my $file = shift;
-    if ( YAML::Syck::_is_openhandle($file) ) {
+    if ( YAML::Syck::_is_glob($file) ) {
         print {$file} YAML::Syck::DumpJSON($_[0]);
     }
     else {
