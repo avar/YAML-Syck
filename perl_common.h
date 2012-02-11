@@ -72,11 +72,11 @@ SyckNode * perl_syck_bad_anchor_handler(SyckParser *p, char *a) {
 }
 
 void perl_syck_error_handler(SyckParser *p, char *msg) {
-    croak(form( "%s parser (line %d, column %ld): %s",
+    croak("%s parser (line %d, column %ld): %s",
         "Syck",
         p->linect + 1,
-        p->cursor - p->lineptr,
-        msg ));
+        (long) (p->cursor - p->lineptr),
+        msg );
 }
 
 void perl_syck_output_handler(SyckEmitter *e, char *str, long len) {

@@ -95,10 +95,10 @@ SKIP : {
     is($yml, undef, "LoadFile returns undef loading an empty file");
 }
 
-{ # Load empty file handle fails
+{ # Load empty file handle succeeds
     open(my $fh, '<', 'emptyfile.yml') or die;
     my $yml = eval {LoadFile($fh)};
-    like($@, qr/^Cannot load an empty file at/ms, "LoadFile dies loading an empty file");
+    ok(!$@, "No failure reading an empty file handle");
     is($yml, undef, "LoadFile returns undef loading an empty file");
 }
 

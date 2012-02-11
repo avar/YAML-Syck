@@ -1,3 +1,10 @@
+[Changes for 1.20_01] (JSON::Syck 0.43_01) - 2012-02-11]
+
+* Add test to assure META.yml is up to date before release
+* Fix for RT 70933 - disable check for empty file handle in LoadFile calls
+* Remove call to non-existant code YAML::Syck::_is_openhandle.
+* Fix for RT 74785 - compiling with -Werror=format-security fails
+
 [Changes for 1.19 (JSON::Syck 0.42 ) - 2011-11-08]
 
 * Do not run t/leak.t on perls prior to 5.8.9 as 5.8.8

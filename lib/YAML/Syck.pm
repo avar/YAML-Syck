@@ -13,7 +13,7 @@ use 5.006;
 use Exporter;
 
 BEGIN {
-    $VERSION = '1.19';
+    $VERSION = '1.20_01';
     @EXPORT  = qw( Dump Load DumpFile LoadFile );
     @ISA     = qw( Exporter );
 
@@ -113,9 +113,6 @@ sub DumpFile {
 sub LoadFile {
     my $file = shift;
     if ( _is_glob($file) ) {
-      if( -z $file ) {
-          die("Cannot load an empty file");
-      };
       Load(do { local $/; <$file> });
     }
     else {

@@ -94,10 +94,10 @@ SKIP : {
     is($json, undef, "LoadFile returns undef loading an empty file");
 }
 
-  { # Load empty file handle fails
+{ # Load empty file handle fails with an obscure message. See RT 70933
     open(my $fh, '<', 'emptyfile.json') or die;
     my $json = eval {LoadFile($fh)};
-    like($@, qr/^Cannot load an empty file at/ms, "LoadFile dies loading an empty file");
+    like($@, qr/^Usage: YAML::Syck::LoadJSON\(s\) at /ms, "LoadFile dies loading an empty file");
     is($json, undef, "LoadFile returns undef loading an empty file");
 }
 

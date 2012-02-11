@@ -5,7 +5,7 @@ use Exporter;
 use YAML::Syck ();
 
 BEGIN {
-    $VERSION    = '0.42';
+    $VERSION    = '0.43_01';
     @EXPORT_OK  = qw( Load Dump LoadFile DumpFile );
     @ISA        = 'Exporter';
     *Load       = \&YAML::Syck::LoadJSON;
@@ -14,7 +14,7 @@ BEGIN {
 
 sub DumpFile {
     my $file = shift;
-    if ( YAML::Syck::_is_openhandle($file) ) {
+    if ( YAML::Syck::_is_glob($file) ) {
         print {$file} YAML::Syck::DumpJSON($_[0]);
     }
     else {
@@ -28,9 +28,6 @@ sub DumpFile {
 sub LoadFile {
     my $file = shift;
     if ( YAML::Syck::_is_glob($file) ) {
-        if(-z $file) {
-	    die("Cannot load an empty file");
-        }
         YAML::Syck::LoadJSON(do { local $/; <$file> });
     }
     else {
