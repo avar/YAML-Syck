@@ -28,9 +28,6 @@ sub DumpFile {
 sub LoadFile {
     my $file = shift;
     if ( YAML::Syck::_is_glob($file) ) {
-        if(-z $file) {
-	    die("Cannot load an empty file");
-        }
         YAML::Syck::LoadJSON(do { local $/; <$file> });
     }
     else {
