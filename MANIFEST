@@ -68,4 +68,5 @@ t/yaml-blessed-ref.t
 t/yaml-implicit-warnings.t
 t/yaml-str-colon-first.t
 t/yaml-tie.t
+t/meta.t
 token.c
