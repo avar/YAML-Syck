@@ -1,3 +1,7 @@
+[Changes for 1.20] (JSON::Syck 0.43) - 2012-02-14]
+
+* Tests all green on CPAN Testers. releasing to public.
+
 [Changes for 1.20_01] (JSON::Syck 0.43_01) - 2012-02-11]
 
 * Add test to assure META.yml is up to date before release
