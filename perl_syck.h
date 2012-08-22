@@ -978,7 +978,7 @@ yaml_syck_emitter_handler
         /* emit an undef (typically pointed from a blesed SvRV) */
         syck_emit_scalar(e, OBJOF("str"), scalar_plain, 0, 0, 0, NULL_LITERAL, NULL_LITERAL_LENGTH);
     }
-    else if (SvPOKp(sv)) {
+    else if (SvPOK(sv)) {
         /* emit a string */
         STRLEN len = sv_len(sv);
 
@@ -1033,11 +1033,19 @@ yaml_syck_emitter_handler
         }
     }
     else if (SvNIOK(sv)) {
-    	if(SvIOK(sv) && syck_str_is_unquotable_integer(SvPV_nolen(sv), sv_len(sv)) ) { /* int detection. */
-    		syck_emit_scalar(e, OBJOF("str"), SCALAR_NUMBER, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
-        } else { /* We need to quote this thing even though it appears a number. Only small integers round trip correctly & portably. */
-    		syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, SvPV_nolen(sv), sv_len(sv));
+    	/* Stringify the sv, being careful not to overwrite its PV part */
+    	SV *sv2 = newSVsv(sv);
+    	STRLEN len;
+    	char *str = SvPV(sv2, len);
+    	if (SvIOK(sv) /* original SV was an int */
+    	    && syck_str_is_unquotable_integer(str, len)) /* small enough to safely round-trip */
+    	{
+    		syck_emit_scalar(e, OBJOF("str"), SCALAR_NUMBER, 0, 0, 0, str, len);
+        } else {
+    		/* We need to quote it */
+    		syck_emit_scalar(e, OBJOF("str"), SCALAR_QUOTED, 0, 0, 0, str, len);
         }
+        SvREFCNT_dec(sv2);
     }
     else {
         switch (ty) {
