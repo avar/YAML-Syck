@@ -20,6 +20,7 @@ inc/Module/Install/WriteAll.pm
 inc/parent.pm
 inc/PerlIO.pm
 inc/Test/Builder.pm
+inc/Test/Builder/IO/Scalar.pm
 inc/Test/Builder/Module.pm
 inc/Test/More.pm
 lib/JSON/Syck.pm
@@ -47,11 +48,13 @@ t/12-dumpfile.t
 t/2-scalars.t
 t/3-objects.t
 t/4-perl_tag_scheme.t
+t/bug/doesnt-stringify.t
 t/bug/rt-49404-double_free.t
 t/bug/rt-54167.t
 t/json-basic.t
 t/json-circular-ref.t
 t/json-crlf.t
+t/json-dumpinto.t
 t/json-empty.t
 t/json-indent.t
 t/json-loadfile.t
@@ -62,11 +65,12 @@ t/json-numbers.t
 t/json-refs.t
 t/json-singlequote.t
 t/leak.t
+t/meta.t
 t/TestYAML.pm
 t/yaml-alias.t
 t/yaml-blessed-ref.t
+t/yaml-dumpinto.t
 t/yaml-implicit-warnings.t
 t/yaml-str-colon-first.t
 t/yaml-tie.t
-t/meta.t
 token.c
