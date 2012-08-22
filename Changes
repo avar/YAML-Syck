@@ -1,3 +1,13 @@
+[Changes for 1.21_01 - 2012-06-22]
+
+* Synchronize JSON::Syck with YAML::Syck version number
+* Add DumpInto functions (YAML+Syck) which dump into
+  a provided scalar instead of a newly allocated one
+* Modify DumpFile functions to output directly to the
+  specified file/filehandle instead of buffering all
+  output in memory.
+* Avoid modifying numbers into strings when emitting
+
 [Changes for 1.20 (JSON::Syck 0.43) - 2012-02-14]
 
 * Tests all green on CPAN Testers. releasing to public.
