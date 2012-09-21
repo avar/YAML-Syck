@@ -1,3 +1,7 @@
+[Changes for 1.21 - 2012-09-20]
+
+* Tests all green on CPAN Testers. releasing to public.
+
 [Changes for 1.21_01 - 2012-06-22]
 
 * Synchronize JSON::Syck with YAML::Syck version number
