@@ -117,7 +117,7 @@ sub LoadFile {
     }
     else {
       if(!-e $file || -z $file) {
-	die("'$file' is empty or non-existant");
+	die("'$file' is empty or non-existent");
       }
         open(my $fh, '<', $file) or die "Cannot read from $file: $!";
         Load(do { local $/; <$fh> });
