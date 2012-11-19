@@ -41,7 +41,7 @@ sub LoadFile {
     }
     else {
         if(!-e $file || -z $file) {
-	    die("'$file' is non-existant or empty");
+	    die("'$file' is non-existent or empty");
 	}
         open(my $fh, '<', $file) or die "Cannot read from $file: $!";
         YAML::Syck::LoadJSON(do { local $/; <$fh> });
