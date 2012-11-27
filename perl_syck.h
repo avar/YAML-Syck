@@ -432,14 +432,16 @@ yaml_syck_parser_handler
                     while ( *type == '@' ) { type++; }
                 }
 
-                if (lang == NULL || (strEQ(lang, "perl"))) {
-                    /* !perl/array on it's own causes no blessing */
-                    if ( (type != NULL) && strNE(type, "array") && *type != '\0' ) {
-                        sv_bless(sv, gv_stashpv(type, TRUE));
-                    }
-                }
-                else if (load_blessed) {
-                    sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
+                if (load_blessed) {
+                	if (lang == NULL || (strEQ(lang, "perl"))) {
+                		/* !perl/array on it's own causes no blessing */
+                		if ( (type != NULL) && strNE(type, "array") && *type != '\0' ) {
+                			sv_bless(sv, gv_stashpv(type, TRUE));
+                		}
+                	}
+                	else {
+                		sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
+                	}
                 }
             }
 #endif
@@ -579,13 +581,15 @@ yaml_syck_parser_handler
                         while ( *type == '%' ) { type++; }
                     }
 
-                    if (lang == NULL || (strEQ(lang, "perl"))) {
-                        /* !perl/hash on it's own causes no blessing */
-                        if ( (type != NULL) && strNE(type, "hash") && *type != '\0' ) {
-                            sv_bless(sv, gv_stashpv(type, TRUE));
-                        }
-                    } else if (load_blessed) {
-                        sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
+                    if (load_blessed) {
+						if (lang == NULL || (strEQ(lang, "perl"))) {
+							/* !perl/hash on it's own causes no blessing */
+							if ( (type != NULL) && strNE(type, "hash") && *type != '\0' ) {
+								sv_bless(sv, gv_stashpv(type, TRUE));
+							}
+						} else {
+							sv_bless(sv, gv_stashpv(form((type == NULL) ? "%s" : "%s::%s", lang, type), TRUE));
+						}
                     }
                 }
 #endif
