@@ -1,3 +1,10 @@
+[Changes for 1.22_01 - 2012-11-27]
+
+* Fix error message typo: s/existant/existent/g
+* Fix for non-printable character detection
+* Quote if non-printable characters are present
+* Change LoadBlessed=0 to not bless under ANY circumstances
+
 [Changes for 1.21 - 2012-09-20]
 
 * Tests all green on CPAN Testers. releasing to public.

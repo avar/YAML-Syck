@@ -20,7 +20,6 @@ inc/Module/Install/WriteAll.pm
 inc/parent.pm
 inc/PerlIO.pm
 inc/Test/Builder.pm
-inc/Test/Builder/IO/Scalar.pm
 inc/Test/Builder/Module.pm
 inc/Test/More.pm
 lib/JSON/Syck.pm
@@ -30,7 +29,6 @@ lib/YAML/Syck.pm
 Makefile.PL
 MANIFEST			This list of files
 META.yml
-META.json
 node.c
 perl_common.h
 perl_syck.h
