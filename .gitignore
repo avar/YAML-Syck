@@ -16,3 +16,9 @@ MYMETA.yml
 .*.swp
 .*.swo
 MYMETA.json
+# Ignore patch files
+*.rej
+*.orig
+# Ignore perltidy files
+*.bak
+*.ERR
