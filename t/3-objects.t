@@ -1,4 +1,4 @@
-use t::TestYAML tests => 48, (
+use t::TestYAML tests => 51, (
     ($] < 5.008) ? (todo => [19..20, 26..29])
                  : ()
 );
@@ -87,8 +87,8 @@ TODO: {
 $YAML::Syck::LoadBlessed = 0;
 
 run_ref_ok(qw(
-    !!perl/hash:foo     foo
-    !perl/foo           foo
+    !!perl/hash:foo     HASH
+    !perl/foo           HASH
     !hs/Foo             HASH
     !haskell.org/Foo    HASH
     !haskell.org/^Foo   HASH
@@ -96,5 +96,18 @@ run_ref_ok(qw(
     !!moose             HASH
     !ruby/object:Test::Bear HASH
 ));
+
+my $hash   = {a => [42, [], {}], h => {53, 12}};
+my $loaded = Load(Dump($hash));
+is_deeply $loaded => $hash, "Deep hash round trips";
+
+my $blesshash   = bless {a => [42, [], bless({}, 'foo')], h => {53, 12}}, 'bar';
+my $stripped = Load(Dump($blesshash));
+is_deeply $stripped => $hash, "Deep hash round trips and strip blessings";
+
+$YAML::Syck::LoadBlessed = 1;
+
+my $not_stripped = Load(Dump($blesshash));
+is_deeply $not_stripped => $blesshash, "Deep hash round trips and doesn't strips blessings";
 
 exit;

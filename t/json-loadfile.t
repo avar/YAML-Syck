@@ -90,7 +90,7 @@ SKIP : {
 
 { # Load empty file fails
     my $json = eval {LoadFile('emptyfile.json')};
-    like($@, qr/^'emptyfile.json' is non-existant or empty at/ms, "LoadFile dies loading an empty file");
+    like($@, qr/^'emptyfile.json' is non-existent or empty at/ms, "LoadFile dies loading an empty file");
     is($json, undef, "LoadFile returns undef loading an empty file");
 }
 

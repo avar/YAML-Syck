@@ -1,8 +1,33 @@
-[Changes for 1.20_01] (JSON::Syck 0.43_01) - 2012-02-11]
+[Changes for 1.22_01 - 2012-11-27]
+
+* Fix error message typo: s/existant/existent/g
+* Fix for non-printable character detection
+* Quote if non-printable characters are present
+* Change LoadBlessed=0 to not bless under ANY circumstances
+
+[Changes for 1.21 - 2012-09-20]
+
+* Tests all green on CPAN Testers. releasing to public.
+
+[Changes for 1.21_01 - 2012-06-22]
+
+* Synchronize JSON::Syck with YAML::Syck version number
+* Add DumpInto functions (YAML+Syck) which dump into
+  a provided scalar instead of a newly allocated one
+* Modify DumpFile functions to output directly to the
+  specified file/filehandle instead of buffering all
+  output in memory.
+* Avoid modifying numbers into strings when emitting
+
+[Changes for 1.20 (JSON::Syck 0.43) - 2012-02-14]
+
+* Tests all green on CPAN Testers. releasing to public.
+
+[Changes for 1.20_01 (JSON::Syck 0.43_01) - 2012-02-11]
 
 * Add test to assure META.yml is up to date before release
 * Fix for RT 70933 - disable check for empty file handle in LoadFile calls
-* Remove call to non-existant code YAML::Syck::_is_openhandle.
+* Remove call to non-existent code YAML::Syck::_is_openhandle.
 * Fix for RT 74785 - compiling with -Werror=format-security fails
 
 [Changes for 1.19 (JSON::Syck 0.42 ) - 2011-11-08]
