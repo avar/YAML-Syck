@@ -1,3 +1,7 @@
+[Changes for 1.22 - 2012-12-04]
+
+* Tests all green on CPAN Testers. releasing to public.
+
 [Changes for 1.22_01 - 2012-11-27]
 
 * Fix error message typo: s/existant/existent/g

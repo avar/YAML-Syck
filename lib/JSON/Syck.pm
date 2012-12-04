@@ -5,7 +5,7 @@ use Exporter;
 use YAML::Syck ();
 
 BEGIN {
-    $VERSION    = '1.22_01';
+    $VERSION    = '1.22';
     @EXPORT_OK  = qw( Load Dump LoadFile DumpFile DumpInto );
     @ISA        = 'Exporter';
     *Load       = \&YAML::Syck::LoadJSON;
