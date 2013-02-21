@@ -3,7 +3,7 @@ package YAML::Syck;
 
 use strict;
 use vars qw(
-    @ISA @EXPORT $VERSION
+    @ISA @EXPORT @EXPORT_OK $VERSION
     $Headless $SortKeys $SingleQuote
     $ImplicitBinary $ImplicitTyping $ImplicitUnicode 
     $UseCode $LoadCode $DumpCode
@@ -13,9 +13,10 @@ use 5.006;
 use Exporter;
 
 BEGIN {
-    $VERSION = '1.20_01';
-    @EXPORT  = qw( Dump Load DumpFile LoadFile );
-    @ISA     = qw( Exporter );
+    $VERSION   = '1.23_01';
+    @EXPORT    = qw( Dump Load DumpFile LoadFile );
+    @EXPORT_OK = qw( DumpInto );
+    @ISA       = qw( Exporter );
 
     $SortKeys = 1;
     $LoadBlessed = 1;
@@ -91,23 +92,26 @@ sub _is_glob {
 sub DumpFile {
     my $file = shift;
     if ( _is_glob($file) ) {
-        if ($#_) {
-            print {$file} YAML::Syck::DumpYAML($_) for @_;
+        for (@_) {
+            my $err = YAML::Syck::DumpYAMLFile($_, $file);
+            if ($err) {
+                $! = 0+$err;
+                die "Error writing to filehandle $file: $!\n";
+            }
         }
-        else {
-            print {$file} YAML::Syck::DumpYAML($_[0]);
-        }
-    }
-    else {
+    } else {
         open(my $fh, '>', $file) or die "Cannot write to $file: $!";
-        if ($#_) {
-            print {$fh} YAML::Syck::DumpYAML($_) for @_;
+        for (@_) {
+            my $err = YAML::Syck::DumpYAMLFile($_, $fh);
+            if ($err) {
+                $! = 0+$err;
+                die "Error writing to file $file: $!\n";
+            }
         }
-        else {
-            print {$fh} YAML::Syck::DumpYAML($_[0]);
-        }
-        close $fh;
+        close $fh
+            or die "Error writing to file $file: $!\n";
     }
+    return 1;
 }
 
 sub LoadFile {
@@ -117,11 +121,18 @@ sub LoadFile {
     }
     else {
       if(!-e $file || -z $file) {
-	die("'$file' is empty or non-existant");
+	die("'$file' is empty or non-existent");
       }
         open(my $fh, '<', $file) or die "Cannot read from $file: $!";
         Load(do { local $/; <$fh> });
     }
+}
+
+sub DumpInto {
+    my $bufref = shift;
+    (ref $bufref) or die "DumpInto not given reference to output buffer\n";
+    YAML::Syck::DumpYAMLInto($_, $bufref) for @_;
+    1;
 }
 
 1;
@@ -151,6 +162,10 @@ YAML::Syck - Fast, lightweight YAML loader and dumper
     # A string with multiple YAML streams in it
     $yaml = Dump(@data);
     @data = Load($yaml);
+
+    # Dumping into a pre-existing output buffer
+    my $yaml;
+    DumpInto(\$yaml, @data);
 
 =head1 DESCRIPTION
 
@@ -228,14 +243,21 @@ both C<$YAML::Syck::LoadCode> and C<$YAML::Syck::DumpCode> to true.
 
 =head2 $YAML::Syck::LoadBlessed
 
-Defaults to true. Setting this to a false value will prevent C<Load> from
-blessing tag names that do not begin with C<!!perl> or C<!perl>; see below.
+Defaults to true. Setting to false will block YAML::Syck from doing ANY
+blessing. This is an interface change since 1.21. The variable name was
+misleading, implying that no blessing would happen when in fact it did.
+
+Prior to 1.22, setting this to a false value only prevented C<Load> from
+blessing tag names that did not begin with C<!!perl> or C<!perl>;.
 
 =head1 BUGS
 
 Dumping Glob/IO values do not work yet.
 
 Dumping of Tied variables is unsupported.
+
+Dumping into tied (or other magic variables) with C<DumpInto> might not work
+properly in all cases.
 
 =head1 CAVEATS
 
@@ -250,14 +272,13 @@ the C<!hs/foo> and C<!!hs/Foo> tags are blessed into C<hs::Foo>.  Note that
 this holds true even if the tag contains non-word characters; for example,
 C<!haskell.org/Foo> is blessed into C<haskell.org::Foo>.  Please use
 L<Class::Rebless> to cast it into other user-defined packages. You can also
-set the LoadBlessed flag false to disable blessing tag names that do not begin
-with C<!!perl> or C<!perl>.
+set the LoadBlessed flag false to disable all blessing.
 
 This module has L<a lot of known
 issues|https://rt.cpan.org/Public/Dist/Display.html?Name=YAML-Syck>
 and has only been semi-actively maintained since 2007. If you
 encounter an issue with it probably won't be fixed unless you L<offer
-up a patch|http://github.com/avar/YAML-Syck> in Git that's ready for
+up a patch|http://github.com/toddr/YAML-Syck> in Git that's ready for
 release.
 
 There are still good reasons to use this module, such as better

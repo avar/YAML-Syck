@@ -13,6 +13,7 @@ sub import {
 
     *::ok = *ok;
     *::is = *is;
+    *::is_deeply = *is_deeply;
     *::roundtrip = *roundtrip;
     *::Dump = *YAML::Syck::Dump;
     *::Load = *YAML::Syck::Load;

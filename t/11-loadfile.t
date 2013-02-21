@@ -91,7 +91,7 @@ SKIP : {
 
 { # Load empty file fails
     my $yml = eval {LoadFile('emptyfile.yml')};
-    like($@, qr/^\'emptyfile.yml' is empty or non-existant at/ms, "LoadFile dies loading an empty file");
+    like($@, qr/^\'emptyfile.yml' is empty or non-existent at/ms, "LoadFile dies loading an empty file");
     is($yml, undef, "LoadFile returns undef loading an empty file");
 }
 
