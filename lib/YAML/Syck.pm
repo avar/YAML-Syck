@@ -278,7 +278,7 @@ This module has L<a lot of known
 issues|https://rt.cpan.org/Public/Dist/Display.html?Name=YAML-Syck>
 and has only been semi-actively maintained since 2007. If you
 encounter an issue with it probably won't be fixed unless you L<offer
-up a patch|http://github.com/avar/YAML-Syck> in Git that's ready for
+up a patch|http://github.com/toddr/YAML-Syck> in Git that's ready for
 release.
 
 There are still good reasons to use this module, such as better

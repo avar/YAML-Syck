@@ -1,6 +1,8 @@
 [Changes for 1.23_01 - 2013-02-21]
 
 * Make sure that LoadBlessed=0 blocks all blessing.
+* Start listing primary repo as toddr on github ( http://github.com/toddr/YAML-Syck )
+* README refreshed via perldoc -t
 
 [Changes for 1.22 - 2012-12-04]
 

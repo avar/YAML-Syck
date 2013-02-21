@@ -40,7 +40,7 @@ can_cc or die "This module requires a C compiler";
 include_deps    'Test::More';
 build_requires  'Devel::Leak' if defined $ENV{'AUTOMATED_TESTING'};
 homepage        'http://search.cpan.org/dist/YAML-Syck';
-repository      'http://github.com/avar/YAML-Syck';
+repository      'http://github.com/toddr/YAML-Syck';
 bugtracker      'https://rt.cpan.org/Public/Dist/Display.html?Name=YAML-Syck';
 tests           't/*.t t/*/*.t';
 WriteAll;
