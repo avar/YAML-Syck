@@ -1,6 +1,6 @@
-[** NEXT **]
+[Changes for 1.23_01 - 2013-02-21]
 
-* Make sure that LoadBlessed do not bless references when set to 0.
+* Make sure that LoadBlessed=0 blocks all blessing.
 
 [Changes for 1.22 - 2012-12-04]
 
